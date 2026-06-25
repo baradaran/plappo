@@ -13,12 +13,15 @@ offline evals before any UI.
 
 > Lena is roughly A2. She opens Plappo — no level to pick; the app already knows
 > her **grammar is around A1 but her vocabulary is A2** from how she's been doing.
-> It gives her a short story at her level (verified in-band before she sees it).
-> She taps `Sandburg` to see "sandcastle" — and it quietly enters her review deck.
-> She answers a question in German: *"Weil sie hat den Schlüssel verloren."* The
-> app shows the one thing to fix — `weil` sends the verb to the end — corrects it,
-> and her **grammar profile nudges up**. Tomorrow her review surfaces `Sandburg`
-> right as she'd start to forget it, and her next story is a notch harder.
+> It gives her a short story at her level — native-sounding German, capped to A2
+> vocabulary, verified in-band before she sees it. She taps `Sandburg` for a quiet
+> "sandcastle" — just enough to follow the sentence; nothing to study. She answers
+> a question in German: *"Weil sie hat den Schlüssel verloren."* The app shows the
+> one thing to fix — `weil` sends the verb to the end — corrects it, and her
+> **grammar profile nudges up**. Tomorrow's review is a grammar cloze (*type the
+> right ending*); because she looked `Sandburg` up, it's the word in that sentence —
+> so she meets it again, in context, without ever "studying" it. Her next story is
+> a notch harder.
 
 ## What works today (all live, on Gemini via Vertex)
 
@@ -26,7 +29,8 @@ offline evals before any UI.
   rate** on correct sentences (the trust metric).
 - **Measured level** — grammar and vocabulary tracked as separate axes; level is
   earned, not set; you choose only a goal.
-- **FSRS spaced repetition** — real forgetting curve; glossed words auto-enter review.
+- **FSRS spaced repetition** — real forgetting curve, retrieval-driven scheduling.
+  *(Direction: grammar-cloze review; vocabulary learned incidentally — ADR-018–022.)*
 - **Focused live feedback** — leads with the single most important error.
 - **Level-gated story generation** — stories are generated *and judged in-band*
   before they ship, and persisted to a growing shared library.

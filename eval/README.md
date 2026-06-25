@@ -28,10 +28,11 @@ python run_eval.py --mock
 
 ### Against Gemini on Vertex (current setup)
 
-There's no Anthropic key on this machine, so the live runs use **yavar's Vertex
-AI credit (Gemini)**. Auth is GCP ADC (`gcloud auth application-default login`);
-project/location are read from `../../yavar/.env` (`VERTEX_PROJECT`,
-`VERTEX_LOCATION`) or process env. See `vertex_backend.py`.
+There's no Anthropic key in this environment, so the live runs use **Vertex
+AI (Gemini)**. Auth is GCP ADC (`gcloud auth application-default login`);
+project/location are read from a local `.env` (`VERTEX_PROJECT`,
+`VERTEX_LOCATION`) or process env (override the path with `VERTEX_ENV`). See
+`vertex_backend.py`.
 
 ```bash
 # Pro vs Flash, side-by-side, over the whole dataset:
@@ -65,7 +66,7 @@ you can eyeball *what* it got wrong, not just the score.
 | `tutor.py` | The engine under test — Claude with a structured-output schema. |
 | `score.py` | Detection / category / correction metrics. |
 | `run_eval.py` | Runner + report. |
-| `vertex_backend.py` | Gemini-on-Vertex engine, reusing yavar's GCP creds. |
+| `vertex_backend.py` | Gemini-on-Vertex engine (GCP ADC auth). |
 | `run_compare.py` | Run several Vertex models and print a side-by-side. |
 | `mock_tutor.py` | Deterministic fake for `--mock`. |
 

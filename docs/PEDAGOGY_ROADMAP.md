@@ -11,7 +11,7 @@ build a mechanic that looks fun but teaches nothing.
 
 ---
 
-## The six principles everything ladders up to
+## The seven principles everything ladders up to
 
 | # | Principle | Grounded in |
 |---|-----------|-------------|
@@ -21,8 +21,67 @@ build a mechanic that looks fun but teaches nothing.
 | **P4** | You remember by **retrieving on a schedule** — spaced, interleaved, effortful recall. | Bjork (desirable difficulties); Roediger (testing effect); FSRS |
 | **P5** | **Motivation** is intrinsic or it's fragile — competence, autonomy, relatedness beat points. | Deci & Ryan (Self-Determination Theory); Bloom (Mastery Learning); Csíkszentmihályi (Flow) |
 | **P6** | **Adapt to the individual** — 1:1 tutoring is the gold standard; an error profile makes it scalable. | Bloom (2-sigma); Vygotsky (ZPD / dynamic assessment); learner-corpus research |
+| **P7** | **Grammar is the target; vocabulary is the medium.** Train grammatical form explicitly; let vocabulary be acquired *incidentally* through repeated meaningful exposure — capped per level, native in register. | Nation (frequency bands, coverage, incidental learning); Wray (formulaic language); Krashen (input) |
 
 ---
+
+## Content design — grammar-first, capped vocabulary, native register *(P7)*
+
+How input is generated and how training works. These are firm product decisions;
+where code doesn't yet match, they're the target (see DECISIONS.md ADR-018–022).
+
+### 1. Grammar is the target — the blank is always a grammatical function
+Every training item is a cloze where the gap tests a **grammatical decision**
+(case, adjective/verb ending, verb position, separable prefix, auxiliary,
+preposition…), tagged with a `taxonomy.py` category. The cue supplies the *meaning*
+(usually the base form in parentheses) so the only thing being produced is the
+**form**: `Ich helfe ___ Bruder. (mein)` → *meinem* `[CASE]`. Grading is
+exact-match on the form (no LLM call), and it feeds the same per-skill grammar
+profile — so **doing review literally raises your measured grammar level.**
+*Why:* the moat is German grammatical accuracy, not vocab recall; Schmidt's
+Noticing and the generation effect apply to *form*.
+
+### 2. Vocabulary is capped per level (controlled vocabulary)
+Content draws from a per-level allowed lexicon (cumulative frequency bands; Goethe
+lists where they exist), plus a small **i+1 budget** of new words that must be
+glossed. *Why:* reading comprehension needs ~95–98% known-word coverage (Hu &
+Nation 2000) — the cap is *what makes input comprehensible*, not a limitation.
+Bonus: it upgrades the story-in-level gate (ADR-011) from "the judge thinks it's
+A2" to a **measurable lexical-coverage check** — lemmatise the text, compute the
+in-band fraction, reject if unsupported out-of-band content words exceed the budget.
+Measurable beats vibes.
+
+### 3. Meaning is a subtle comprehension aid, never a trained or featured thing
+A word lookup is an ephemeral crutch: a quiet gloss, **no flashcard, no XP, no
+"added to your deck."** Its only job is to make *this sentence* comprehensible now.
+*Why:* incidental acquisition through meaningful input (Krashen; Webb; Nation), not
+deliberate paired-associate study. Meaning is plumbing for comprehensible input —
+deliberately *not* a feature.
+
+### 4. Vocabulary is acquired as a by-product of grammar practice
+A gloss-tap is an **"I don't know this word" signal**. Words you've signalled (or
+never met) are preferentially reused as the **carrier words in upcoming grammar
+cloze items** — so you meet them again, in natural context, while practising
+grammar. A word's unknown-status **decays as you stop looking it up** (several
+no-lookup encounters → treated as known) and it loses its boost. *Why:* words stick
+after ~8–12 meaningful encounters (Nation; Webb), not via definitions — this routes
+those encounters through the grammar loop and turns the lookup into a free implicit
+mastery signal. *Caveat:* "didn't look up" ≠ "knows it" — treat it as a soft prior
+over several encounters, never a verdict.
+
+### 5. The German must be native-authentic *within* the cap
+Cap the **range** (which words/structures), never the **naturalness**. Within an A2
+lexicon you can write textbook German or the German a native actually uses; we
+require the latter — real collocations (*eine Entscheidung treffen*, not *machen*),
+natural connectors and word order, modal particles (*doch, mal, eben*) where
+natural, common contractions (*ins, am, gibt's*). At B2–C2, "the German people work
+with" means real functional/professional register (Nominalstil, Passiv,
+Konnektoren). *Why:* native-like fluency is largely formulaic/collocational (Wray),
+not vocabulary breadth; authentic input beats contrived textbook language (Gilmore).
+Range and naturalness are independent axes — **simple words, real language.**
+*Measure it:* the story judge gets a second axis — *naturalness* (reads as native
+vs. textbook/translationese) — scored separately from level, so "in-level" never
+drifts into "stilted."
 
 ## Phase 0 — Foundations *(✅ done & validated)*
 
@@ -142,6 +201,14 @@ an active scholarly disagreement, not a settled fact.
 - Poehner, M. & Lantolf, J. (2005). "Dynamic assessment in the language classroom." *Language Teaching Research.*
 - Ellis, R. (2003). *Task-based Language Learning and Teaching* (TBLT, Phase 3).
 - AI-tutoring efficacy is moving fast (2024–2026) — treat any single study as provisional and re-check yearly.
+
+### P7 — Vocabulary, coverage, formulaic language, authenticity
+- Nation, I.S.P. (2013). *Learning Vocabulary in Another Language* (2nd ed.), CUP — frequency bands, coverage, incidental learning, encounters needed.
+- Hu, M. & Nation, P. (2000). "Unknown vocabulary density and reading comprehension." *Reading in a Foreign Language* 13(1). **[free]** — the ~98% coverage threshold for comprehension; the empirical basis for capping vocabulary.
+- Webb, S. (2007). "The effects of repetition on vocabulary knowledge." *Applied Linguistics* 28(1) — how many meaningful encounters a word needs.
+- Laufer, B. & Nation, P. (1995). "Vocabulary size and use: lexical richness in L2 written production." *Applied Linguistics* 16(3) — lexical frequency profiling (the measurable cap).
+- Wray, A. (2002). *Formulaic Language and the Lexicon*, CUP — native-like selection/fluency is chunk-based, not vocabulary-breadth-based.
+- Gilmore, A. (2007). "Authentic materials and authenticity in foreign language learning." *Language Teaching* 40(2). **[debated]** — authentic vs. contrived input; the case for native register.
 
 ### Standards
 - **CEFR Companion Volume (2020)**, Council of Europe **[free]** ([coe.int](https://www.coe.int/en/web/common-european-framework-reference-languages)) — the authoritative source for level descriptors, can-do statements, and mediation. Use this for the level→competence mapping rather than ad-hoc lists.

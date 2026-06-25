@@ -1,7 +1,7 @@
 """Run the eval against multiple Vertex/Gemini models and print a side-by-side.
 
 Same dataset, prompt, schema, and scorer for every model — so the comparison is
-apples-to-apples. Defaults to Gemini 2.5 Pro vs Flash (yavar's two models).
+apples-to-apples. Defaults to Gemini 2.5 Pro vs Flash.
 
     python run_compare.py
     python run_compare.py gemini-2.5-flash gemini-2.5-pro

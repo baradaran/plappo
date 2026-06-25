@@ -1,12 +1,12 @@
-"""Gemini-on-Vertex backend for the tutor, reusing yavar's GCP credentials.
+"""Gemini-on-Vertex backend for the tutor.
 
-Why this exists: there's no Anthropic key available here, but yavar has Vertex
-AI credit (Gemini). This backend lets the SAME eval (same prompt, same schema,
-same dataset, same scorer) run against Gemini 2.5 Pro / Flash, so the numbers
-are comparable to a future Claude run.
+This backend lets the SAME eval (same prompt, same schema, same dataset, same
+scorer) run against Gemini 2.5 Pro / Flash, so the numbers are comparable to a
+future Claude run.
 
-Auth + config are borrowed from yavar:
-  - VERTEX_PROJECT / VERTEX_LOCATION from yavar/.env (or process env)
+Auth + config:
+  - VERTEX_PROJECT / VERTEX_LOCATION from process env, or a local .env file
+    (path overridable via VERTEX_ENV; defaults to ../.env)
   - bearer token via `gcloud auth application-default print-access-token` (ADC)
 
 Note this evaluates GEMINI, not Claude — see README. It's a deliberate,
@@ -23,10 +23,11 @@ import urllib.request
 from taxonomy import ErrorCategory
 from tutor import SYSTEM_PROMPT, TutorFeedback
 
-# Where to find yavar's Vertex config if it's not already in the environment.
-_YAVAR_ENV = os.environ.get(
-    "YAVAR_ENV",
-    os.path.join(os.path.dirname(__file__), "..", "..", "yavar", ".env"),
+# Where to find Vertex config (VERTEX_PROJECT/VERTEX_LOCATION) if it's not
+# already in the environment. Override the path with VERTEX_ENV.
+_VERTEX_ENV = os.environ.get(
+    "VERTEX_ENV",
+    os.path.join(os.path.dirname(__file__), "..", ".env"),
 )
 
 _token_cache = {"token": "", "exp": 0.0}
@@ -45,11 +46,11 @@ def _load_dotenv_value(path, key):
 
 
 def vertex_config():
-    project = os.environ.get("VERTEX_PROJECT") or _load_dotenv_value(_YAVAR_ENV, "VERTEX_PROJECT")
+    project = os.environ.get("VERTEX_PROJECT") or _load_dotenv_value(_VERTEX_ENV, "VERTEX_PROJECT")
     location = (os.environ.get("VERTEX_LOCATION")
-                or _load_dotenv_value(_YAVAR_ENV, "VERTEX_LOCATION") or "global")
+                or _load_dotenv_value(_VERTEX_ENV, "VERTEX_LOCATION") or "global")
     if not project:
-        raise RuntimeError("VERTEX_PROJECT not found (env or yavar/.env).")
+        raise RuntimeError("VERTEX_PROJECT not found (env or .env).")
     return project, location
 
 
@@ -169,15 +170,19 @@ def _model_endpoint(model_id):
             f"/publishers/google/models/{model_id.split('/')[-1]}:generateContent")
 
 
-def vertex_json(model_id, system, user, response_schema, temperature=0.6, max_tokens=8192):
-    """One structured (JSON-schema-constrained) generation. Returns a parsed dict."""
+def vertex_json(model_id, system, user, response_schema, temperature=0.6, max_tokens=8192,
+                thinking_budget=None):
+    """One structured (JSON-schema-constrained) generation. Returns a parsed dict.
+    Pass thinking_budget=0 on Flash to disable thinking (all tokens go to output) —
+    useful for long bulk outputs that would otherwise be truncated."""
+    gen_cfg = {"temperature": temperature, "maxOutputTokens": max_tokens,
+               "responseMimeType": "application/json", "responseSchema": response_schema}
+    if thinking_budget is not None:
+        gen_cfg["thinkingConfig"] = {"thinkingBudget": thinking_budget}
     body = {
         "systemInstruction": {"parts": [{"text": system}]},
         "contents": [{"role": "user", "parts": [{"text": user}]}],
-        "generationConfig": {
-            "temperature": temperature, "maxOutputTokens": max_tokens,
-            "responseMimeType": "application/json", "responseSchema": response_schema,
-        },
+        "generationConfig": gen_cfg,
     }
     req = urllib.request.Request(
         _model_endpoint(model_id), data=json.dumps(body).encode("utf-8"),

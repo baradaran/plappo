@@ -38,9 +38,9 @@ imports from there. **Why:** The model can only emit labels we score; no drift
 between layers. **Alternatives:** Ad-hoc strings per layer — guarantees divergence.
 **Status:** Done (20 categories).
 
-### ADR-005 — LLM = Gemini on Vertex (via yavar's ADC), isolated behind one file
-**Context:** No Anthropic key in this environment, but `yavar` has Vertex (Gemini)
-credit. **Decision:** Run on Gemini via GCP ADC, with *all* LLM access behind
+### ADR-005 — LLM = Gemini on Vertex (via GCP ADC), isolated behind one file
+**Context:** No Anthropic key in this environment, but Vertex (Gemini) credit is
+available. **Decision:** Run on Gemini via GCP ADC, with *all* LLM access behind
 `vertex_backend.py`. **Why:** Use available credit; keep the provider a one-file
 concern so switching to Claude later is trivial. **Alternatives:** Block on getting
 a Claude key — rejected; the harness is provider-agnostic by design. **Status:** Done.
@@ -147,6 +147,52 @@ server imports the same `eval/` modules (`tutor`, `vertex_backend`, `story_servi
 **Why:** The validated engine *is* the production engine. **Alternatives:** A separate
 prod implementation — invites drift between measured and shipped behaviour.
 **Status:** Done.
+
+### ADR-018 — Grammar is the target; the cloze blank is always a grammatical function
+**Context:** Should review train word meaning? **Decision:** No. Every training item
+is a cloze whose gap tests a *grammatical* form (case, ending, verb position, aux,
+preposition…), tagged by taxonomy category; the cue supplies meaning (base form),
+grading is exact-match, and it feeds the grammar profile. **Why:** the moat is
+German grammatical accuracy; vocab recall is a different, crowded product.
+**Supersedes:** the vocabulary half of ADR-008 (FSRS schedules *grammar* items now).
+**Status:** Decided; deck is currently mixed — implementation pending.
+See [PEDAGOGY_ROADMAP.md → Content design #1](PEDAGOGY_ROADMAP.md).
+
+### ADR-019 — Vocabulary is capped per level (controlled vocabulary)
+**Context:** Comprehensible input needs the learner to already know most words.
+**Decision:** Content draws from a per-level allowed lexicon (frequency bands /
+Goethe lists) + a small glossed i+1 budget; the story gate adds a **measurable
+lexical-coverage check** (in-band lemma fraction), not just the LLM judge. **Why:**
+~95–98% known-word coverage is required for comprehension (Hu & Nation 2000); the
+cap *is* the i+1 mechanism, and coverage is measurable where the judge is not.
+**Status:** Decided; gate currently judge-only — coverage check pending.
+
+### ADR-020 — Meaning is a subtle comprehension aid, never trained or featured
+**Context:** How prominent should word meaning be? **Decision:** A lookup is an
+ephemeral, quiet gloss — no flashcard, no XP, no "added to deck." It exists only to
+make the current sentence comprehensible. **Why:** incidental acquisition via input
+(Krashen; Webb), not deliberate study; meaning is plumbing, not a feature.
+**Status:** Decided; removes the gloss→deck wiring added earlier — pending.
+
+### ADR-021 — Vocabulary acquired incidentally via grammar-cloze carrier frequency
+**Context:** If we don't test vocab, how is it learned? **Decision:** A gloss-tap is
+an "unknown word" signal; unknown words are preferentially reused as the **carrier
+words** in upcoming grammar cloze items (more meaningful exposure). Unknown-status
+decays as the learner stops looking the word up. **Why:** ~8–12 meaningful
+encounters drive uptake (Nation; Webb); this routes them through the grammar loop
+and uses the lookup as a free implicit mastery signal. **Caveat:** the
+no-lookup→known signal is noisy — soft prior over several encounters, not a verdict.
+**Status:** Decided; implementation pending.
+
+### ADR-022 — Native-authentic German *within* the cap; naturalness as a 2nd judge axis
+**Context:** Capping vocabulary risks stilted "Lehrbuchdeutsch". **Decision:** Treat
+*range* (capped) and *naturalness* (always native) as independent axes — simple
+words, real language: real collocations, modal particles, natural order,
+contractions; functional/professional register at B2–C2. The story judge scores a
+separate **naturalness** axis (native vs. textbook/translationese). **Why:**
+native-like fluency is formulaic/collocational (Wray); authentic input beats
+contrived (Gilmore); the two axes don't trade off. **Status:** Decided; prompt +
+judge naturalness axis pending.
 
 ---
 

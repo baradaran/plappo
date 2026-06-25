@@ -1,12 +1,12 @@
 # Plappo — clickable prototype
 
 A 4-screen walkthrough of the app, with the **feedback card wired to live
-Gemini 2.5 Flash** on Vertex (via yavar's GCP credit).
+Gemini 2.5 Flash** on Vertex AI.
 
 ## Run
 
 ```bash
-# needs the gcloud ADC login that yavar already uses
+# needs a gcloud ADC login (gcloud auth application-default login)
 cd prototype
 python server.py            # -> http://127.0.0.1:8000
 ```

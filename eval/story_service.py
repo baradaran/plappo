@@ -24,6 +24,7 @@ import time
 from taxonomy import ErrorCategory
 from story_level_eval import classify, judge
 from vertex_backend import vertex_json
+from vocab_coverage import coverage as lexical_coverage
 
 THEMES = ["everyday", "family", "nature", "travel", "school",
           "animals", "food", "city", "friendship", "work"]
@@ -87,21 +88,26 @@ def generate_gated_story(level, topic, gen_model="gemini-2.5-flash",
         text = " ".join(story.get("sentences", []))
         if not text:
             continue
-        j = judge(judge_model, level, text)
-        cls = classify(level, j)
         gloss_forms = set()
         for g in story.get("glossary", []):
             gloss_forms.add((g.get("word") or "").lower())
             gloss_forms.add((g.get("lemma") or "").lower())
+        # 1) LLM judge (grammar + holistic level); 2) deterministic lexical coverage
+        j = judge(judge_model, level, text)
+        cls = classify(level, j)
         over = j.get("over_level_words", []) or []
         unsupported = [w for w in over if w.lower() not in gloss_forms]
-        ship_ok = (cls != "above") or (not unsupported)
+        judge_ok = (cls != "above") or (not unsupported)
+        cov = lexical_coverage(text, level, gloss_forms)
+        ship_ok = judge_ok and cov["in_band"]
         check = {"target": level, "estimated": j.get("estimated_cefr"), "class": cls,
                  "over_words": over, "unsupported_over_words": unsupported,
+                 "coverage": cov["coverage"], "uncovered_words": cov["uncovered"][:15],
                  "in_band": ship_ok, "attempts": attempt}
         if ship_ok:
             break
-        avoid = unsupported  # regenerate, steering away from the leaked words
+        # regenerate, steering away from both the judge's leaks and the out-of-band words
+        avoid = list(dict.fromkeys((unsupported or []) + cov["uncovered"][:20]))
     story["check"] = check
     story["level"] = level
     story["topic"] = topic
