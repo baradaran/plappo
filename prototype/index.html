@@ -656,7 +656,7 @@ function normalizeStory(s){const gloss={},set=new Set();
  // just keep their questions.
  const qs=(s.questions||[]).map(q=>({q,en:''}));
  if(s.task&&s.task.prompt)qs.unshift({q:s.task.prompt,en:s.task.en||'',task:true});
- return {title:s.title||'Geschichte',sentences:s.sentences||[],gloss,glossArr:[...set],
+ return {id:s.id,title:s.title||'Geschichte',sentences:s.sentences||[],gloss,glossArr:[...set],
   questions:qs,level:s.level||profile.level,check:s.check||{}};}
 function fallbackStory(){const gloss={},set=new Set();
  Object.entries(GLOSS).forEach(([k,v])=>{const kk=k.toLowerCase();gloss[kk]=[v[0],v[1],v[2]];set.add(kk);});
@@ -674,6 +674,14 @@ function cacheStory(level,s){try{const k='plappo_story_cache_'+level;
 let tappedThisRead=new Set(), curCarriers=[];
 function learningWords(){const e=profile.encounters||{},known=profile.known||{};
  return Object.keys(e).filter(w=>!known[w]).sort((a,b)=>e[b]-e[a]).slice(0,5);}
+/* ADR-013: the learner's weakest grammar skills + stories already seen, sent to the
+   server so the library selector picks the unseen story that best targets them. */
+function weakSkills(){const cfg=LEVELCFG[profile.level];
+ return cfg.skills.map(s=>[s,profile.skills[s]||0]).filter(([s,v])=>v<MASTER)
+  .sort((a,b)=>a[1]-b[1]).map(([s])=>s).slice(0,4);}
+function markSeen(id){if(!id)return;profile.seen=profile.seen||[];
+ if(!profile.seen.includes(id)){profile.seen.push(id);
+  if(profile.seen.length>200)profile.seen=profile.seen.slice(-200);saveProfile();}}
 function pickCached(level,excludeTitle){try{
   const arr=JSON.parse(localStorage.getItem('plappo_story_cache_'+level)||'[]')
    .filter(x=>x.title!==excludeTitle);
@@ -687,7 +695,8 @@ async function openReader(force){push('p-reader');tappedThisRead=new Set();
  try{const topic=TOPICS[Math.floor(Math.random()*TOPICS.length)];
   const prefer=(force||lw.length)?'fresh':'library';
   const r=await fetch('/api/story',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({level:profile.level,topic,prefer,learning_words:lw})});const s=await r.json();
+    body:JSON.stringify({level:profile.level,topic,prefer,learning_words:lw,
+      weak_skills:weakSkills(),seen_ids:profile.seen||[]})});const s=await r.json();
   if(s.error)throw new Error(s.error);story=normalizeStory(s);
   localStorage.setItem(key,JSON.stringify(story));cacheStory(profile.level,story);}
  catch(e){const cached=pickCached(profile.level,story&&story.title);
@@ -700,6 +709,7 @@ function setReaderLoading(){document.getElementById('readerTitle').textContent='
  document.getElementById('story').innerHTML=`<div class="loadingStory"><div class="spin"></div>
   Generating a story at level ${profile.level} and checking it stays in-level…</div>`;}
 function renderStoryView(){if(!story.glossSet)story.glossSet=new Set(story.glossArr||[]);
+ markSeen(story.id);                                       // ADR-013: don't re-serve this story
  document.getElementById('readerTitle').textContent=story.title;
  const chk=document.getElementById('readerCheck'),c=story.check||{};
  if(chk){if(c.offline){chk.className='readerchk warn';chk.textContent='offline';}

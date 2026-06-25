@@ -91,7 +91,9 @@ class Handler(BaseHTTPRequestHandler):
                 # possible (cheap, no LLM call); only generate on a miss or a
                 # "fresh" request, then persist the result for everyone.
                 if prefer != "fresh":
-                    cached = select_from_library(level)
+                    cached = select_from_library(
+                        level, weak_skills=req.get("weak_skills") or [],
+                        exclude=req.get("seen_ids") or [])
                     if cached:
                         cached["source"] = "library"
                         return self._send(200, json.dumps(cached, ensure_ascii=False))

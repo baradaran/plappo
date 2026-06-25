@@ -70,7 +70,8 @@ upstream knows what model answered.
 { level (working, DERIVED), goal, xp, streak, vocab, seenWords,
   skills: { <taxonomy enum>: 0..100 },        ← per-skill mastery
   encounters: { word: lookupCount },          ← ADR-021: "unknown word" signal
-  known: { word: true }, seenNoLookup: { word: n } }   ← carrier decay
+  known: { word: true }, seenNoLookup: { word: n },    ← carrier decay
+  seen: [ storyId ] }                          ← ADR-013: don't re-serve stories
 ```
 
 **Deck item** (FSRS) — one review card (grammar-only typed cloze, ADR-018):
@@ -112,10 +113,10 @@ client per-level cache  →  shared library (select_from_library)  →  generate
    (per device, instant)      (cheap, no LLM call)                    (LLM, only on miss/"fresh")
 ```
 
-The library record is already tagged (`grammar_points`, `theme`), so the future
-**personalised selector** — pick the in-level story that best exercises the
-learner's weak skills and matches interests — slots into `select_from_library()`
-without touching generation. That's the "no big refactor later" payoff.
+The library record is tagged (`grammar_points`, `theme`), and the **personalised
+selector** (`select_from_library`) ranks unseen in-level stories by overlap with the
+learner's weak skills — cheap, no LLM call, no change to generation. The forward-
+compatible data model meant this dropped in without a refactor.
 
 **Carrier reads are the personalised "fresh" path (ADR-021).** When the learner has
 looked-up (unknown) words, the reader requests a *fresh* story seeded with those

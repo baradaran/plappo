@@ -179,9 +179,19 @@ def save_to_library(story):
     os.replace(tmp, _LIB_PATH)
 
 
-def select_from_library(level, exclude=()):
-    """Cheap per-read selection from the corpus (no LLM call). The future
-    personalised selector (match weak grammar_points / interests) slots in here."""
-    cand = [s for s in load_library()
-            if s.get("level") == level and s.get("id") not in exclude]
-    return random.choice(cand) if cand else None
+def select_from_library(level, weak_skills=(), exclude=()):
+    """Personalised per-read selection (ADR-013) — cheap ranking, no LLM call.
+
+    Pick the in-level, unseen story that best exercises the learner's weak grammar
+    (most overlap between its `grammar_points` and `weak_skills`); random among ties
+    for variety. Falls back to any unseen in-level story when nothing matches."""
+    weak, seen = set(weak_skills), set(exclude)
+    cand = [s for s in load_library() if s.get("level") == level and s.get("id") not in seen]
+    if not cand:
+        return None
+
+    def score(s):
+        return len(weak & set(s.get("grammar_points", [])))
+
+    best = max(score(s) for s in cand)
+    return random.choice([s for s in cand if score(s) == best])

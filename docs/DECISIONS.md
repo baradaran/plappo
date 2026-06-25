@@ -116,8 +116,11 @@ time. The library converts a per-read variable cost into a one-time fixed cost
 amortised across all users; it also enables extensive-reading *volume* and vocab
 recycling, and moves the drift-gate to authoring time (where human QA can live).
 **Alternatives:** On-demand-every-time — simple at tiny scale, doesn't scale.
-**Status:** Forward-compatible data model + persistence shipped; per-user selector
-is the documented next step (slots into `select_from_library()`).
+**Status:** **Done.** Shared library with tagged, gated, persisted stories;
+`select_from_library(level, weak_skills, exclude)` ranks unseen in-level stories by
+overlap of `grammar_points` with the learner's weak skills (random among ties), no
+LLM call. The reader sends `weak_skills` + `seen_ids`; carrier reads (ADR-021) still
+take the fresh path. Remaining: theme/interest signal as a tiebreaker.
 
 ### ADR-014 — UI: content serif vs. chrome sans, calm semantics, one hero action
 **Context:** The app puts a blank box in front of a beginner — UX must not add load.
