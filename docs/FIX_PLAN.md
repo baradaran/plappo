@@ -67,8 +67,10 @@ are currently gameable, self-reported, or disconnected from real errors.
   article-optional for vocab, optional `it.accept[]`). FSRS grade is derived from
   the verified result (correct+fast → Easy, correct → Good, wrong/gave-up → Again)
   and highlighted, with manual override retained. "Show answer" still available.
-- ☐ **P3** Remove auto-enroll on gloss open; explicit "+ Add to review" button;
-  optional auto-suggest after 2nd encounter (`encounters[lemma]`).
+- ☑ **P3** Gloss lookup no longer auto-enrolls; the sheet has an explicit
+  "+ Add to review" button (`addCurrentVocab`). Encounters are tracked
+  (`profile.encounters`) and after a 2nd encounter the button nudges
+  ("seen N×") — but never adds without a tap. Button reflects "✓ In your reviews".
 
 ## Phase 3 — Content depth, accessibility, polish, QA
 - ☐ **P7** Task-based prompts in story generation (additive on story `questions`);

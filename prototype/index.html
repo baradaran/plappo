@@ -421,10 +421,14 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
     <div class="grab"></div>
     <div><span class="word" id="shWord"></span><span class="pos" id="shPos"></span></div>
     <div class="mean" id="shMean"></div>
-    <button class="hear" onclick="speakWord()">
-      <svg viewBox="0 0 24 24" width="18" fill="none" stroke="currentColor" stroke-width="1.9"
-        stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
-      Hear it</button>
+    <div class="btnrow" style="margin-top:4px">
+      <button class="hear" onclick="speakWord()">
+        <svg viewBox="0 0 24 24" width="18" fill="none" stroke="currentColor" stroke-width="1.9"
+          stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+        Hear it</button>
+      <button class="btn quiet" id="addVocabBtn" style="flex:1;min-height:0;padding:9px 12px"
+        onclick="addCurrentVocab()">+ Add to review</button>
+    </div>
   </div>
 
   <div class="toast" id="toast"></div>
@@ -684,12 +688,27 @@ function renderStoryView(){if(!story.glossSet)story.glossSet=new Set(story.gloss
   el.appendChild(p);});
  document.getElementById('dots').innerHTML=story.sentences.map((_,i)=>`<i class="${i<2?'on':''}"></i>`).join('');}
 function closeReader(){document.getElementById('p-reader').classList.remove('on');stopSpeak();}
+let sheetGloss={back:'',en:''};
 function openSheet(w){const k=w.replace(/[.,„":!?»«]/g,'').toLowerCase();
  const g=(story&&story.gloss[k])||null,disp=g?g[0]:w.replace(/[.,„":!?»«]/g,'');
  document.getElementById('shWord').textContent=disp;document.getElementById('shPos').textContent=g?g[1]:'';
  document.getElementById('shMean').textContent=(g&&g[2])||'— no gloss —';sheetWord=disp;
- document.getElementById('sheet').classList.add('on');document.getElementById('scrim').classList.add('on');
- if(g&&g[2])addVocabFromGloss(disp,g[2]);}
+ // P3: looking a word up is NOT the same as wanting to drill it forever. We only
+ // count the encounter; enrolling in spaced review is a deliberate tap. After a
+ // 2nd encounter of a still-unknown word we nudge (but never auto-add).
+ sheetGloss={back:disp,en:(g&&g[2])||''};
+ if(g&&g[2]){profile.encounters=profile.encounters||{};
+  profile.encounters[k]=(profile.encounters[k]||0)+1;saveProfile();}
+ const btn=document.getElementById('addVocabBtn');
+ const already=g&&g[2]&&deck&&deck.some(it=>it.type==='vocab'&&it.back===disp);
+ const seen=(profile.encounters&&profile.encounters[k])||0;
+ btn.disabled=!(g&&g[2]);
+ btn.textContent=!(g&&g[2])?'No gloss':already?'✓ In your reviews'
+  :seen>=2?'+ Add to review (seen '+seen+'×)':'+ Add to review';
+ document.getElementById('sheet').classList.add('on');document.getElementById('scrim').classList.add('on');}
+function addCurrentVocab(){if(!sheetGloss.en)return;
+ addVocabFromGloss(sheetGloss.back,sheetGloss.en);
+ const btn=document.getElementById('addVocabBtn');if(btn){btn.textContent='✓ In your reviews';}}
 function closeSheet(){document.getElementById('sheet').classList.remove('on');
  document.getElementById('scrim').classList.remove('on');}
 
