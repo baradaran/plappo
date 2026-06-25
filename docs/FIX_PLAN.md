@@ -136,3 +136,6 @@ are currently gameable, self-reported, or disconnected from real errors.
   smoke). **All planned items landed.**
 - **Outstanding (needs creds):** run `skills_demonstrated_eval.py` and the live
   feedback/story endpoints with `VERTEX_PROJECT` set; build the P7 task-quality eval.
+- **Latency tracking (follow-up request)** — `/api/feedback` now times the LLM call
+  and returns `latency_ms` (also logged server-side with the model); the UI shows a
+  live elapsed timer during the wait and "checked in N s" on the feedback card.

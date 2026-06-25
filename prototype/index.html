@@ -188,6 +188,7 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
   align-items:center;justify-content:space-between;gap:10px}
 .fb .acts{display:flex;gap:10px;padding:12px 18px 18px}
 .fb .acts .btn{flex:1}
+.fb .timing{padding:0 18px 14px;margin-top:-6px;font-size:11px;text-align:right}
 
 /* checking shimmer */
 .checking{margin-top:18px;border:1px solid var(--line);border-radius:var(--r-l);background:var(--surface);
@@ -766,15 +767,25 @@ function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 
 async function check(){const s=document.getElementById('answer').value.trim();if(!s)return;
  const b=document.getElementById('checkbtn');b.disabled=true;b.textContent='Checking…';
+ // Live elapsed timer so the wait is visible, not a blank spinner; final latency
+ // (server LLM time, with client round-trip as fallback) is shown on the card.
+ const t0=performance.now();
  document.getElementById('fbslot').innerHTML=
-  `<div class="checking"><div class="spin"></div>Reading your German…</div>`;
+  `<div class="checking"><div class="spin"></div>Reading your German… <span id="ctimer" class="muted"></span></div>`;
+ const ti=setInterval(()=>{const e=document.getElementById('ctimer');
+   if(e)e.textContent=((performance.now()-t0)/1000).toFixed(1)+'s';},100);
  try{const r=await fetch('/api/feedback',{method:'POST',headers:{'Content-Type':'application/json'},
    body:JSON.stringify({level:profile.level,sentence:s})});const fb=await r.json();
+  fb._clientMs=Math.round(performance.now()-t0);
   if(fb.error)throw new Error(fb.error);applyResult(fb,s);renderFeedback(fb,s);}
  catch(e){document.getElementById('fbslot').innerHTML=
    `<div class="fb"><div class="top"><div class="verdict">Couldn't check just now</div></div>
     <div class="note"><div class="ex">${esc(e.message)}</div></div></div>`;}
- finally{b.disabled=false;b.textContent='Check again';}}
+ finally{clearInterval(ti);b.disabled=false;b.textContent='Check again';}}
+/* Render a small "checked in N s" line from the server's measured LLM latency
+   (preferred) or the client round-trip. */
+function latencyNote(fb){const ms=fb&&(fb.latency_ms||fb._clientMs);if(!ms)return'';
+ return `<div class="muted timing">checked in ${(ms/1000).toFixed(1)}s</div>`;}
 
 function renderFeedback(fb,original){const slot=document.getElementById('fbslot');
  if(!fb.has_errors&&(!fb.errors||!fb.errors.length)){
@@ -782,7 +793,7 @@ function renderFeedback(fb,original){const slot=document.getElementById('fbslot'
    <span class="ring2" style="background:var(--good)">✓</span> Perfekt — that's correct German.</div></div>
    <div class="solution"><div class="lab">Your sentence</div><div class="txt"><span>${esc(original)}</span>
    <button class="hear" onclick="speak(${JSON.stringify(original)})">🔊</button></div></div>
-   <div class="acts"><button class="btn" onclick="nextQ()">Next</button></div></div>`;
+   <div class="acts"><button class="btn" onclick="nextQ()">Next</button></div>${latencyNote(fb)}</div>`;
   return;}  // U5: no autoplay — the 🔊 button plays on demand
  /* focused feedback: lead with the single most important error */
  const errs=[...fb.errors].sort((a,b)=>PRIORITY.indexOf(a.category)-PRIORITY.indexOf(b.category));
@@ -819,7 +830,7 @@ function renderFeedback(fb,original){const slot=document.getElementById('fbslot'
    <span>${esc(fb.corrected_sentence)}</span>
    <button class="hear" onclick="speak(${JSON.stringify(fb.corrected_sentence)})">🔊</button></div></div>
   <div class="acts"><button class="btn quiet" onclick="drillFromFeedback()">Drill this</button>
-   <button class="btn" onclick="nextQ()">Next</button></div></div>`;
+   <button class="btn" onclick="nextQ()">Next</button></div>${latencyNote(fb)}</div>`;
  /* animate the noticing: strike the error, reveal the fix */
  setTimeout(()=>{const d=document.getElementById('d0'),i=document.getElementById('i0');
   if(d)d.classList.add('struck');if(i)i.classList.add('show');},450);}

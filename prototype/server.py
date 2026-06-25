@@ -11,6 +11,7 @@ never sees the Vertex token — it just POSTs {level, sentence} here.
 import json
 import os
 import sys
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 # Reuse the validated Vertex backend from the eval harness.
@@ -58,8 +59,12 @@ class Handler(BaseHTTPRequestHandler):
                 sentence = (req.get("sentence") or "").strip()
                 if not sentence:
                     return self._send(400, json.dumps({"error": "empty sentence"}))
+                t0 = time.perf_counter()
                 fb = tutor().get_feedback(level, sentence)
+                latency_ms = round((time.perf_counter() - t0) * 1000)
                 out = fb.model_dump(mode="json")
+                out["latency_ms"] = latency_ms  # LLM round-trip, surfaced in the UI
+                sys.stderr.write(f"  feedback {latency_ms} ms ({MODEL})\n")
                 # Attach the deterministic content-vocabulary classification so the
                 # client measures the vocab axis from content lemmas, not raw tokens
                 # (P2). No extra LLM call.
