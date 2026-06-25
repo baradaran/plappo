@@ -667,17 +667,27 @@ function fallbackStory(){const gloss={},set=new Set();
 function cacheStory(level,s){try{const k='plappo_story_cache_'+level;
   const arr=JSON.parse(localStorage.getItem(k)||'[]').filter(x=>x.title!==s.title);
   arr.unshift(s);localStorage.setItem(k,JSON.stringify(arr.slice(0,5)));}catch(e){}}
+/* ADR-021: looked-up (unknown) words ride along as carriers in freshly generated
+   stories, so you meet them again in context while practising grammar — then "decay"
+   to known when you see them again WITHOUT looking them up. Invisible plumbing:
+   meaning is never trained or shown as a feature. */
+let tappedThisRead=new Set(), curCarriers=[];
+function learningWords(){const e=profile.encounters||{},known=profile.known||{};
+ return Object.keys(e).filter(w=>!known[w]).sort((a,b)=>e[b]-e[a]).slice(0,5);}
 function pickCached(level,excludeTitle){try{
   const arr=JSON.parse(localStorage.getItem('plappo_story_cache_'+level)||'[]')
    .filter(x=>x.title!==excludeTitle);
   return arr.length?arr[Math.floor(Math.random()*arr.length)]:null;}catch(e){return null;}}
-async function openReader(force){push('p-reader');
- const key='plappo_story_'+profile.level;
- if(!force){const c=localStorage.getItem(key);if(c){try{story=JSON.parse(c);renderStoryView();return;}catch(e){}}}
+async function openReader(force){push('p-reader');tappedThisRead=new Set();
+ const key='plappo_story_'+profile.level, lw=learningWords();
+ // Skip the per-level cache when there are unknown words to reinforce — we want a
+ // fresh story that carries them (ADR-021).
+ if(!force && !lw.length){const c=localStorage.getItem(key);if(c){try{story=JSON.parse(c);renderStoryView();return;}catch(e){}}}
  setReaderLoading();
  try{const topic=TOPICS[Math.floor(Math.random()*TOPICS.length)];
+  const prefer=(force||lw.length)?'fresh':'library';
   const r=await fetch('/api/story',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({level:profile.level,topic,prefer:force?'fresh':'library'})});const s=await r.json();
+    body:JSON.stringify({level:profile.level,topic,prefer,learning_words:lw})});const s=await r.json();
   if(s.error)throw new Error(s.error);story=normalizeStory(s);
   localStorage.setItem(key,JSON.stringify(story));cacheStory(profile.level,story);}
  catch(e){const cached=pickCached(profile.level,story&&story.title);
@@ -705,6 +715,10 @@ function renderStoryView(){if(!story.glossSet)story.glossSet=new Set(story.gloss
     s.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openSheet(tok);}};}
    p.appendChild(s);});
   el.appendChild(p);});
+ // ADR-021: note which carrier (looked-up) words actually appear, so closeReader
+ // can credit a no-lookup encounter as progress toward "known".
+ {const lw=learningWords(),toks=story.sentences.join(' ').toLowerCase().split(/[^a-zäöüß]+/);
+  curCarriers=lw.filter(w=>toks.some(t=>t.length>=4&&(t===w||t.startsWith(w.slice(0,4))||w.startsWith(t.slice(0,4)))));}
  // U2: real reading progress — light dots by how far the reader has scrolled, not
  // a fixed "first two". If the whole story fits without scrolling, it's all read.
  document.getElementById('dots').innerHTML=story.sentences.map(()=>`<i></i>`).join('');
@@ -716,7 +730,17 @@ function paintProgress(){const dots=document.getElementById('dots');if(!dots||!s
  const frac=max>4?rb.scrollTop/max:1;
  const lit=max<=4?n:Math.min(n,Math.max(1,Math.ceil(frac*n)));
  [...dots.children].forEach((d,i)=>d.classList.toggle('on',i<lit));}
-function closeReader(){document.getElementById('p-reader').classList.remove('on');stopSpeak();}
+function closeReader(){
+ // ADR-021 decay: a carrier word seen this read but NOT looked up counts toward
+ // "understood"; after a couple such, it drops out of the unknown set and loses its
+ // carrier boost. Looking it up again keeps it unknown.
+ if(curCarriers.length){profile.seenNoLookup=profile.seenNoLookup||{};profile.known=profile.known||{};
+  curCarriers.forEach(w=>{if(tappedThisRead.has(w)){profile.seenNoLookup[w]=0;}
+   else{profile.seenNoLookup[w]=(profile.seenNoLookup[w]||0)+1;
+    if(profile.seenNoLookup[w]>=2){if(profile.encounters)delete profile.encounters[w];profile.known[w]=true;}}});
+  saveProfile();}
+ curCarriers=[];
+ document.getElementById('p-reader').classList.remove('on');stopSpeak();}
 function openSheet(w){const k=w.replace(/[.,„":!?»«]/g,'').toLowerCase();
  const g=(story&&story.gloss[k])||null,disp=g?g[0]:w.replace(/[.,„":!?»«]/g,'');
  document.getElementById('shWord').textContent=disp;document.getElementById('shPos').textContent=g?g[1]:'';
@@ -725,6 +749,7 @@ function openSheet(w){const k=w.replace(/[.,„":!?»«]/g,'').toLowerCase();
  // card — this app trains grammar, not word meaning. We only COUNT the encounter:
  // an "I don't know this word" signal that will bias which words recur as carriers
  // in grammar cloze (ADR-021). Nothing is enrolled in review.
+ tappedThisRead.add(k);                                   // ADR-021: looked-up this read
  if(g&&g[2]){profile.encounters=profile.encounters||{};
   profile.encounters[k]=(profile.encounters[k]||0)+1;saveProfile();}
  document.getElementById('sheet').classList.add('on');document.getElementById('scrim').classList.add('on');}

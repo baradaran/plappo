@@ -194,8 +194,11 @@ decays as the learner stops looking the word up. **Why:** ~8–12 meaningful
 encounters drive uptake (Nation; Webb); this routes them through the grammar loop
 and uses the lookup as a free implicit mastery signal. **Caveat:** the
 no-lookup→known signal is noisy — soft prior over several encounters, not a verdict.
-**Status:** Partial. Lookups are tracked (`profile.encounters`); the carrier-word
-selection (bias unknown words into upcoming cloze) is the remaining build.
+**Status:** **Done.** Lookups increment `profile.encounters`; the reader sends the
+top unknown words as `learning_words`, and the generator weaves them into a *fresh*
+story (so they recur in the reading + its questions). Decay: a carrier seen but not
+looked up increments `seenNoLookup`; after 2, the word is marked `known` and loses
+its boost. Invisible to the user — meaning is never shown as a feature.
 
 ### ADR-022 — Native-authentic German *within* the cap; naturalness as a 2nd judge axis
 **Context:** Capping vocabulary risks stilted "Lehrbuchdeutsch". **Decision:** Treat
@@ -210,7 +213,6 @@ judge naturalness axis pending.
 ---
 
 ## Open decisions / next up
-- **Carrier-word selection** (ADR-021): bias looked-up words into upcoming cloze.
 - **Naturalness axis** in the story generator + judge (ADR-022).
 - Ranked **focused-feedback on the engine side** (ADR-010 is UI-only today).
 - The **per-user story selector** in `select_from_library()` (ADR-013).

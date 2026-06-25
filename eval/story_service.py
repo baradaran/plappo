@@ -89,18 +89,23 @@ def _gen_system(level):
     )
 
 
-def _generate(model, level, topic, n, avoid):
+def _generate(model, level, topic, n, avoid, learning_words):
     user = f"Write a {n}-sentence story at level {level}. Topic: {topic}."
+    if learning_words:
+        # ADR-021: re-expose words the learner looked up, in natural context.
+        user += ("\nWhere it fits naturally (do not force it), use a few of these German words the "
+                 "learner is currently practising: " + ", ".join(learning_words[:8]) + ".")
     if avoid:
         user += f"\nDo NOT use these words (too hard): {', '.join(avoid)}. Use simpler ones."
     return vertex_json(model, _gen_system(level), user, STORY_SCHEMA, temperature=0.7)
 
 
 def generate_gated_story(level, topic, gen_model="gemini-2.5-flash",
-                         judge_model="gemini-2.5-flash", sentences=8, max_tries=2):
+                         judge_model="gemini-2.5-flash", sentences=8, max_tries=2,
+                         learning_words=()):
     avoid, story, check = [], {}, {}
     for attempt in range(1, max_tries + 1):
-        story = _generate(gen_model, level, topic, sentences, avoid)
+        story = _generate(gen_model, level, topic, sentences, avoid, learning_words)
         text = " ".join(story.get("sentences", []))
         if not text:
             continue

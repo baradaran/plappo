@@ -95,7 +95,8 @@ class Handler(BaseHTTPRequestHandler):
                     if cached:
                         cached["source"] = "library"
                         return self._send(200, json.dumps(cached, ensure_ascii=False))
-                story = generate_gated_story(level, topic)
+                learning = req.get("learning_words") or []
+                story = generate_gated_story(level, topic, learning_words=learning)
                 save_to_library(story)
                 return self._send(200, json.dumps(story, ensure_ascii=False))
             return self._send(404, json.dumps({"error": "not found"}))

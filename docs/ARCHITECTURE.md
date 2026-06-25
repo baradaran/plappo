@@ -68,7 +68,9 @@ upstream knows what model answered.
 **Profile** (`index.html`, localStorage) — the learner:
 ```
 { level (working, DERIVED), goal, xp, streak, vocab, seenWords,
-  skills: { <taxonomy enum>: 0..100 } }      ← per-skill mastery
+  skills: { <taxonomy enum>: 0..100 },        ← per-skill mastery
+  encounters: { word: lookupCount },          ← ADR-021: "unknown word" signal
+  known: { word: true }, seenNoLookup: { word: n } }   ← carrier decay
 ```
 
 **Deck item** (FSRS) — one review card (grammar-only typed cloze, ADR-018):
@@ -114,6 +116,12 @@ The library record is already tagged (`grammar_points`, `theme`), so the future
 **personalised selector** — pick the in-level story that best exercises the
 learner's weak skills and matches interests — slots into `select_from_library()`
 without touching generation. That's the "no big refactor later" payoff.
+
+**Carrier reads are the personalised "fresh" path (ADR-021).** When the learner has
+looked-up (unknown) words, the reader requests a *fresh* story seeded with those
+words (`learning_words`) so they recur in context; with none pending, it serves from
+the shared library. So personalisation rides the on-demand tier ADR-013 already
+reserved, and every fresh story is still persisted for everyone.
 
 ## Tech choices
 

@@ -289,5 +289,98 @@
     "created_at": "2026-06-25T09:42:48Z",
     "gen_model": "gemini-2.5-flash",
     "source": "generated"
+  },
+  {
+    "title": "Ein Tag am Meer",
+    "sentences": [
+      "Heute ist ein schöner Tag.",
+      "Wir fahren ans Meer.",
+      "Der Strand ist groß und der Sand ist warm.",
+      "Meine Schwester baut eine große Sandburg.",
+      "Ich suche schöne Muscheln am Wasser.",
+      "Von hier sehen wir einen roten Leuchtturm.",
+      "Später schwimmen wir im kühlen Wasser und spielen.",
+      "Das ist ein perfekter Tag am Meer!"
+    ],
+    "glossary": [
+      {
+        "word": "Meer",
+        "lemma": "das Meer",
+        "pos": "Noun",
+        "en": "sea"
+      },
+      {
+        "word": "Strand",
+        "lemma": "der Strand",
+        "pos": "Noun",
+        "en": "beach"
+      },
+      {
+        "word": "Sandburg",
+        "lemma": "die Sandburg",
+        "pos": "Noun",
+        "en": "sandcastle"
+      },
+      {
+        "word": "Muscheln",
+        "lemma": "die Muschel",
+        "pos": "Noun",
+        "en": "shells"
+      },
+      {
+        "word": "Leuchtturm",
+        "lemma": "der Leuchtturm",
+        "pos": "Noun",
+        "en": "lighthouse"
+      },
+      {
+        "word": "baut",
+        "lemma": "bauen",
+        "pos": "Verb",
+        "en": "builds"
+      },
+      {
+        "word": "kühlen",
+        "lemma": "kühl",
+        "pos": "Adjective",
+        "en": "cool"
+      }
+    ],
+    "questions": [
+      "Wohin fahren die Personen heute?",
+      "Was macht die Schwester am Strand?",
+      "Was sehen sie vom Strand aus?"
+    ],
+    "task": {
+      "prompt": "Stell dir vor, du bist auch am Meer. Schreibe eine kurze Nachricht an einen Freund und erzähle, was du dort machst und was dir am besten gefällt.",
+      "en": "Imagine you are also at the sea. Write a short message to a friend and tell them what you are doing there and what you like best."
+    },
+    "grammar_points": [
+      "CASE",
+      "GENDER",
+      "ADJ_ENDING",
+      "VERB_CONJUGATION",
+      "VERB_POSITION",
+      "PREPOSITION",
+      "WORD_ORDER"
+    ],
+    "theme": "nature",
+    "check": {
+      "target": "A2",
+      "estimated": "A2",
+      "class": "on",
+      "over_words": [],
+      "unsupported_over_words": [],
+      "coverage": 1.0,
+      "uncovered_words": [],
+      "in_band": true,
+      "attempts": 2
+    },
+    "level": "A2",
+    "topic": "ein Tag am Meer",
+    "id": "st_A2_1782382093804",
+    "created_at": "2026-06-25T10:08:13Z",
+    "gen_model": "gemini-2.5-flash",
+    "source": "generated"
   }
 ]
