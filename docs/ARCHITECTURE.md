@@ -138,3 +138,7 @@ reserved, and every fresh story is still persisted for everyone.
   axis are deterministic and data-driven, not hand-rolled heuristics (ADR-019).
 - **Persistence today** is `localStorage` (client) + a JSON file (library). The
   data *shapes* are DB-ready; only the storage swaps.
+- **Analytics is opt-in and no-PII** (ADR-023): `POST /api/log` only accepts
+  consented, pseudonymous events (no IP stored); `/api/log/export` + `/api/log/delete`
+  serve GDPR access/erasure. Events land in git-ignored `prototype/data/events.jsonl`.
+  See [PRIVACY.md](PRIVACY.md).

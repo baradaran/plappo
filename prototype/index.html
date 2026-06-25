@@ -430,6 +430,22 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
     </div>
   </div>
 
+  <!-- GDPR consent (opt-in; nothing logged until "Allow") -->
+  <div class="scrim" id="consentScrim"></div>
+  <div class="sheet" id="consent">
+    <div class="grab"></div>
+    <h2 class="h2" style="margin:0 0 6px">Help improve Plappo?</h2>
+    <p class="sub">With your OK we log your <b>anonymous</b> learning data — the German you
+      write and your review results — to make the lessons better.
+      <b>No name, no email, no account, no IP, no ads.</b> You can export or delete it
+      anytime in Profile.</p>
+    <p class="muted" style="margin:8px 0 0;line-height:1.45">Please don't type personal details
+      (names, addresses) into your answers.</p>
+    <div class="btnrow" style="margin-top:14px">
+      <button class="btn quiet" onclick="declineConsent()">No thanks</button>
+      <button class="btn" onclick="grantConsent()">Allow</button></div>
+  </div>
+
   <div class="toast" id="toast"></div>
 </div>
 
@@ -697,7 +713,8 @@ async function openReader(force){push('p-reader');tappedThisRead=new Set();
     body:JSON.stringify({level:profile.level,topic,prefer,learning_words:lw,
       weak_skills:weakSkills(),seen_ids:profile.seen||[]})});const s=await r.json();
   if(s.error)throw new Error(s.error);story=normalizeStory(s);
-  localStorage.setItem(key,JSON.stringify(story));cacheStory(profile.level,story);}
+  localStorage.setItem(key,JSON.stringify(story));cacheStory(profile.level,story);
+  logEvent('story',{level:story.level,source:s.source||'generated',check:story.check||{}});}
  catch(e){const cached=pickCached(profile.level,story&&story.title);
   if(cached){story=cached;toast('Offline — showing a saved story');}
   else{story=fallbackStory();toast('Offline story (generator unavailable)');}}
@@ -798,7 +815,10 @@ async function check(){const s=document.getElementById('answer').value.trim();if
  try{const r=await fetch('/api/feedback',{method:'POST',headers:{'Content-Type':'application/json'},
    body:JSON.stringify({level:profile.level,sentence:s})});const fb=await r.json();
   fb._clientMs=Math.round(performance.now()-t0);
-  if(fb.error)throw new Error(fb.error);applyResult(fb,s);renderFeedback(fb,s);}
+  if(fb.error)throw new Error(fb.error);applyResult(fb,s);renderFeedback(fb,s);
+  logEvent('feedback',{level:profile.level,sentence:s,n_errors:(fb.errors||[]).length,
+    cats:(fb.errors||[]).map(e=>e.category),corrected:fb.corrected_sentence,
+    demonstrated:fb.demonstrated||[]});}
  catch(e){document.getElementById('fbslot').innerHTML=
    `<div class="fb"><div class="top"><div class="verdict">Couldn't check just now</div></div>
     <div class="note"><div class="ex">${esc(e.message)}</div></div></div>`;}
@@ -966,7 +986,11 @@ function reveal(correct){const it=rqueue[rpos];const ans=it.answer;
   `<div class="muted" style="margin-bottom:6px">${hint}</div><div class="grades">${
    [[1,'Again','again'],[2,'Hard',''],[3,'Good','good'],[4,'Easy','']].map(([g,lab,cls])=>
    `<button class="grade ${cls}${g===derived?' on':''}" onclick="grade(${g})">${lab}<small>${previewIv(it,g)}</small></button>`).join('')}</div>`;}
-function grade(g){const it=rqueue[rpos];gradeItem(it,g);
+function grade(g){const it=rqueue[rpos];
+ const sB=it.S,rB=it.reps,el=it.last?(Date.now()-it.last)/864e5:0;   // FSRS-optimisation signal
+ gradeItem(it,g);
+ logEvent('review',{cat:it.cat,grade:g,reps:rB,elapsed_days:+el.toFixed(2),
+   s_before:+sB.toFixed(3),s_after:+it.S.toFixed(3),d_after:+it.D.toFixed(2)});
  if(it.type==='grammar'){if(g===1)profile.skills[it.cat]=Math.max(0,(profile.skills[it.cat]||50)-10);
   else if(g>=3)profile.skills[it.cat]=Math.min(100,(profile.skills[it.cat]||50)+5);saveProfile();}
  saveDeck();rrev++;rpos++;rpos>=rqueue.length?finishReview():showCard();}
@@ -1060,16 +1084,59 @@ function renderProfile(){const p=levelProgress(),cfg=p.cfg,ga=grammarAchieved(),
   <div class="muted" style="margin:-4px 0 8px">The one thing you choose: where you're headed.</div>
   <div class="levels">${ORDER.map(l=>{const locked=idx(l)<=idx(profile.level);
    return`<b class="${l===profile.goal?'on':''}" style="${locked?'opacity:.38;pointer-events:none':''}"
-     onclick="setGoal('${l}')">${l}</b>`;}).join('')}</div>`;}
+     onclick="setGoal('${l}')">${l}</b>`;}).join('')}</div>
+  <div class="sectlabel">Data &amp; privacy</div>
+  <div class="card" style="padding:14px 16px">
+   <div class="muted" style="line-height:1.5">${consentGiven()
+     ? 'Anonymous learning data is <b>on</b> — no name, email, IP, or tracking. It helps improve the lessons.'
+     : 'Data collection is <b>off</b>. Turn it on to help improve the lessons (anonymous; no name/email/IP).'}</div>
+   <div class="btnrow" style="margin-top:10px">${consentGiven()
+     ? '<button class="btn quiet" onclick="toggleConsent(false)">Turn off</button>'
+     : '<button class="btn" onclick="toggleConsent(true)">Turn on</button>'}</div>
+   <div class="btnrow" style="margin-top:8px">
+    <button class="btn quiet" onclick="exportMyData()">Export my data</button>
+    <button class="btn quiet" onclick="deleteMyData()">Delete my data</button></div>
+  </div>`;}
 function setGoal(l){profile.goal=l;saveProfile();renderProfile();renderLearn();}
 
 /* ============ toast ============ */
 let toastT;function toast(msg){const t=document.getElementById('toast');t.textContent=msg;
  t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2600);}
 
+/* ====== consented, pseudonymous analytics (GDPR/BDSG — see docs/PRIVACY.md) ======
+   Nothing is logged until the learner opts IN. No name/email/account/IP; a random
+   pseudonymous id groups events so e.g. FSRS parameters can be optimised later.
+   Export + delete live in Profile. Timestamps are coarsened to the day. */
+const APP_VER='proto-1', CONSENT_VER=1;
+function consentGiven(){return !!(profile.consent&&profile.consent.analytics&&profile.anonId);}
+function logEvent(type,payload){if(!consentGiven())return;
+ fetch('/api/log',{method:'POST',headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({consent:true,id:profile.anonId,ts:new Date().toISOString().slice(0,10),
+     type,payload,app:APP_VER})}).catch(()=>{});}
+function grantConsent(){profile.consent={analytics:true,ts:new Date().toISOString(),version:CONSENT_VER};
+ if(!profile.anonId)profile.anonId=(crypto.randomUUID?crypto.randomUUID():'a'+Date.now()+'.'+Math.random());
+ saveProfile();closeConsent();toast('Thanks — anonymous data on. Change it anytime in Profile.');}
+function setConsent(on){profile.consent={analytics:!!on,ts:new Date().toISOString(),version:CONSENT_VER};
+ if(on&&!profile.anonId)profile.anonId=(crypto.randomUUID?crypto.randomUUID():'a'+Date.now()+'.'+Math.random());
+ saveProfile();}
+function declineConsent(){setConsent(false);closeConsent();}
+function closeConsent(){document.getElementById('consent').classList.remove('on');
+ document.getElementById('consentScrim').classList.remove('on');}
+function maybeConsent(){if(!profile.consent){document.getElementById('consent').classList.add('on');
+ document.getElementById('consentScrim').classList.add('on');}}
+function toggleConsent(on){setConsent(on);renderProfile();toast(on?'Anonymous data on.':'Data collection off.');}
+async function exportMyData(){if(!profile.anonId)return toast('No data — analytics is off.');
+ const r=await fetch('/api/log/export',{method:'POST',headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({id:profile.anonId})});const d=await r.json();
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],
+   {type:'application/json'}));a.download='plappo-my-data.json';a.click();}
+async function deleteMyData(){if(!profile.anonId)return toast('No data to delete.');
+ await fetch('/api/log/delete',{method:'POST',headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({id:profile.anonId})}).catch(()=>{});toast('Your data was deleted.');}
+
 /* ============ init ============ */
 loadProfile();recompute();loadDeck();document.getElementById('streak').textContent='🔥 '+profile.streak;
-renderLearn();updateDue();
+renderLearn();updateDue();maybeConsent();
 </script>
 </body>
 </html>

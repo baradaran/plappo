@@ -223,6 +223,20 @@ contractions); the judge scores a separate `naturalness` 1-5 axis + flags
 `unnatural_phrases`; the gate ships only `naturalness≥4` and re-styles on a miss.
 The eval reports per-story naturalness + an average.
 
+### ADR-023 — Analytics logging is opt-in, pseudonymous, no-PII, with rights (GDPR/BDSG)
+**Context:** We want learning data (to optimise FSRS, calibrate the judge/level, and
+improve feedback), but the app runs under EU/German law. **Decision:** Log **nothing
+until explicit opt-in consent** (Art. 6(1)(a) + TDDDG §25); store **no** name/email/
+account/IP/fingerprint; group events by a **random pseudonymous id**; coarsen
+timestamps to the day; expose **export** (Art. 15/20) and **delete** (Art. 17) +
+consent withdrawal in-app; never commit event data (git-ignored). **Why:** data
+minimisation + consent is the lawful, low-risk path; truly anonymous-ish learning
+events still let us optimise without identifying anyone. **Also documented:** the
+*service* itself sends learner text to the LLM provider (a processor) — a separate
+Art. 6(1)(b) flow needing a DPA + transfer assessment in production. **Status:**
+**Done (prototype).** See [PRIVACY.md](PRIVACY.md); production checklist there is
+not yet implemented. Not legal advice — needs DPO/lawyer review before launch.
+
 ---
 
 ## Open decisions / next up

@@ -57,6 +57,7 @@ python story_level_eval.py --levels A2,B1,B2 --sentences 12   # story-in-level d
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Components, data flow, **data contracts**, runtime vs offline, scaling |
 | [docs/DECISIONS.md](docs/DECISIONS.md) | **Decision walkthrough** (ADRs) — every choice and its reasoning |
 | [docs/PEDAGOGY_ROADMAP.md](docs/PEDAGOGY_ROADMAP.md) | The learning science, phased roadmap, **cited & checkable** sources |
+| [docs/PRIVACY.md](docs/PRIVACY.md) | Data handling under **GDPR / BDSG / TDDDG** — consent, no-PII, your rights |
 | [eval/README.md](eval/README.md) | The eval harnesses + latest results |
 | [prototype/README.md](prototype/README.md) | The app prototype: screens, what's real vs stubbed |
 

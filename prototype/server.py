@@ -12,6 +12,7 @@ import json
 import os
 import sys
 import time
+from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 # Reuse the validated Vertex backend from the eval harness.
@@ -37,6 +38,39 @@ def tutor():
     if _tutor is None:
         _tutor = VertexGeminiTutor(MODEL)
     return _tutor
+
+
+# --- consented, pseudonymous event log (GDPR/BDSG; see docs/PRIVACY.md) --------
+# We store ONLY what the consented client sends (no IP, no identity), one JSON
+# object per line, stamped with a coarse receive DATE (not a precise timestamp).
+EVENTS_PATH = os.path.join(HERE, "data", "events.jsonl")
+
+
+def _append_event(ev):
+    os.makedirs(os.path.dirname(EVENTS_PATH), exist_ok=True)
+    with open(EVENTS_PATH, "a", encoding="utf-8") as f:
+        f.write(json.dumps(ev, ensure_ascii=False) + "\n")
+
+
+def _events_for(anon_id):
+    try:
+        with open(EVENTS_PATH, encoding="utf-8") as f:
+            return [json.loads(ln) for ln in f if ln.strip() and json.loads(ln).get("id") == anon_id]
+    except OSError:
+        return []
+
+
+def _delete_events_for(anon_id):
+    """Right to erasure (Art. 17): drop every event for this pseudonymous id."""
+    try:
+        with open(EVENTS_PATH, encoding="utf-8") as f:
+            lines = [ln for ln in f if ln.strip()]
+    except OSError:
+        return 0
+    keep = [ln for ln in lines if json.loads(ln).get("id") != anon_id]
+    with open(EVENTS_PATH, "w", encoding="utf-8") as f:
+        f.writelines(keep)
+    return len(lines) - len(keep)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -101,6 +135,23 @@ class Handler(BaseHTTPRequestHandler):
                 story = generate_gated_story(level, topic, learning_words=learning)
                 save_to_library(story)
                 return self._send(200, json.dumps(story, ensure_ascii=False))
+            if self.path == "/api/log":
+                # Only consented, pseudonymous, no-PII events are accepted. We never
+                # store the client IP; the server stamps only a coarse receive date.
+                if req.get("consent") is not True or not req.get("id"):
+                    return self._send(204, b"")   # silently drop anything non-consented
+                _append_event({
+                    "id": req.get("id"), "ts": req.get("ts"), "type": req.get("type"),
+                    "payload": req.get("payload"), "app": req.get("app"),
+                    "recv_date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+                })
+                return self._send(204, b"")
+            if self.path == "/api/log/export":          # Art. 15/20: access + portability
+                aid = req.get("id")
+                return self._send(200, json.dumps({"id": aid, "events": _events_for(aid)},
+                                                  ensure_ascii=False))
+            if self.path == "/api/log/delete":          # Art. 17: erasure
+                return self._send(200, json.dumps({"deleted": _delete_events_for(req.get("id"))}))
             return self._send(404, json.dumps({"error": "not found"}))
         except Exception as e:  # noqa: BLE001
             self._send(500, json.dumps({"error": str(e)}))

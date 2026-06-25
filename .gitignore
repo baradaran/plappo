@@ -41,3 +41,6 @@ CLAUDE.md
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# user analytics events (GDPR: never commit personal data)
+prototype/data/
