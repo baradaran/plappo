@@ -1,0 +1,51 @@
+{
+  "generator": "gemini-2.5-flash",
+  "judge": "gemini-2.5-pro",
+  "sentences": 6,
+  "summary": {
+    "above": 2,
+    "on": 0,
+    "below": 0
+  },
+  "stories": [
+    {
+      "target": "A2",
+      "topic": "der erste Schultag",
+      "title": "Leos erster Schultag",
+      "text": "Heute ist Leos erster Schultag. Er ist ein bisschen nervös, aber auch sehr gespannt. In der Schule trifft er seine Lehrerin, Frau Schmidt. Sie ist sehr nett und lächelt viel. Leo lernt auch ein Mädchen namens Mia kennen. Sie spielen zusammen und haben viel Spaß.",
+      "estimated": "A2",
+      "class": "above",
+      "over_words": [
+        "namens"
+      ],
+      "over_grammar": [
+        "Use of the genitive preposition 'namens'"
+      ],
+      "coverage": 0.978,
+      "naturalness": 4,
+      "unnatural_phrases": [
+        "ein Mädchen namens Mia"
+      ],
+      "note": "The text is almost perfectly at the A2 level. The only element that is clearly above A2 is the word 'namens', which is a genitive preposition typically learned at B1 or later. A more level-appropriate and slightly more natural phrasing for this simple context would be '...ein Mädchen kennen. Sie heißt Mia.' or '...ein Mädchen kennen, das Mia heißt.' Otherwise, the text is excellent for the target level.",
+      "latency_s": 23.9
+    },
+    {
+      "target": "A2",
+      "topic": "ein verlorener Hund im Park",
+      "title": "Bello im Park",
+      "text": "Ein kleiner Hund namens Bello spielt fröhlich im Park. Seine Besitzerin, Frau Schmidt, sitzt auf einer Bank und liest ein Buch. Plötzlich sieht Bello einen Vogel und rennt schnell hinterher. Frau Schmidt schaut auf und bemerkt, dass Bello weg ist. Sie ruft seinen Namen: \"Bello! Wo bist du?\" und sucht überall. Endlich findet sie Bello unter einem großen Baum; er ist müde, aber glücklich.",
+      "estimated": "A2",
+      "class": "above",
+      "over_words": [
+        "Besitzerin",
+        "bemerkt"
+      ],
+      "over_grammar": [],
+      "coverage": 0.906,
+      "naturalness": 5,
+      "unnatural_phrases": [],
+      "note": "The text is an excellent example of the A2 level, correctly using key grammatical structures like separable verbs (`aufschauen`, `hinterherrennen`), adjective declension, and a subordinate clause with 'dass'. The vocabulary is mostly appropriate, though 'Besitzerin' and 'bemerkt' are arguably closer to B1. The language is completely natural and flows well.",
+      "latency_s": 19.6
+    }
+  ]
+}

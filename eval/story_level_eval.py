@@ -48,10 +48,14 @@ JUDGE_SCHEMA = {
         "over_level_words": {"type": "ARRAY", "items": {"type": "STRING"}},
         "over_level_grammar": {"type": "ARRAY", "items": {"type": "STRING"}},
         "stays_in_level": {"type": "BOOLEAN"},
+        # ADR-022: naturalness is a SEPARATE axis from level. 1=stilted textbook /
+        # translationese, 5=reads like a native actually wrote it.
+        "naturalness": {"type": "INTEGER"},
+        "unnatural_phrases": {"type": "ARRAY", "items": {"type": "STRING"}},
         "note": {"type": "STRING"},
     },
     "required": ["estimated_cefr", "over_level_words", "over_level_grammar",
-                 "stays_in_level", "note"],
+                 "stays_in_level", "naturalness", "unnatural_phrases", "note"],
 }
 
 
@@ -63,10 +67,14 @@ def gen_system(level):
 
 
 def judge_system(level):
-    return (f"You are a strict CEFR examiner. The German text was written for a learner at level "
-            f"{level}. List any words clearly above {level} and any grammar clearly above {level}. "
-            f"Give your best overall CEFR estimate. stays_in_level=true ONLY if nothing is clearly "
-            f"above {level}. Be conservative; do not flag words a {level} learner would plausibly know.")
+    return (f"You are a strict CEFR examiner AND a native German speaker. The text was written for a "
+            f"learner at level {level}. (1) List any words clearly above {level} and any grammar clearly "
+            f"above {level}; give your overall CEFR estimate; stays_in_level=true ONLY if nothing is "
+            f"clearly above {level} (be conservative — don't flag words a {level} learner would know). "
+            f"(2) Rate naturalness 1-5: 5 = reads exactly like German a native would actually write; "
+            f"1 = stilted textbook or translated-from-English German. Naturalness is SEPARATE from "
+            f"level — simple, low-level words can be perfectly natural. List any unnatural / "
+            f"translationese phrases that hurt the score.")
 
 
 def generate(model, level, topic, n):
@@ -123,14 +131,16 @@ def main():
             records[cls] += 1
             ow, og = j.get("over_level_words", []), j.get("over_level_grammar", [])
             cov = lexical_coverage(text, level)   # deterministic lexical check (ADR-019)
+            nat = j.get("naturalness") or 0       # naturalness axis (ADR-022)
             rows.append({"target": level, "topic": topic, "title": title, "text": text,
                          "estimated": j.get("estimated_cefr"), "class": cls,
                          "over_words": ow, "over_grammar": og, "coverage": cov["coverage"],
+                         "naturalness": nat, "unnatural_phrases": j.get("unnatural_phrases", []),
                          "note": j.get("note", ""), "latency_s": round(time.time() - t0, 1)})
             mark = {"above": "DRIFT↑", "on": "ON   ", "below": "EASY↓"}[cls]
             extra = f" · over: {', '.join(ow[:5])}" if ow else ""
             print(f"  [{mark}] target {level} · est {j.get('estimated_cefr'):<2} · "
-                  f"cov {cov['coverage']:.0%} · {topic}{extra}")
+                  f"cov {cov['coverage']:.0%} · nat {nat}/5 · {topic}{extra}")
 
     n = sum(records.values())
     print("\n" + "=" * 60)
@@ -138,7 +148,10 @@ def main():
     print("=" * 60)
     print(f"ON band (ship): {records['on']}/{n} = {records['on']/n:.0%}")
     print(f"  ↑ above (drift / too hard): {records['above']}/{n}")
-    print(f"  ↓ below (too easy):         {records['below']}/{n}\n")
+    print(f"  ↓ below (too easy):         {records['below']}/{n}")
+    nats = [r["naturalness"] for r in rows if r["naturalness"]]
+    if nats:
+        print(f"avg naturalness: {sum(nats)/len(nats):.1f}/5  (ADR-022; 5=native, 1=textbook)\n")
     for lvl in levels:
         sub = [r for r in rows if r["target"] == lvl]
         c = {"above": 0, "on": 0, "below": 0}

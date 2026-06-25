@@ -120,10 +120,13 @@ python story_level_eval.py --levels A2,B1,B2 --sentences 12
 
 Finding: short stories stay in band, but **longer A2 stories drift up** (leak
 over-level words like `Schulgebäude`, `umarmt`) — confirming arXiv 2505.08351
-(2025) that "write at level X" is not reliable. So the app gates generation:
-`story_service.py` generates a story + glossary + questions, judges it, and ships
-only in-band content (treating over-level words as OK **iff glossed** — that's
-i+1). Wired into the prototype's reader via the server's `/api/story`.
+(2025) that "write at level X" is not reliable. So the app gates generation on
+**three axes**: the LLM judge's CEFR level (over-level words OK **iff glossed** —
+that's i+1, ADR-012), a deterministic **lexical-coverage** check (`vocab_coverage.py`
+via `simplemma`+`wordfreq`, ADR-019), and a **naturalness** score 1-5 (native vs.
+textbook, ADR-022). `story_service.py` ships only stories that pass all three and
+re-generates on a miss; wired into the reader via the server's `/api/story`. The
+eval prints coverage and naturalness per story.
 
 ## How to read the result
 

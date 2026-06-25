@@ -28,6 +28,7 @@ from vocab_coverage import coverage as lexical_coverage
 
 THEMES = ["everyday", "family", "nature", "travel", "school",
           "animals", "food", "city", "friendship", "work"]
+NAT_THRESHOLD = 4   # ADR-022: ship only stories the judge rates >=4/5 for naturalness
 
 STORY_SCHEMA = {
     "type": "OBJECT",
@@ -73,6 +74,11 @@ def _gen_system(level):
         f"You write short stories in German for learners at exactly CEFR level {level}. "
         f"Use vocabulary and grammar appropriate to {level}; make it engaging and worth a "
         f"{level} learner's time, but do not exceed {level}.\n"
+        f"Write the German a NATIVE speaker would actually write at this level of simplicity — "
+        f"natural collocations (eine Entscheidung treffen, not machen), real word order, modal "
+        f"particles (doch, mal, eben) and contractions (ins, am, gibt's) where natural. NOT stilted "
+        f"textbook German or translated-from-English. Simple words, but real, idiomatic language; "
+        f"at B2+, the functional register people actually use. (ADR-022)\n"
         f"Also return:\n"
         f"- glossary: the 5-8 key or hardest words a {level} learner might not know, each with "
         f"the surface form exactly as it appears in the text, its lemma, part of speech, and a "
@@ -89,7 +95,7 @@ def _gen_system(level):
     )
 
 
-def _generate(model, level, topic, n, avoid, learning_words):
+def _generate(model, level, topic, n, avoid, learning_words, restyle=()):
     user = f"Write a {n}-sentence story at level {level}. Topic: {topic}."
     if learning_words:
         # ADR-021: re-expose words the learner looked up, in natural context.
@@ -97,15 +103,19 @@ def _generate(model, level, topic, n, avoid, learning_words):
                  "learner is currently practising: " + ", ".join(learning_words[:8]) + ".")
     if avoid:
         user += f"\nDo NOT use these words (too hard): {', '.join(avoid)}. Use simpler ones."
+    if restyle:
+        # ADR-022: the previous attempt read as stilted/translated — fix the phrasing.
+        user += ("\nThe previous attempt read as stilted or translated. Rewrite to sound like natural "
+                 "native German; in particular fix these phrasings: " + "; ".join(restyle) + ".")
     return vertex_json(model, _gen_system(level), user, STORY_SCHEMA, temperature=0.7)
 
 
 def generate_gated_story(level, topic, gen_model="gemini-2.5-flash",
                          judge_model="gemini-2.5-flash", sentences=8, max_tries=2,
                          learning_words=()):
-    avoid, story, check = [], {}, {}
+    avoid, restyle, story, check = [], [], {}, {}
     for attempt in range(1, max_tries + 1):
-        story = _generate(gen_model, level, topic, sentences, avoid, learning_words)
+        story = _generate(gen_model, level, topic, sentences, avoid, learning_words, restyle)
         text = " ".join(story.get("sentences", []))
         if not text:
             continue
@@ -113,22 +123,26 @@ def generate_gated_story(level, topic, gen_model="gemini-2.5-flash",
         for g in story.get("glossary", []):
             gloss_forms.add((g.get("word") or "").lower())
             gloss_forms.add((g.get("lemma") or "").lower())
-        # 1) LLM judge (grammar + holistic level); 2) deterministic lexical coverage
+        # 1) LLM judge (level + naturalness); 2) deterministic lexical coverage
         j = judge(judge_model, level, text)
         cls = classify(level, j)
         over = j.get("over_level_words", []) or []
         unsupported = [w for w in over if w.lower() not in gloss_forms]
         judge_ok = (cls != "above") or (not unsupported)
         cov = lexical_coverage(text, level, gloss_forms)
-        ship_ok = judge_ok and cov["in_band"]
+        nat = j.get("naturalness") or 0                       # ADR-022
+        unnatural = j.get("unnatural_phrases", []) or []
+        ship_ok = judge_ok and cov["in_band"] and nat >= NAT_THRESHOLD
         check = {"target": level, "estimated": j.get("estimated_cefr"), "class": cls,
                  "over_words": over, "unsupported_over_words": unsupported,
                  "coverage": cov["coverage"], "uncovered_words": cov["uncovered"][:15],
+                 "naturalness": nat, "unnatural_phrases": unnatural[:8],
                  "in_band": ship_ok, "attempts": attempt}
         if ship_ok:
             break
-        # regenerate, steering away from both the judge's leaks and the out-of-band words
+        # regenerate: steer away from out-of-band words AND fix the stilted phrasing
         avoid = list(dict.fromkeys((unsupported or []) + cov["uncovered"][:20]))
+        restyle = unnatural[:6]
     story["check"] = check
     story["level"] = level
     story["topic"] = topic

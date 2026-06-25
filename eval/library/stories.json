@@ -382,5 +382,103 @@
     "created_at": "2026-06-25T10:08:13Z",
     "gen_model": "gemini-2.5-flash",
     "source": "generated"
+  },
+  {
+    "title": "Ein schöner Tag in der Stadt",
+    "sentences": [
+      "Heute Morgen bin ich früh aufgewacht.",
+      "Ich wollte einen schönen Tag in der Stadt verbringen.",
+      "Zuerst bin ich ins Café gegangen und habe einen Kaffee getrunken.",
+      "Danach habe ich den Markt besucht, dort gab es viele frische Sachen.",
+      "Ich habe ein paar Äpfel und Käse gekauft.",
+      "Zum Mittagessen saß ich in einem kleinen Restaurant und habe Pizza gegessen.",
+      "Am Nachmittag bin ich durch den Park spaziert und habe die Sonne genossen.",
+      "Es war wirklich ein toller Tag in der Stadt!"
+    ],
+    "glossary": [
+      {
+        "word": "aufgewacht",
+        "lemma": "aufwachen",
+        "pos": "Verb",
+        "en": "woke up"
+      },
+      {
+        "word": "verbringen",
+        "lemma": "verbringen",
+        "pos": "Verb",
+        "en": "to spend (time)"
+      },
+      {
+        "word": "Markt",
+        "lemma": "Markt",
+        "pos": "Nomen",
+        "en": "market"
+      },
+      {
+        "word": "frische",
+        "lemma": "frisch",
+        "pos": "Adjektiv",
+        "en": "fresh"
+      },
+      {
+        "word": "Mittagessen",
+        "lemma": "Mittagessen",
+        "pos": "Nomen",
+        "en": "lunch"
+      },
+      {
+        "word": "spaziert",
+        "lemma": "spazieren",
+        "pos": "Verb",
+        "en": "walked"
+      },
+      {
+        "word": "genossen",
+        "lemma": "genießen",
+        "pos": "Verb",
+        "en": "enjoyed"
+      }
+    ],
+    "questions": [
+      "Wann ist die Person aufgewacht?",
+      "Was hat die Person auf dem Markt gekauft?",
+      "Wo hat die Person am Nachmittag spaziert?"
+    ],
+    "task": {
+      "prompt": "Stell dir vor, du hast auch einen Tag in einer Stadt verbracht. Schreib eine kurze Nachricht an einen Freund und erzähl, was du gemacht hast und was dir am besten gefallen hat.",
+      "en": "Imagine you also spent a day in a city. Write a short message to a friend and tell them what you did and what you liked best."
+    },
+    "grammar_points": [
+      "CASE",
+      "ADJ_ENDING",
+      "VERB_CONJUGATION",
+      "AUX_CHOICE",
+      "SEPARABLE_VERB",
+      "PREPOSITION",
+      "WORD_ORDER",
+      "CONNECTOR"
+    ],
+    "theme": "city",
+    "check": {
+      "target": "A2",
+      "estimated": "A2",
+      "class": "on",
+      "over_words": [],
+      "unsupported_over_words": [],
+      "coverage": 0.988,
+      "uncovered_words": [
+        "caf"
+      ],
+      "naturalness": 5,
+      "unnatural_phrases": [],
+      "in_band": true,
+      "attempts": 1
+    },
+    "level": "A2",
+    "topic": "ein Tag in der Stadt",
+    "id": "st_A2_1782386501521",
+    "created_at": "2026-06-25T11:21:41Z",
+    "gen_model": "gemini-2.5-flash",
+    "source": "generated"
   }
 ]

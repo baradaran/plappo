@@ -207,13 +207,15 @@ words, real language: real collocations, modal particles, natural order,
 contractions; functional/professional register at B2–C2. The story judge scores a
 separate **naturalness** axis (native vs. textbook/translationese). **Why:**
 native-like fluency is formulaic/collocational (Wray); authentic input beats
-contrived (Gilmore); the two axes don't trade off. **Status:** Decided; prompt +
-judge naturalness axis pending.
+contrived (Gilmore); the two axes don't trade off. **Status:** **Done.** The
+generator prompt demands native register (collocations, modal particles,
+contractions); the judge scores a separate `naturalness` 1-5 axis + flags
+`unnatural_phrases`; the gate ships only `naturalness≥4` and re-styles on a miss.
+The eval reports per-story naturalness + an average.
 
 ---
 
 ## Open decisions / next up
-- **Naturalness axis** in the story generator + judge (ADR-022).
 - Ranked **focused-feedback on the engine side** (ADR-010 is UI-only today).
 - The **per-user story selector** in `select_from_library()` (ADR-013).
 - Drop-in **real FSRS** library (ADR-008) — data model already matches.
