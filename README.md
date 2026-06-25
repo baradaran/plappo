@@ -74,6 +74,11 @@ docs/        architecture, decisions, pedagogy
 This is a validated **prototype**, not production. The risky cores — reliable
 feedback and in-level content — are proven by evals and running live. Known limits
 are documented per-decision in [docs/DECISIONS.md](docs/DECISIONS.md): the LLM judge
-isn't ground truth, the level→grammar map is a heuristic, FSRS is a faithful
-simplification, and persistence is `localStorage` + a JSON file (DB-ready shapes).
-The next steps are listed there too.
+isn't ground truth, the level→grammar map is a heuristic, Zipf frequency is an
+imperfect CEFR proxy, and persistence is `localStorage` + a JSON file (DB-ready
+shapes). The next steps are listed there too.
+
+## License
+
+Copyright © 2026 Plappo. **All rights reserved.** Proprietary — no use, copying,
+modification, or distribution without prior written permission. See [LICENSE](LICENSE).
