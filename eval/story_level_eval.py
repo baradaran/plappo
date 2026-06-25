@@ -30,6 +30,7 @@ import time
 from datetime import datetime, timezone
 
 from vertex_backend import vertex_json
+from vocab_coverage import coverage as lexical_coverage
 
 ORDER = ["A1", "A2", "B1", "B2", "C1", "C2"]
 TOPICS = ["der erste Schultag", "ein verlorener Hund im Park"]
@@ -121,13 +122,15 @@ def main():
             cls = classify(level, j)
             records[cls] += 1
             ow, og = j.get("over_level_words", []), j.get("over_level_grammar", [])
+            cov = lexical_coverage(text, level)   # deterministic lexical check (ADR-019)
             rows.append({"target": level, "topic": topic, "title": title, "text": text,
                          "estimated": j.get("estimated_cefr"), "class": cls,
-                         "over_words": ow, "over_grammar": og, "note": j.get("note", ""),
-                         "latency_s": round(time.time() - t0, 1)})
+                         "over_words": ow, "over_grammar": og, "coverage": cov["coverage"],
+                         "note": j.get("note", ""), "latency_s": round(time.time() - t0, 1)})
             mark = {"above": "DRIFT↑", "on": "ON   ", "below": "EASY↓"}[cls]
             extra = f" · over: {', '.join(ow[:5])}" if ow else ""
-            print(f"  [{mark}] target {level} · est {j.get('estimated_cefr'):<2} · {topic}{extra}")
+            print(f"  [{mark}] target {level} · est {j.get('estimated_cefr'):<2} · "
+                  f"cov {cov['coverage']:.0%} · {topic}{extra}")
 
     n = sum(records.values())
     print("\n" + "=" * 60)

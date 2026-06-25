@@ -28,6 +28,9 @@ env/
 .mypy_cache/
 .ruff_cache/
 
+# --- Local-only files (not for the public repo) ---
+CLAUDE.md
+
 # --- IDE / tooling ---
 .qodo/
 .idea/

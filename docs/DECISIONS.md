@@ -5,7 +5,7 @@ reasoning — so a new architect or engineer can understand not just *what* the 
 is but *why*. Format per entry: **Context · Decision · Why · Alternatives · Status**.
 
 Cross-refs: [ARCHITECTURE.md](ARCHITECTURE.md), [PEDAGOGY_ROADMAP.md](PEDAGOGY_ROADMAP.md),
-[CLAUDE.md](../CLAUDE.md).
+[CONTRIBUTING.md](../CONTRIBUTING.md).
 
 ---
 
@@ -165,7 +165,13 @@ Goethe lists) + a small glossed i+1 budget; the story gate adds a **measurable
 lexical-coverage check** (in-band lemma fraction), not just the LLM judge. **Why:**
 ~95–98% known-word coverage is required for comprehension (Hu & Nation 2000); the
 cap *is* the i+1 mechanism, and coverage is measurable where the judge is not.
-**Status:** Decided; gate currently judge-only — coverage check pending.
+**Status:** **Done.** `build_vocab_bands.py` bootstraps per-level lexicons
+(`data/vocab_bands.json`); `vocab_coverage.py` computes coverage (function-word
+whitelist + heuristic stemmer + glossary support); the story gate now requires
+`judge_ok AND coverage≥0.80` and reports `coverage`/`uncovered_words` in `check`.
+**Caveat:** bands are an LLM bootstrap (not Goethe/corpus) and the stemmer is
+heuristic — the threshold is lenient to catch *gross* drift; tighten toward ~0.98
+with a real list + lemmatiser.
 
 ### ADR-020 — Meaning is a subtle comprehension aid, never trained or featured
 **Context:** How prominent should word meaning be? **Decision:** A lookup is an

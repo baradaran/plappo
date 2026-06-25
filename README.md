@@ -53,7 +53,7 @@ python story_level_eval.py --levels A2,B1,B2 --sentences 12   # story-in-level d
 
 | Doc | What it covers |
 |---|---|
-| [CLAUDE.md](CLAUDE.md) | **Engineering standards** — how to write code here without future refactors |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | **Engineering standards** — how to write code here without future refactors |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Components, data flow, **data contracts**, runtime vs offline, scaling |
 | [docs/DECISIONS.md](docs/DECISIONS.md) | **Decision walkthrough** (ADRs) — every choice and its reasoning |
 | [docs/PEDAGOGY_ROADMAP.md](docs/PEDAGOGY_ROADMAP.md) | The learning science, phased roadmap, **cited & checkable** sources |

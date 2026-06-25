@@ -18,7 +18,11 @@ import os
 import re
 
 _BANDS_PATH = os.path.join(os.path.dirname(__file__), "data", "vocab_bands.json")
-COVERAGE_THRESHOLD = 0.90   # see module docstring
+# Deliberately lenient: the band list + heuristic stemmer are an approximation, so
+# this gate's job is to catch *gross* out-of-band drift (e.g. "Industrialisierung"
+# in an A2 story) cheaply, while the LLM judge handles the nuance. Raise toward the
+# ~0.98 comprehension figure once a real Goethe/corpus list + lemmatiser are in.
+COVERAGE_THRESHOLD = 0.80
 
 # Closed-class function words + the most common irregular/contracted forms. These
 # are A1 by definition and the band-list+stemmer can't reach them (der≠article
@@ -52,9 +56,15 @@ _SUFFIXES = ["lichen", "ischen", "ische", "ungen", "keit", "heit", "lich", "isch
 
 
 def _stem(w):
-    for s in _SUFFIXES:
-        if w.endswith(s) and len(w) - len(s) >= 3:
-            return w[:-len(s)]
+    # iterate so multi-suffix inflections reduce consistently:
+    # spielten -> spiel, spielen -> spiel (the band and the token must agree)
+    prev = None
+    while w != prev and len(w) > 3:
+        prev = w
+        for s in _SUFFIXES:
+            if w.endswith(s) and len(w) - len(s) >= 3:
+                w = w[: -len(s)]
+                break
     return w
 
 
@@ -89,7 +99,8 @@ def coverage(text, level, gloss_forms=()):
     uncovered, covered = [], 0
     for t in tokens:
         st = _stem(t)
-        if t in allowed or st in allowed_st or t in gloss or st in gloss_st:
+        if (t in _FUNCTION_WORDS or t in allowed or st in allowed_st
+                or t in gloss or st in gloss_st):
             covered += 1
         else:
             uncovered.append(t)

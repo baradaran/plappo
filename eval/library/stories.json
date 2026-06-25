@@ -87,5 +87,110 @@
     "created_at": "2026-06-24T21:21:44Z",
     "gen_model": "gemini-2.5-flash",
     "source": "generated"
+  },
+  {
+    "title": "Anna im Park",
+    "sentences": [
+      "Es war ein schöner, sonniger Samstag.",
+      "Anna wollte in den Park gehen.",
+      "Sie nahm ihr Buch und eine Decke mit.",
+      "Im Park saßen viele Leute auf dem Gras.",
+      "Kinder spielten Ball und lachten laut.",
+      "Anna fand einen ruhigen Platz unter einem großen Baum.",
+      "Sie las ihr Buch und genoss die frische Luft.",
+      "Am Abend ging sie glücklich nach Hause."
+    ],
+    "glossary": [
+      {
+        "word": "sonniger",
+        "lemma": "sonnig",
+        "pos": "adj",
+        "en": "sunny"
+      },
+      {
+        "word": "Decke",
+        "lemma": "Decke",
+        "pos": "Nomen",
+        "en": "blanket"
+      },
+      {
+        "word": "Gras",
+        "lemma": "Gras",
+        "pos": "Nomen",
+        "en": "grass"
+      },
+      {
+        "word": "lachten",
+        "lemma": "lachen",
+        "pos": "Verb",
+        "en": "laughed"
+      },
+      {
+        "word": "Platz",
+        "lemma": "Platz",
+        "pos": "Nomen",
+        "en": "spot/place"
+      },
+      {
+        "word": "genoss",
+        "lemma": "genießen",
+        "pos": "Verb",
+        "en": "enjoyed"
+      },
+      {
+        "word": "frische",
+        "lemma": "frisch",
+        "pos": "adj",
+        "en": "fresh"
+      },
+      {
+        "word": "glücklich",
+        "lemma": "glücklich",
+        "pos": "adj",
+        "en": "happy"
+      }
+    ],
+    "questions": [
+      "Was für ein Tag war es?",
+      "Was hat Anna in den Park mitgenommen?",
+      "Wo hat Anna ihr Buch gelesen?"
+    ],
+    "grammar_points": [
+      "CASE",
+      "GENDER",
+      "ADJ_ENDING",
+      "VERB_CONJUGATION",
+      "SEPARABLE_VERB",
+      "PREPOSITION",
+      "WORD_ORDER",
+      "PLURAL"
+    ],
+    "theme": "everyday",
+    "check": {
+      "target": "A2",
+      "estimated": "A2",
+      "class": "above",
+      "over_words": [
+        "genoss"
+      ],
+      "unsupported_over_words": [],
+      "coverage": 0.881,
+      "uncovered_words": [
+        "anna",
+        "nahm",
+        "saßen",
+        "ball",
+        "las",
+        "luft"
+      ],
+      "in_band": true,
+      "attempts": 1
+    },
+    "level": "A2",
+    "topic": "ein Tag im Park",
+    "id": "st_A2_1782375062432",
+    "created_at": "2026-06-25T08:11:02Z",
+    "gen_model": "gemini-2.5-flash",
+    "source": "generated"
   }
 ]
