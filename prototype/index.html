@@ -253,6 +253,11 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .grade:active{transform:scale(.97)}
 .grade small{font-weight:600;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
 .grade.again{border-color:#e6c1b3}.grade.good{border-color:#bfe0c6}
+.grade.on{box-shadow:0 0 0 2px var(--brand) inset}
+.rin{width:100%;box-sizing:border-box;border:1.5px solid var(--line);border-radius:12px;
+  padding:13px 14px;font-size:17px;font-family:var(--serif);background:var(--surface);
+  color:var(--ink);margin-bottom:10px}
+.rin:focus{outline:none;border-color:var(--brand)}
 .rdone{flex:1;display:grid;place-content:center;text-align:center;padding:30px;gap:8px}
 .rdone .big{font-size:48px}
 /* ===== drill ===== */
@@ -829,26 +834,53 @@ function startReview(){const now=Date.now();
  if(!rqueue.length){toast('All caught up — nothing due 🎉');return;}
  rpos=0;rrev=0;push('p-review-session');showCard();}
 function endReview(){closePush('p-review-session');updateDue();renderReview();}
-function showCard(){const it=rqueue[rpos];
+let rStart=0;
+/* P4: verified recall. The learner TYPES the answer and we check it, rather than
+   self-reporting "did I know it?" — consistent with the app's measure-don't-declare
+   premise (ADR-009). The FSRS grade is then derived from the verified result (with
+   a manual override kept for judgment calls). */
+function normAns(s){return (s||'').toString().toLowerCase().trim()
+ .replace(/[.,!?;:„""»«]/g,'').replace(/\s+/g,' ')
+ .replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss');}
+function acceptsFor(it){const a=it.type==='vocab'?it.back:it.answer;const set=new Set([normAns(a)]);
+ const m=(a||'').match(/^(der|die|das)\s+(.+)/i);if(m)set.add(normAns(m[2]));  // vocab w/o article
+ (it.accept||[]).forEach(x=>set.add(normAns(x)));return set;}
+function showCard(){const it=rqueue[rpos];rStart=Date.now();
  document.getElementById('rprog').style.width=(100*rpos/rqueue.length)+'%';
  const body=document.getElementById('rbody');
  if(it.type==='vocab'){body.innerHTML=`<div class="rcard"><div class="rkind">Vocabulary · ${rpos+1}/${rqueue.length}</div>
    <div class="rfront">${it.front}</div><div class="rprompt">Recall it in German</div><div id="rback"></div></div>`;}
  else{body.innerHTML=`<div class="rcard"><div class="rkind">Grammar · ${CAT[it.cat].l} · ${rpos+1}/${rqueue.length}</div>
    <div class="rcloze">${it.front.replace('___','<b style="color:var(--brand)">＿＿＿</b>')}</div>
-   <div class="rprompt">Fill the gap</div><div id="rback"></div></div>`;}
- document.getElementById('rfoot').innerHTML=`<button class="btn" onclick="reveal()">Show answer</button>`;}
-function reveal(){const it=rqueue[rpos];const ans=it.type==='vocab'?it.back:it.answer;
- document.getElementById('rback').innerHTML=`<div class="rback"><div class="ans">${ans}</div>
+   <div class="rprompt">Type the missing word</div><div id="rback"></div></div>`;}
+ document.getElementById('rfoot').innerHTML=
+  `<input id="rinput" class="rin" autocomplete="off" autocapitalize="off" spellcheck="false"
+     aria-label="Your answer" placeholder="Type your answer"
+     onkeydown="if(event.key==='Enter')checkRecall()">
+   <div class="btnrow"><button class="btn quiet" onclick="reveal(null)">Show answer</button>
+   <button class="btn" onclick="checkRecall()">Check</button></div>`;
+ setTimeout(()=>{const i=document.getElementById('rinput');if(i)i.focus();},60);}
+function checkRecall(){const it=rqueue[rpos];const i=document.getElementById('rinput');if(!i)return;
+ reveal(acceptsFor(it).has(normAns(i.value)));}
+function reveal(correct){const it=rqueue[rpos];const ans=it.type==='vocab'?it.back:it.answer;
+ const verdict=correct===true?'<span style="color:var(--good)">✓ Correct</span>'
+   :correct===false?'<span style="color:#b4502f">✗ Not quite</span>':'';
+ document.getElementById('rback').innerHTML=`<div class="rback">
+   ${verdict?`<div style="font-weight:700;margin-bottom:6px">${verdict}</div>`:''}
+   <div class="ans">${ans}</div>
    ${it.type==='grammar'?`<div class="ex">${it.expl}</div>`:''}
    <button class="hear" style="margin-top:14px" onclick="speak(${JSON.stringify(ans)})">
      <svg viewBox="0 0 24 24" width="16" fill="none" stroke="currentColor" stroke-width="1.9"
        stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
      Hear it</button></div>`;
  speak(ans);
- document.getElementById('rfoot').innerHTML=`<div class="grades">${
+ // Derive the grade from the verified result; correct+fast => Easy. null = gave up.
+ const derived=correct===true?(Date.now()-rStart<4000?4:3):1;
+ const hint=correct===null?'Grade yourself:':'Suggested from your answer — adjust if needed:';
+ document.getElementById('rfoot').innerHTML=
+  `<div class="muted" style="margin-bottom:6px">${hint}</div><div class="grades">${
    [[1,'Again','again'],[2,'Hard',''],[3,'Good','good'],[4,'Easy','']].map(([g,lab,cls])=>
-   `<button class="grade ${cls}" onclick="grade(${g})">${lab}<small>${previewIv(it,g)}</small></button>`).join('')}</div>`;}
+   `<button class="grade ${cls}${g===derived?' on':''}" onclick="grade(${g})">${lab}<small>${previewIv(it,g)}</small></button>`).join('')}</div>`;}
 function grade(g){const it=rqueue[rpos];gradeItem(it,g);
  if(it.type==='grammar'){if(g===1)profile.skills[it.cat]=Math.max(0,(profile.skills[it.cat]||50)-10);
   else if(g>=3)profile.skills[it.cat]=Math.min(100,(profile.skills[it.cat]||50)+5);saveProfile();}

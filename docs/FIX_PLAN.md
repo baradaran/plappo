@@ -62,8 +62,11 @@ are currently gameable, self-reported, or disconnected from real errors.
   sentence as the tap-to-build target; "Drill this" passes it via `lastDrill`/
   `drillFromFeedback()` (avoids quoting a sentence into inline onclick). Canned
   `DRILLS` remain the fallback for weak-skill drills opened from the Learn tab.
-- ☐ **P4** Verified type-to-recall on review cards; derive FSRS grade from
-  correctness (+latency); manual override kept. Items gain `accept[]`.
+- ☑ **P4** Verified type-to-recall: review cards now take a typed answer, checked
+  via `normAns`/`acceptsFor` (case/punctuation/umlaut-transliteration tolerant,
+  article-optional for vocab, optional `it.accept[]`). FSRS grade is derived from
+  the verified result (correct+fast → Easy, correct → Good, wrong/gave-up → Again)
+  and highlighted, with manual override retained. "Show answer" still available.
 - ☐ **P3** Remove auto-enroll on gloss open; explicit "+ Add to review" button;
   optional auto-suggest after 2nd encounter (`encounters[lemma]`).
 
