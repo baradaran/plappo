@@ -32,7 +32,11 @@ body{background:#e7e1d4;color:var(--ink);font-family:var(--sans);
 .appbar{display:flex;align-items:center;gap:12px;padding:16px 20px 12px;
   position:sticky;top:0;background:linear-gradient(var(--paper),rgba(245,241,232,.86));
   backdrop-filter:blur(8px);z-index:20}
-.appbar .ico-btn{visibility:hidden}
+/* Hide the main appbar's back arrow by default (Learn is the root); the
+   overlays reuse .appbar but their close buttons must stay visible, so scope
+   this to #backbtn only. .cangoback reveals it on secondary tab screens. */
+#backbtn{visibility:hidden}
+.app.cangoback #backbtn{visibility:visible}
 .appbar .ttl{font-weight:650;font-size:17px;letter-spacing:-.01em;flex:1}
 .appbar .streak{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--ink-2);
   background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:5px 11px}
@@ -525,9 +529,19 @@ let qi=0;
 function go(tab){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id==='s-'+tab));
  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.tab===tab));
  document.getElementById('apptitle').textContent={learn:'Plappo',review:'Review',profile:'Profile'}[tab];
+ // Learn is the root tab; show the appbar back arrow on the others so there's
+ // always a predictable way back.
+ document.querySelector('.app').classList.toggle('cangoback',tab!=='learn');
  if(tab==='learn')renderLearn();if(tab==='review')renderReview();if(tab==='profile')renderProfile();
  document.querySelector('main').scrollTop=0;}
-function pop(){} /* appbar back unused on tab screens */
+function pop(){ // appbar back: close any open overlay, else return to the Learn tab
+ const open=document.querySelector('.push.on');
+ if(open){const id=open.id;
+   if(id==='p-reader')return closeReader();
+   if(id==='p-practice')return closePractice();
+   if(id==='p-review-session')return endReview();
+   return closePush(id);}
+ go('learn');}
 
 /* ============ LEARN ============ */
 function renderLearn(){const p=levelProgress(),ga=grammarAchieved(),va=vocabAchieved();
