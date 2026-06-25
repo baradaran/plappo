@@ -86,8 +86,11 @@ heuristic ("≈"). **Status:** Done.
 highest-priority (treatable, level-core) error; others collapse behind "+N more".
 **Why:** Meta-analytic evidence (Ferris/Bitchener) — focused correction on treatable
 errors beats comprehensive correction, which overloads and demotivates.
-**Alternatives:** Show everything — rejected. **Status:** Done in UI; a ranked
-engine-side version is a Phase-1 roadmap item.
+**Alternatives:** Show everything — rejected. **Status:** **Done, engine-side.** The
+tutor returns `errors` already ordered by pedagogical priority (meaning-blocking and
+treatable rule-based errors first); the UI just leads with `errors[0]` and dropped
+its static client-side ranking. Ordering doesn't affect grammar scoring (the scorer
+compares category *sets*).
 
 ### ADR-011 — Don't trust "write at level X"; gate generated stories with a judge
 **Context:** The input half depends on stories staying in-level. **Decision:** A
@@ -219,8 +222,7 @@ The eval reports per-story naturalness + an average.
 ---
 
 ## Open decisions / next up
-- Ranked **focused-feedback on the engine side** (ADR-010 is UI-only today).
-- The **per-user story selector** in `select_from_library()` (ADR-013).
 - Drop-in **real FSRS** library (ADR-008) — data model already matches.
+- Theme/interest signal as a selector tiebreaker (ADR-013).
 - **Calibrate the story judge** against human CEFR ratings (ADR-011); tune `ZIPF_BANDS` (ADR-019).
 - Validate the **level→grammar map** against a real syllabus (ADR-007).

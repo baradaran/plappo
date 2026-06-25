@@ -445,10 +445,9 @@ const CAT={
  SUBJUNCTIVE_II:{l:'Konjunktiv II',c:'#7e9b86'},SUBJUNCTIVE_I:{l:'Konjunktiv I',c:'#5f8a7a'},
  PASSIVE:{l:'Passiv',c:'#9c7bb0'},NOMINALIZATION:{l:'Nominalstil',c:'#7d8aa6'},
  PARTICIPIAL:{l:'Participial attr.',c:'#a97da0'},MODAL_PARTICLE:{l:'Modal particles',c:'#8c97a8'}};
-/* focused feedback: which error to lead with (treatable, level-core first) */
-const PRIORITY=['VERB_POSITION','CASE','AUX_CHOICE','VERB_CONJUGATION','GENDER','ADJ_ENDING',
- 'SEPARABLE_VERB','PREPOSITION','RELATIVE_CLAUSE','SUBJUNCTIVE_II','SUBJUNCTIVE_I','PASSIVE',
- 'CONNECTOR','PARTICIPIAL','NOMINALIZATION','PLURAL','NEGATION','WORD_ORDER','MODAL_PARTICLE','SPELLING'];
+/* Focused feedback (ADR-010): the ENGINE returns errors already ordered by
+   pedagogical priority, so the UI just leads with errors[0] — no client-side
+   ranking that could drift from the engine's judgement. */
 
 /* ============ level model ============ */
 const LEVELCFG={
@@ -818,7 +817,8 @@ function renderFeedback(fb,original){const slot=document.getElementById('fbslot'
    <div class="acts"><button class="btn" onclick="nextQ()">Next</button></div>${latencyNote(fb)}</div>`;
   return;}  // U5: no autoplay — the 🔊 button plays on demand
  /* focused feedback: lead with the single most important error */
- const errs=[...fb.errors].sort((a,b)=>PRIORITY.indexOf(a.category)-PRIORITY.indexOf(b.category));
+ // Trust the engine's priority ordering (ADR-010): errors arrive most-important-first.
+ const errs=fb.errors.slice();
  const primary=errs[0],rest=errs.slice(1);
  let wrote=esc(original);if(primary.original_fragment&&wrote.includes(esc(primary.original_fragment))){
   wrote=wrote.replace(esc(primary.original_fragment),

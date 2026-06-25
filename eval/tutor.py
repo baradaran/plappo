@@ -34,7 +34,9 @@ class DetectedError(BaseModel):
 class TutorFeedback(BaseModel):
     has_errors: bool = Field(description="True if the sentence contains at least one grammatical error.")
     corrected_sentence: str = Field(description="The full corrected sentence. If already correct, repeat it unchanged.")
-    errors: List[DetectedError] = Field(description="One entry per grammatical error. Empty if none.")
+    errors: List[DetectedError] = Field(
+        description="One entry per grammatical error, ORDERED most-important-to-fix-first "
+                    "(see rule 7). The app leads with errors[0]. Empty if none.")
     # Additive field (does not affect grammar scoring): the constructions the
     # learner actually used CORRECTLY in this sentence. The app credits skill
     # mastery only for skills genuinely exercised here — so a learner can't
@@ -68,6 +70,12 @@ Identify ONLY genuine grammatical errors. Follow these rules strictly:
    a correct relative clause → RELATIVE_CLAUSE; correct Akkusativ object → CASE).
    Be conservative: do NOT list a category just because the sentence avoided it,
    and never list a category that also appears in `errors`. Empty list is fine.
+7. ORDER `errors` by pedagogical priority — the single most important error to fix
+   FIRST (the app shows errors[0] as "the one thing to fix"). Prioritise, in order:
+   (a) errors that change the meaning or block understanding; (b) treatable,
+   rule-based errors the learner can act on (case, agreement, verb position,
+   auxiliary, separable verbs) over subtle/stylistic ones; (c) errors central to
+   the learner's level. Put the highest-impact, most teachable error first.
 """
 
 
