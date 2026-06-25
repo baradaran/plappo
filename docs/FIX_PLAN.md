@@ -73,8 +73,12 @@ are currently gameable, self-reported, or disconnected from real errors.
   ("seen N×") — but never adds without a tap. Button reflects "✓ In your reviews".
 
 ## Phase 3 — Content depth, accessibility, polish, QA
-- ☐ **P7** Task-based prompts in story generation (additive on story `questions`);
-  small generation eval. *(largest item — may split/defer)*
+- ◐ **P7** Task-based prompts: story generation now produces a communicative
+  `task {prompt, en}` (additive in `STORY_SCHEMA` + prompt); the client surfaces it
+  as the first production prompt (badged "✍️ Task") ahead of comprehension
+  questions, with back-compat for task-less library stories. **Follow-up:** a
+  dedicated task-quality eval (answerability/level) — deferred (needs live creds;
+  lower risk since answers still run through the validated feedback engine).
 - ☑ **U2** Real reading progress: dots now light by scroll position
   (`paintProgress`), all lit if the story fits without scrolling; no fake default.
 - ☑ **U5** A11y + autoplay: glossed words are keyboard-reachable buttons

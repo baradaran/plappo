@@ -48,12 +48,23 @@ STORY_SCHEMA = {
             },
         },
         "questions": {"type": "ARRAY", "items": {"type": "STRING"}},
+        # A communicative writing TASK (TBLT): the learner produces language for a
+        # real goal tied to the story, not just recalls facts. Additive — older
+        # library stories without it fall back to the comprehension questions.
+        "task": {
+            "type": "OBJECT",
+            "properties": {
+                "prompt": {"type": "STRING"},   # the task, in German at level
+                "en": {"type": "STRING"},        # one-line English hint
+            },
+            "required": ["prompt", "en"],
+        },
         # --- tags for the library / future selection layer ---
         "grammar_points": {"type": "ARRAY",
                            "items": {"type": "STRING", "enum": [c.value for c in ErrorCategory]}},
         "theme": {"type": "STRING", "enum": THEMES},
     },
-    "required": ["title", "sentences", "glossary", "questions", "grammar_points", "theme"],
+    "required": ["title", "sentences", "glossary", "questions", "task", "grammar_points", "theme"],
 }
 
 
@@ -67,6 +78,11 @@ def _gen_system(level):
         f"the surface form exactly as it appears in the text, its lemma, part of speech, and a "
         f"short English gloss.\n"
         f"- questions: 3 short comprehension questions in German at level {level}.\n"
+        f"- task: ONE short real-world WRITING task in German (at level {level}) that asks the "
+        f"learner to PRODUCE language for a communicative goal related to the story — e.g. write a "
+        f"reply, a message, give an opinion or a recommendation — NOT just recall facts. Phrase it "
+        f"so the answer is a few sentences of the learner's own German. Include a one-line English "
+        f"hint in `en`.\n"
         f"- grammar_points: which grammatical structures (from the allowed tag set) the story "
         f"actually exercises, so it can later be matched to a learner's weak points.\n"
         f"- theme: the closest theme tag."

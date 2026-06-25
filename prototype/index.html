@@ -653,8 +653,13 @@ let story=null;
 function normalizeStory(s){const gloss={},set=new Set();
  (s.glossary||[]).forEach(g=>{const disp=g.lemma||g.word,en=g.en||'',pos=g.pos||'';
   [g.word,g.lemma].forEach(f=>{if(f){const k=f.toLowerCase();gloss[k]=[disp,pos,en];set.add(k);}});});
+ // P7 (TBLT): lead with the communicative writing task (produce language for a
+ // real goal), then the comprehension questions. Older stories without a task
+ // just keep their questions.
+ const qs=(s.questions||[]).map(q=>({q,en:''}));
+ if(s.task&&s.task.prompt)qs.unshift({q:s.task.prompt,en:s.task.en||'',task:true});
  return {title:s.title||'Geschichte',sentences:s.sentences||[],gloss,glossArr:[...set],
-  questions:(s.questions||[]).map(q=>({q,en:''})),level:s.level||profile.level,check:s.check||{}};}
+  questions:qs,level:s.level||profile.level,check:s.check||{}};}
 function fallbackStory(){const gloss={},set=new Set();
  Object.entries(GLOSS).forEach(([k,v])=>{const kk=k.toLowerCase();gloss[kk]=[v[0],v[1],v[2]];set.add(kk);});
  return {title:'Der verlorene Schlüssel',sentences:STORY.map(s=>s.replace(/<\/?n>/g,'')),gloss,glossArr:[...set],
@@ -750,8 +755,9 @@ function readAloud(){if(story)speak(story.sentences.join(' '));}
 function startQuestions(){closeReader();qi=0;loadQ();document.getElementById('p-practice').classList.add('on');}
 function closePractice(){document.getElementById('p-practice').classList.remove('on');renderLearn();}
 function loadQ(){const q=story.questions[qi];
- document.getElementById('qcount').textContent=`Question ${qi+1} of ${story.questions.length}`;
- document.getElementById('qtext').innerHTML=`${q.q}${q.en?`<span class="en">${q.en}</span>`:''}`;
+ document.getElementById('qcount').textContent=
+  (q.task?'✍️ Task':'Question '+(qi+1)+' of '+story.questions.length);
+ document.getElementById('qtext').innerHTML=`${esc(q.q)}${q.en?`<span class="en">${esc(q.en)}</span>`:''}`;
  document.getElementById('answer').value='';document.getElementById('fbslot').innerHTML='';
  const b=document.getElementById('checkbtn');b.textContent='Check my German';b.disabled=false;
  b.onclick=check;document.querySelector('#p-practice .reader-body').scrollTop=0;}
