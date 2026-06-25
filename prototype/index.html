@@ -505,8 +505,15 @@ function levelProgress(){const cfg=LEVELCFG[profile.level];
 function applyResult(fb,sentence){const cfg=LEVELCFG[profile.level];
  profile.onboarded=true;                       // first checked answer = calibrated
  const errs=new Set((fb.errors||[]).map(e=>e.category));
- cfg.skills.forEach(s=>{if(errs.has(s))profile.skills[s]=Math.max(0,(profile.skills[s]||0)-12);
-  else if(!fb.has_errors)profile.skills[s]=Math.min(100,(profile.skills[s]||0)+6);});
+ // Credit only skills the learner actually EXERCISED here (P1): a skill the model
+ // marked `demonstrated` (used correctly) goes up; a skill in `errors` goes down.
+ // No blanket credit — you can't master a construction you never produced. An
+ // empty `demonstrated` (model unsure) means no positive movement this turn, which
+ // is the safe default and keeps the measured level honest (ADR-009).
+ const shown=new Set(fb.demonstrated||[]);
+ cfg.skills.forEach(s=>{
+  if(errs.has(s))profile.skills[s]=Math.max(0,(profile.skills[s]||0)-12);
+  else if(shown.has(s))profile.skills[s]=Math.min(100,(profile.skills[s]||0)+6);});
  // Vocabulary credit is independent of grammar correctness — you used the word
  // either way. Count distinct CONTENT lemmas (classified server-side), so function
  // words and verbosity can't inflate the measure (P2). seenLemmas is the truth;

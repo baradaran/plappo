@@ -32,13 +32,15 @@ are currently gameable, self-reported, or disconnected from real errors.
   checked answer sets `onboarded=true`. (Full blocking placement = still optional.)
 
 ## Phase 1 — Measurement validity (the core claim)
-- ☐ **P1-eval** `eval/skills_demonstrated_eval.py` (or extend `dataset.py`): measure
-  precision of the new `demonstrated` field; no false "demonstrated" on dodged
-  constructions. Gate the UI change on this.
-- ☐ **P1** Extend `TutorFeedback` with `demonstrated: List[ErrorCategory]`; update
-  `SYSTEM_PROMPT` (and fix stale "A1-B2" → "A1-C2"); mirror schema in
-  `vertex_backend.py`; rewrite `applyResult` to credit only exercised skills
-  (`-` errored, `+` demonstrated), no blanket +6.
+- ☑ **P1-eval** `eval/skills_demonstrated_eval.py` measures contradiction rate
+  (demonstrated ∩ errors → must be 0), advanced over-claim on A1/A2 correct
+  sentences (→ ~0), and coverage. `--mock` mode verified it catches an injected
+  over-claim. **Run live with creds before fully trusting the field.**
+- ☑ **P1** `TutorFeedback.demonstrated: List[ErrorCategory]` added (additive);
+  `SYSTEM_PROMPT` updated + stale "A1-B2"→"A1-C2"; mirrored in `vertex_backend.py`
+  `_RESPONSE_SCHEMA` (not required); `applyResult` now credits only exercised
+  skills (`-` errored, `+` demonstrated) — blanket +6 removed. Empty `demonstrated`
+  → no positive movement (safe default, robust if the model omits the field).
 - ☑ **P2** Vocabulary by content lemmas vs bands, decoupled from correctness:
   `classify_vocab()` added to `vocab_coverage.py` (reuses stemmer/function-words/
   bands, tags each lemma with its lowest band); `/api/feedback` returns
@@ -90,3 +92,8 @@ are currently gameable, self-reported, or disconnected from real errors.
   function words excluded, decoupled from grammar correctness. `/api/feedback`
   now returns `content_lemmas`. (Live end-to-end needs `VERTEX_PROJECT`; the
   classifier itself is unit-tested.)
+- **P1 done** — the keystone. Skills now move only when actually exercised
+  (`demonstrated`), not on a blanket "no error" bonus. New eval gates the field's
+  trustworthiness; `--mock` verified mechanics + back-compat (`run_eval --mock`
+  still passes). ⚠️ Run `skills_demonstrated_eval.py` live (Vertex) before relying
+  on the field — until then the UI degrades safely (no credit when unsure).

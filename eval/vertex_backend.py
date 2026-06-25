@@ -90,6 +90,12 @@ _RESPONSE_SCHEMA = {
                 "required": ["category", "original_fragment", "correction", "explanation"],
             },
         },
+        # Constructions the learner used correctly (additive; see tutor.TutorFeedback).
+        # Not required, so the model may return [] when nothing was clearly exercised.
+        "demonstrated": {
+            "type": "ARRAY",
+            "items": {"type": "STRING", "enum": [c.value for c in ErrorCategory]},
+        },
     },
     "required": ["has_errors", "corrected_sentence", "errors"],
 }

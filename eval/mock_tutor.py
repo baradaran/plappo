@@ -17,6 +17,10 @@ _MISS_DETECTION = {"a09"}          # has an error but mock reports none (false n
 _INVENT_ON_CORRECT = {"a11", "b04"}  # correct sentences the mock wrongly "fixes"
 _WRONG_CATEGORY = {"b06": "VERB_CONJUGATION"}  # right that it's wrong, wrong label
 _WRONG_CORRECTION = {"b01"}        # detects + categorises, but botches the rewrite
+# Mock an over-claim of an advanced skill on a simple correct sentence, so the
+# demonstrated-skills eval has a non-zero over-claim to catch (mirrors how the
+# other injections exercise the grammar metrics).
+_OVERCLAIM_DEMONSTRATED = {"a01": "PASSIVE"}
 
 
 def _gold_feedback(case) -> TutorFeedback:
@@ -26,8 +30,16 @@ def _gold_feedback(case) -> TutorFeedback:
                       explanation="(gold)")
         for cat in case.errors
     ]
+    # Plausible demonstrated skills: for a correct sentence, "show" one of its
+    # level skills; for the injected case, deliberately over-claim an advanced one.
+    demonstrated = []
+    if case.id in _OVERCLAIM_DEMONSTRATED:
+        demonstrated = [ErrorCategory(_OVERCLAIM_DEMONSTRATED[case.id])]
+    elif not case.errors:
+        demonstrated = []  # conservative default; the real model fills this in
     return TutorFeedback(has_errors=bool(case.errors),
-                         corrected_sentence=case.corrected, errors=errs)
+                         corrected_sentence=case.corrected, errors=errs,
+                         demonstrated=demonstrated)
 
 
 def get_feedback(_client, level: str, sentence: str) -> TutorFeedback:

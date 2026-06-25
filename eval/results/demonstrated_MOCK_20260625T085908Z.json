@@ -1,0 +1,322 @@
+{
+  "model": "MOCK",
+  "aggregate": {
+    "n_cases": 38,
+    "contradiction_rate": 0.0,
+    "advanced_overclaim_rate_on_A1A2_correct": 0.167,
+    "coverage_on_correct": 0.056,
+    "mean_demonstrated_on_correct": 0.06,
+    "contradictions": 0,
+    "overclaims": 1
+  },
+  "cases": [
+    {
+      "id": "a01",
+      "level": "A1",
+      "is_correct": true,
+      "demonstrated": [
+        "PASSIVE"
+      ],
+      "contradiction": [],
+      "overclaim": [
+        "PASSIVE"
+      ]
+    },
+    {
+      "id": "a02",
+      "level": "A1",
+      "is_correct": true,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "a03",
+      "level": "A1",
+      "is_correct": false,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "a04",
+      "level": "A1",
+      "is_correct": false,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "a05",
+      "level": "A1",
+      "is_correct": false,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "a06",
+      "level": "A1",
+      "is_correct": false,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "a07",
+      "level": "A1",
+      "is_correct": true,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "a08",
+      "level": "A2",
+      "is_correct": false,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "a09",
+      "level": "A2",
+      "is_correct": false,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "a10",
+      "level": "A2",
+      "is_correct": false,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "a11",
+      "level": "A2",
+      "is_correct": true,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "a12",
+      "level": "A2",
+      "is_correct": true,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "a13",
+      "level": "A2",
+      "is_correct": false,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "a14",
+      "level": "A2",
+      "is_correct": true,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "b01",
+      "level": "B1",
+      "is_correct": false,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "b02",
+      "level": "B1",
+      "is_correct": false,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "b03",
+      "level": "B1",
+      "is_correct": true,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "b04",
+      "level": "B1",
+      "is_correct": true,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "b05",
+      "level": "B1",
+      "is_correct": false,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "b06",
+      "level": "B1",
+      "is_correct": false,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "b07",
+      "level": "B1",
+      "is_correct": false,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "b08",
+      "level": "B1",
+      "is_correct": true,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "b09",
+      "level": "B2",
+      "is_correct": true,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "b10",
+      "level": "B2",
+      "is_correct": true,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "b11",
+      "level": "B2",
+      "is_correct": false,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "b12",
+      "level": "B2",
+      "is_correct": true,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "c01",
+      "level": "C1",
+      "is_correct": true,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "c02",
+      "level": "C1",
+      "is_correct": true,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "c03",
+      "level": "C1",
+      "is_correct": true,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "c04",
+      "level": "C1",
+      "is_correct": false,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "c05",
+      "level": "C1",
+      "is_correct": false,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "c06",
+      "level": "C1",
+      "is_correct": false,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "c07",
+      "level": "C2",
+      "is_correct": true,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "c08",
+      "level": "C2",
+      "is_correct": true,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "c09",
+      "level": "C2",
+      "is_correct": true,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "c10",
+      "level": "C2",
+      "is_correct": false,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "c11",
+      "level": "C2",
+      "is_correct": false,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    },
+    {
+      "id": "c12",
+      "level": "C2",
+      "is_correct": false,
+      "demonstrated": [],
+      "contradiction": [],
+      "overclaim": []
+    }
+  ]
+}

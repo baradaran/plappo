@@ -35,11 +35,21 @@ class TutorFeedback(BaseModel):
     has_errors: bool = Field(description="True if the sentence contains at least one grammatical error.")
     corrected_sentence: str = Field(description="The full corrected sentence. If already correct, repeat it unchanged.")
     errors: List[DetectedError] = Field(description="One entry per grammatical error. Empty if none.")
+    # Additive field (does not affect grammar scoring): the constructions the
+    # learner actually used CORRECTLY in this sentence. The app credits skill
+    # mastery only for skills genuinely exercised here — so a learner can't
+    # "master" a construction they never produced (ADR-009). Be conservative.
+    demonstrated: List[ErrorCategory] = Field(
+        default_factory=list,
+        description=("Taxonomy categories the learner clearly used CORRECTLY in this "
+                     "sentence (a construction was actually present and is right). "
+                     "Empty if none was clearly exercised. Never list a category that "
+                     "also appears in errors."))
 
 
 SYSTEM_PROMPT = f"""You are a precise German grammar tutor for a CEFR learner.
 
-You are given one sentence written by a learner, plus their level (A1-B2).
+You are given one sentence written by a learner, plus their level (A1-C2).
 Identify ONLY genuine grammatical errors. Follow these rules strictly:
 
 1. If the sentence is grammatically correct, set has_errors=false, return the
@@ -53,6 +63,11 @@ Identify ONLY genuine grammatical errors. Follow these rules strictly:
    grammatical while preserving the learner's intended meaning. Keep their words
    and content where possible.
 5. Keep each explanation to one short, encouraging sentence a learner can act on.
+6. In `demonstrated`, list the taxonomy categories the learner used CORRECTLY in
+   this sentence — only constructions that are actually PRESENT and right (e.g.
+   a correct relative clause → RELATIVE_CLAUSE; correct Akkusativ object → CASE).
+   Be conservative: do NOT list a category just because the sentence avoided it,
+   and never list a category that also appears in `errors`. Empty list is fine.
 """
 
 
