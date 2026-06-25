@@ -741,6 +741,8 @@ function renderFeedback(fb,original){const slot=document.getElementById('fbslot'
  const strengths=(fb.demonstrated||[]).filter(c=>!errCats.has(c)&&CAT[c]).map(c=>CAT[c].l);
  const lead=strengths.length?`Your ${strengths[0]} was right — one thing to fix:`
    :`Good effort — one thing to fix:`;
+ // P5: remember this correction so "Drill this" rebuilds the learner's own sentence.
+ lastDrill={cat:primary.category,sentence:fb.corrected_sentence||'',why:primary.explanation||''};
  const moreBtn=rest.length?`<button class="more" onclick="this.nextElementSibling.style.display='block';this.remove()">
    + ${rest.length} more ${rest.length>1?'things':'thing'} to polish later</button>
    <div style="display:none">${rest.map(e=>{const mm=CAT[e.category]||{l:e.category,c:'#999'};
@@ -759,7 +761,7 @@ function renderFeedback(fb,original){const slot=document.getElementById('fbslot'
   <div class="solution"><div class="lab">✓ Correct</div><div class="txt">
    <span>${esc(fb.corrected_sentence)}</span>
    <button class="hear" onclick="speak(${JSON.stringify(fb.corrected_sentence)})">🔊</button></div></div>
-  <div class="acts"><button class="btn quiet" onclick="openDrill('${primary.category}')">Drill this</button>
+  <div class="acts"><button class="btn quiet" onclick="drillFromFeedback()">Drill this</button>
    <button class="btn" onclick="nextQ()">Next</button></div></div>`;
  /* animate the noticing: strike the error, reveal the fix */
  setTimeout(()=>{const d=document.getElementById('d0'),i=document.getElementById('i0');
@@ -864,11 +866,26 @@ function finishReview(){document.getElementById('rprog').style.width='100%';
 /* ===== drill (tap to build) ===== */
 let drill={ans:[],built:[],toks:[],cat:''};
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
-function openDrill(cat){const d=DRILLS[cat]||DRILLS._default;
- drill={cat,ans:d.ans.slice(),built:[],toks:shuffle(d.ans.slice())};
- document.getElementById('dwhy').textContent='Drill · '+(CAT[cat]?CAT[cat].l:'Grammar')+' — '+d.why;
- document.getElementById('den').innerHTML=d.en+'<span class="en">Build the German sentence</span>';
+/* P5: when a drill comes from real feedback, build it from the learner's OWN
+   corrected sentence (rebuild it correctly) instead of a canned example, so the
+   practice matches the mistake just made. `sentence`/`why` are optional; without
+   them (e.g. a weak-skill drill from the Learn tab) we fall back to DRILLS. */
+function openDrill(cat,sentence,why){
+ let ans,prompt,hint;
+ if(sentence&&sentence.trim().split(/\s+/).length>1){
+  ans=sentence.trim().split(/\s+/);
+  prompt='Rebuild your corrected sentence';
+  hint='Drill · '+(CAT[cat]?CAT[cat].l:'Grammar')+(why?' — '+why:'');
+ }else{const d=DRILLS[cat]||DRILLS._default;
+  ans=d.ans.slice();prompt=d.en;hint='Drill · '+(CAT[cat]?CAT[cat].l:'Grammar')+' — '+d.why;}
+ drill={cat,ans:ans.slice(),built:[],toks:shuffle(ans.slice())};
+ document.getElementById('dwhy').textContent=hint;
+ document.getElementById('den').innerHTML=esc(prompt)+'<span class="en">Tap the words in the right order</span>';
  document.getElementById('dresult').textContent='';renderDrill();push('p-drill');}
+/* Drill the mistake from the most recent feedback card (avoids quoting a whole
+   sentence into an inline onclick). */
+let lastDrill={cat:'',sentence:''};
+function drillFromFeedback(){openDrill(lastDrill.cat,lastDrill.sentence,lastDrill.why);}
 function renderDrill(){const b=document.getElementById('dbuild');
  b.innerHTML=drill.built.length?drill.built.map((w,i)=>`<span class="pl" onclick="unplace(${i})">${w}</span>`).join('')
    :'<span class="ph">tap the words below in order…</span>';

@@ -58,8 +58,10 @@ are currently gameable, self-reported, or disconnected from real errors.
   becomes a grammar cloze from the learner's own corrected sentence (blank the
   fixed span), tagged category + explanation, due in ~6h, deduped by
   category+cloze. Closes the feedback→retention loop.
-- ☐ **P5** `openDrill(cat, correctedSentence, fragment)` builds tap-to-build from the
-  learner's corrected sentence; `DRILLS` only as fallback.
+- ☑ **P5** `openDrill(cat, sentence, why)` rebuilds the learner's own corrected
+  sentence as the tap-to-build target; "Drill this" passes it via `lastDrill`/
+  `drillFromFeedback()` (avoids quoting a sentence into inline onclick). Canned
+  `DRILLS` remain the fallback for weak-skill drills opened from the Learn tab.
 - ☐ **P4** Verified type-to-recall on review cards; derive FSRS grade from
   correctness (+latency); manual override kept. Items gain `accept[]`.
 - ☐ **P3** Remove auto-enroll on gloss open; explicit "+ Add to review" button;
