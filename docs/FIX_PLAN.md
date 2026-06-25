@@ -89,7 +89,10 @@ are currently gameable, self-reported, or disconnected from real errors.
   serves a random saved story, falling back to the hardcoded one only if none.
 - ☑ **U7** Documented the 412px phone-frame mock + `?demo=1` in `prototype/README`
   (chose to document rather than rework into a responsive layout).
-- ☐ **U8** Manual QA checklist over every open/close/first-run/offline/error path.
+- ☑ **U8** `docs/QA_CHECKLIST.md` covers automated + manual flows (first-run,
+  reading/glossary, feedback, verified review, navigation). Automated smoke +
+  back-compat evals pass; a DOM-stubbed harness verified the data layer at runtime
+  (no blanket skill credit, lemma vocab, error→card + dedup, tolerant recall, bands).
 
 ---
 
@@ -98,9 +101,9 @@ are currently gameable, self-reported, or disconnected from real errors.
 |---|---|---|
 | `TutorFeedback` | `demonstrated: [ErrorCategory]` | `tutor.py` (+ mirror in `vertex_backend.py`) |
 | `/api/feedback` response | `content_lemmas: [str]` | `server.py` + `vocab_coverage.classify_vocab` |
-| story object | optional task framing on `questions` | `story_service.py` |
-| profile | `v`, `onboarded`, `seenLemmas`, `encounters` | `prototype/index.html` |
-| review item | `accept[]`, error-sourced cloze fields | `prototype/index.html` |
+| story object | new `task {prompt, en}` (questions unchanged) | `story_service.py` |
+| profile | `v`, `onboarded`, `goal`, `seenLemmas`, `encounters` | `prototype/index.html` |
+| review item | error-sourced cloze (`key`, `cat`, `expl`); optional `accept[]` | `prototype/index.html` |
 
 ## Commit sequence
 0 → P2 → (P1-eval → P1 → U3/U4) → (P6 → P5 → P4 → P3) → Phase 3 (P7 last).
@@ -122,3 +125,14 @@ are currently gameable, self-reported, or disconnected from real errors.
 - **U3/U4 done** — Phase 1 complete. Praise is now earned (names a real
   `demonstrated` strength); skill bars show qualitative bands, not pseudo-precise
   integers. Both ride on P1's `demonstrated` signal.
+- **Phase 2 done** — P6 (errors → cloze review cards), P5 (drills from the
+  learner's own corrected sentence), P4 (typed, verified recall driving FSRS),
+  P3 (deliberate vocab enrollment). The feedback→retention loop is now closed and
+  no longer self-reported.
+- **Phase 3 done** — P7 (TBLT task per story; dedicated task-quality eval is a
+  noted follow-up), U2 (scroll-based reading progress), U5 (keyboard/aria for
+  glossed words, non-color diff cues, no TTS autoplay), U6 (offline story
+  rotation), U7 (phone-mock documented), U8 (QA checklist + automated & runtime
+  smoke). **All planned items landed.**
+- **Outstanding (needs creds):** run `skills_demonstrated_eval.py` and the live
+  feedback/story endpoints with `VERTEX_PROJECT` set; build the P7 task-quality eval.
