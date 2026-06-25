@@ -278,7 +278,7 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
       <svg viewBox="0 0 24 24" width="22" fill="none" stroke="currentColor" stroke-width="2.2"
         stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
     <div class="ttl" id="apptitle">Plappo</div>
-    <div class="streak" id="streak">🔥 5</div>
+    <div class="streak" id="streak">🔥 0</div>
   </div>
 
   <main>
@@ -326,7 +326,7 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
       Learn</button>
     <button class="tab" data-tab="review" onclick="go('review')" style="position:relative">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="6" width="14" height="14" rx="2"/><path d="M7 3h10a2 2 0 0 1 2 2v10"/></svg>
-      <span class="badge" id="dueBadge">7</span>
+      <span class="badge" id="dueBadge" style="display:none">0</span>
       Review</button>
     <button class="tab" data-tab="profile" onclick="go('profile')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6"/></svg>
@@ -455,12 +455,31 @@ const CANDO={A1:'order food, introduce yourself, ask simple questions',
  A2:'talk about your day, the past, and make plans',B1:'handle most travel situations and explain opinions',
  B2:'discuss abstract topics and argue a point clearly',C1:'use German flexibly for work and study',
  C2:'express yourself precisely with native-like nuance'};
-function seedProfile(){return{level:'A2',xp:240,streak:5,vocab:600,seenWords:[],
+const PROFILE_V=2;
+/* Honest cold start: a new user has NO history. The app's whole premise is that
+   level is measured, not declared — so we don't fabricate a streak/XP/skills.
+   The first real answer seeds the measured level from data. */
+function freshProfile(){return{v:PROFILE_V,level:'A1',goal:'A2',xp:0,streak:0,vocab:0,
+ onboarded:false,seenWords:[],seenLemmas:[],encounters:{},skills:{}};}
+/* Populated state for screenshots/walkthroughs only — reachable via ?demo=1 and
+   clearly a demo, never shown to a genuine first-time user. */
+function demoProfile(){return{v:PROFILE_V,level:'A2',goal:'B1',xp:240,streak:5,vocab:600,
+ onboarded:true,seenWords:[],seenLemmas:[],encounters:{},
  skills:{GENDER:92,CASE:84,VERB_CONJUGATION:86,SPELLING:96,NEGATION:84,PLURAL:82,
   AUX_CHOICE:48,SEPARABLE_VERB:40,PREPOSITION:55}};}
+/* Forward-migrate older saved profiles additively (never wipe a real user's
+   data). Pre-v2 saves predate seenLemmas/encounters; they DO represent real use,
+   so we keep them and mark them onboarded. */
+function migrate(p){if(!p||!p.skills)return freshProfile();
+ if(!p.v){p.v=PROFILE_V;p.seenLemmas=p.seenLemmas||[];p.encounters=p.encounters||{};
+  if(p.onboarded===undefined)p.onboarded=true;}
+ return p;}
 let profile;
-function loadProfile(){try{profile=JSON.parse(localStorage.getItem('plappo2'))||seedProfile();}
- catch(e){profile=seedProfile();}if(!profile.skills)profile=seedProfile();}
+function loadProfile(){
+ if(new URLSearchParams(location.search).has('demo')){profile=demoProfile();return;}
+ try{const raw=JSON.parse(localStorage.getItem('plappo2'));
+  profile=raw?migrate(raw):freshProfile();}
+ catch(e){profile=freshProfile();}}
 function saveProfile(){localStorage.setItem('plappo2',JSON.stringify(profile));}
 
 /* ===== inferred level (you EARN your level, you don't set it) ==============
@@ -484,6 +503,7 @@ function levelProgress(){const cfg=LEVELCFG[profile.level];
  const g=mastered/cfg.skills.length,v=Math.min((profile.vocab||0)/cfg.vocab,1);
  return{pct:Math.round(100*(.7*g+.3*v)),mastered,total:cfg.skills.length,v,cfg};}
 function applyResult(fb,sentence){const cfg=LEVELCFG[profile.level];
+ profile.onboarded=true;                       // first checked answer = calibrated
  const errs=new Set((fb.errors||[]).map(e=>e.category));
  cfg.skills.forEach(s=>{if(errs.has(s))profile.skills[s]=Math.max(0,(profile.skills[s]||0)-12);
   else if(!fb.has_errors)profile.skills[s]=Math.min(100,(profile.skills[s]||0)+6);});
@@ -552,6 +572,15 @@ function renderLearn(){const p=levelProgress(),ga=grammarAchieved(),va=vocabAchi
    <div class="muted" style="margin-top:6px">Grammar ${ga} · Vocabulary ${va} · ⭐ ${profile.xp}</div>
   </div><span class="chev">›</span>`;
  const cfg=LEVELCFG[profile.level];
+ // First run: no data yet, so recommending "weak skills" would be fabricated.
+ // Invite the learner to calibrate by writing — the measurement starts there.
+ if(!profile.onboarded){document.getElementById('reco').innerHTML=
+  `<div class="row" onclick="openReader()"><div class="ic" style="background:var(--brand-tint)">
+    <span style="width:10px;height:10px;border-radius:50%;background:var(--brand);display:block"></span></div>
+   <div class="tx"><b>New here? Let's measure your level</b>
+    <span class="muted">Read a short story and answer in your own German — Plappo measures
+    your level from your writing. Nothing to set.</span></div><span class="chev">›</span></div>`;
+  return;}
  const weak=cfg.skills.map(s=>[s,profile.skills[s]||0]).filter(([s,v])=>v<MASTER)
   .sort((a,b)=>a[1]-b[1]).slice(0,3);
  document.getElementById('reco').innerHTML=(weak.length?weak:[['VERB_POSITION',0]]).map(([k])=>{
@@ -738,8 +767,12 @@ function seedDeck(){const now=Date.now(),d=864e5;let id=0;
  return [
    ...V.map((v,i)=>mk({type:'vocab',front:v[0],back:v[1],due:now-(i<4?d:-2*d)})),
    ...G.map((g,i)=>mk({type:'grammar',front:g[0],answer:g[1],cat:g[2],expl:g[3],due:now-(i<3?d:-2*d)}))];}
-function loadDeck(){try{deck=JSON.parse(localStorage.getItem('plappo_deck'));}catch(e){}
- if(!deck||!deck.length)deck=seedDeck();}
+function loadDeck(){
+ // Demo mode shows a pre-populated deck; a real new user starts empty and the
+ // deck fills from what they actually read and get wrong (P3/P6) — no fake "due".
+ if(new URLSearchParams(location.search).has('demo')){deck=seedDeck();return;}
+ try{deck=JSON.parse(localStorage.getItem('plappo_deck'));}catch(e){}
+ if(!deck)deck=[];}
 function saveDeck(){localStorage.setItem('plappo_deck',JSON.stringify(deck));}
 function updateDue(){const n=deck.filter(it=>it.due<=Date.now()).length;
  const b=document.getElementById('dueBadge');b.textContent=n;b.style.display=n?'':'none';}

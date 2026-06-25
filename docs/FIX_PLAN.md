@@ -20,13 +20,16 @@ are currently gameable, self-reported, or disconnected from real errors.
 
 ---
 
-## Phase 0 — Foundations & honest cold start
-- ☐ **MIG** Profile/deck schema version (`profile.v=2`) + `migrate()` from the v1
+## Phase 0 — Foundations & honest cold start  ✅ done
+- ☑ **MIG** Profile/deck schema version (`profile.v=2`) + `migrate()` from the v1
   `plappo2` key, so later metric changes can't corrupt existing `localStorage`.
-- ☐ **U1** Zero-start: `seedProfile()` → `xp:0, streak:0`, empty skills (no
-  fabricated "🔥 5 / 240 XP"). `?demo=1` flag loads populated demo data, labeled.
-- ☐ **U1b** Lightweight first-run onboarding cue ("calibrate by writing a few
-  sentences") instead of fabricated history. (Full blocking placement = optional.)
+  Fresh deck starts empty; demo deck only via `?demo=1`.
+- ☑ **U1** Zero-start: `freshProfile()` → `level A1, xp:0, streak:0`, empty skills
+  (no fabricated "🔥 5 / 240 XP"). `?demo=1` loads `demoProfile()`, labeled demo.
+  Static header defaults neutralised (🔥 0, hidden due-badge).
+- ☑ **U1b** First-run cue in `renderLearn` ("New here? Let's measure your level")
+  replaces fabricated weak-skill recommendations until the first answer; the first
+  checked answer sets `onboarded=true`. (Full blocking placement = still optional.)
 
 ## Phase 1 — Measurement validity (the core claim)
 - ☐ **P1-eval** `eval/skills_demonstrated_eval.py` (or extend `dataset.py`): measure
@@ -79,4 +82,5 @@ are currently gameable, self-reported, or disconnected from real errors.
 ---
 
 ## Status log
-- _(none yet)_
+- **Phase 0 done** — honest cold start + profile/deck v2 migration. New users start
+  at A1 with zero history and a calibration cue; demo data behind `?demo=1`.
