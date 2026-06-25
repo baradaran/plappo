@@ -526,9 +526,25 @@ function applyResult(fb,sentence){const cfg=LEVELCFG[profile.level];
  profile.seenLemmas=[...seen];
  profile.vocab=Math.max(profile.vocab||0,profile.seenLemmas.length);
  profile.xp+=fb.has_errors?5:12;
+ mintErrorCards(fb);                            // P6: real mistakes enter spaced review
  const before=profile.level;recompute();                       // level is earned, not set
  if(idx(profile.level)>idx(before))profile.justLeveled=profile.level;
  saveProfile();document.getElementById('streak').textContent='🔥 '+profile.streak;}
+/* P6: closes the feedback→retention loop. Each corrected error becomes a grammar
+   cloze drawn from the learner's OWN corrected sentence (blank the fixed span),
+   tagged with its category + explanation, due soon. Deduped by category+cloze so
+   repeating a mistake doesn't spawn duplicates. */
+function mintErrorCards(fb){if(!deck||!fb||!fb.errors)return;
+ const sent=(fb.corrected_sentence||'').trim();if(!sent)return;
+ const now=Date.now();let added=0;
+ fb.errors.forEach(e=>{const corr=(e.correction||'').trim();
+  if(!corr||!sent.includes(corr))return;          // need the fix to appear verbatim
+  const front=sent.replace(corr,'___');
+  const key='err:'+e.category+':'+front;
+  if(deck.some(it=>it.key===key))return;
+  deck.push({id:'e'+now+'_'+(added++),key,type:'grammar',front,answer:corr,
+   cat:e.category,expl:e.explanation||'',reps:0,S:2,D:5,last:0,due:now+6*36e5});});
+ if(added){saveDeck();updateDue();}}
 function ring(pct,col){const r=72,C=2*Math.PI*r,o=C*(1-pct/100);
  return`<svg width="168" height="168" viewBox="0 0 168 168"><circle cx="84" cy="84" r="${r}"
   fill="none" stroke="#ece5d6" stroke-width="13"/><circle cx="84" cy="84" r="${r}" fill="none"

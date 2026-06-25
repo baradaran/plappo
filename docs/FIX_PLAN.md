@@ -54,8 +54,10 @@ are currently gameable, self-reported, or disconnected from real errors.
   still reflects the underlying value. Vocab keeps a genuine count.
 
 ## Phase 2 — Close the feedback → retention loop
-- ☐ **P6** On each error, mint a grammar cloze review card from `corrected_sentence`
-  (blank the corrected fragment), tagged category + explanation; dedup.
+- ☑ **P6** `mintErrorCards(fb)` (called from `applyResult`): each corrected error
+  becomes a grammar cloze from the learner's own corrected sentence (blank the
+  fixed span), tagged category + explanation, due in ~6h, deduped by
+  category+cloze. Closes the feedback→retention loop.
 - ☐ **P5** `openDrill(cat, correctedSentence, fragment)` builds tap-to-build from the
   learner's corrected sentence; `DRILLS` only as fallback.
 - ☐ **P4** Verified type-to-recall on review cards; derive FSRS grade from
