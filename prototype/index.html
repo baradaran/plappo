@@ -507,9 +507,14 @@ function applyResult(fb,sentence){const cfg=LEVELCFG[profile.level];
  const errs=new Set((fb.errors||[]).map(e=>e.category));
  cfg.skills.forEach(s=>{if(errs.has(s))profile.skills[s]=Math.max(0,(profile.skills[s]||0)-12);
   else if(!fb.has_errors)profile.skills[s]=Math.min(100,(profile.skills[s]||0)+6);});
- if(!fb.has_errors){const w=new Set(sentence.toLowerCase().split(/[^a-zäöüß]+/).filter(x=>x.length>1));
-  let a=0;w.forEach(x=>{if(!profile.seenWords.includes(x)){profile.seenWords.push(x);a++;}});
-  profile.vocab+=a;}
+ // Vocabulary credit is independent of grammar correctness — you used the word
+ // either way. Count distinct CONTENT lemmas (classified server-side), so function
+ // words and verbosity can't inflate the measure (P2). seenLemmas is the truth;
+ // keep any pre-existing (migrated) count until the lemma tally overtakes it.
+ const seen=new Set(profile.seenLemmas||[]);
+ (fb.content_lemmas||[]).forEach(l=>seen.add(l));
+ profile.seenLemmas=[...seen];
+ profile.vocab=Math.max(profile.vocab||0,profile.seenLemmas.length);
  profile.xp+=fb.has_errors?5:12;
  const before=profile.level;recompute();                       // level is earned, not set
  if(idx(profile.level)>idx(before))profile.justLeveled=profile.level;

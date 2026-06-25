@@ -115,6 +115,43 @@ def coverage(text, level, gloss_forms=()):
             "uncovered": uniq, "in_band": cov >= COVERAGE_THRESHOLD}
 
 
+_ORDER = ["A1", "A2", "B1", "B2", "C1", "C2"]
+_stem_level = None
+
+
+def _band_index():
+    """stem -> lowest CEFR band that contains it (built once, cached)."""
+    global _stem_level
+    if _stem_level is None:
+        _, stemmed = _load()
+        _stem_level = {}
+        for lvl in _ORDER:               # A1 first, so the lowest band wins
+            for st in stemmed.get(lvl, set()):
+                _stem_level.setdefault(st, lvl)
+    return _stem_level
+
+
+def classify_vocab(text):
+    """The *content* vocabulary a learner produced in `text`.
+
+    Returns distinct non-function-word lemmas (stems), each tagged with the
+    lowest CEFR band it falls in (None if not in our bootstrap list). Deterministic
+    and LLM-free — reuses the same stemmer, function-word list, and bands as the
+    coverage gate (one source of truth). Used to measure the vocabulary axis from
+    *content* words, so function words and verbosity don't inflate it (ADR-009).
+    """
+    level_of = _band_index()
+    out = {}
+    for t in re.findall(r"[a-zäöüß]+", text.lower()):
+        if len(t) <= 1 or t in _FUNCTION_WORDS:
+            continue
+        st = _stem(t)
+        if st in out:
+            continue
+        out[st] = {"lemma": st, "surface": t, "band": level_of.get(st)}
+    return list(out.values())
+
+
 if __name__ == "__main__":  # quick manual check
     import sys
     lvl = sys.argv[1] if len(sys.argv) > 1 else "A2"

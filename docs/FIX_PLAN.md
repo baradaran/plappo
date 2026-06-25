@@ -39,9 +39,11 @@ are currently gameable, self-reported, or disconnected from real errors.
   `SYSTEM_PROMPT` (and fix stale "A1-B2" → "A1-C2"); mirror schema in
   `vertex_backend.py`; rewrite `applyResult` to credit only exercised skills
   (`-` errored, `+` demonstrated), no blanket +6.
-- ☐ **P2** Vocabulary by content lemmas vs bands, decoupled from correctness:
-  `classify_vocab()` in `vocab_coverage.py`; `/api/feedback` returns
-  `content_lemmas`; client tracks `seenLemmas`, maps vocab→CEFR via bands.
+- ☑ **P2** Vocabulary by content lemmas vs bands, decoupled from correctness:
+  `classify_vocab()` added to `vocab_coverage.py` (reuses stemmer/function-words/
+  bands, tags each lemma with its lowest band); `/api/feedback` returns
+  `content_lemmas`; client tracks `seenLemmas` and counts distinct content lemmas
+  regardless of errors (migrated counts preserved via `max`). Unit-tested.
 - ☐ **U3** Contingent praise from real `demonstrated` strengths; drop the RNG.
 - ☐ **U4** One precision register — banded skill labels/bars, hide raw integers.
 
@@ -84,3 +86,7 @@ are currently gameable, self-reported, or disconnected from real errors.
 ## Status log
 - **Phase 0 done** — honest cold start + profile/deck v2 migration. New users start
   at A1 with zero history and a calibration cue; demo data behind `?demo=1`.
+- **P2 done** — vocabulary measured from content lemmas (server `classify_vocab`),
+  function words excluded, decoupled from grammar correctness. `/api/feedback`
+  now returns `content_lemmas`. (Live end-to-end needs `VERTEX_PROJECT`; the
+  classifier itself is unit-tested.)

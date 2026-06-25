@@ -59,7 +59,16 @@ class Handler(BaseHTTPRequestHandler):
                 if not sentence:
                     return self._send(400, json.dumps({"error": "empty sentence"}))
                 fb = tutor().get_feedback(level, sentence)
-                return self._send(200, json.dumps(fb.model_dump(mode="json"), ensure_ascii=False))
+                out = fb.model_dump(mode="json")
+                # Attach the deterministic content-vocabulary classification so the
+                # client measures the vocab axis from content lemmas, not raw tokens
+                # (P2). No extra LLM call.
+                try:
+                    from vocab_coverage import classify_vocab
+                    out["content_lemmas"] = [v["lemma"] for v in classify_vocab(sentence)]
+                except Exception:  # noqa: BLE001 — vocab is a nicety, never block feedback
+                    out["content_lemmas"] = []
+                return self._send(200, json.dumps(out, ensure_ascii=False))
             if self.path == "/api/story":
                 from story_service import (generate_gated_story, save_to_library,
                                            select_from_library)
