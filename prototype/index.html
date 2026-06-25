@@ -989,7 +989,7 @@ function reveal(correct){const it=rqueue[rpos];const ans=it.answer;
 function grade(g){const it=rqueue[rpos];
  const sB=it.S,rB=it.reps,el=it.last?(Date.now()-it.last)/864e5:0;   // FSRS-optimisation signal
  gradeItem(it,g);
- logEvent('review',{cat:it.cat,grade:g,reps:rB,elapsed_days:+el.toFixed(2),
+ logEvent('review',{card:it.id,cat:it.cat,grade:g,reps:rB,elapsed_days:+el.toFixed(2),
    s_before:+sB.toFixed(3),s_after:+it.S.toFixed(3),d_after:+it.D.toFixed(2)});
  if(it.type==='grammar'){if(g===1)profile.skills[it.cat]=Math.max(0,(profile.skills[it.cat]||50)-10);
   else if(g>=3)profile.skills[it.cat]=Math.min(100,(profile.skills[it.cat]||50)+5);saveProfile();}

@@ -44,3 +44,4 @@ desktop.ini
 
 # user analytics events (GDPR: never commit personal data)
 prototype/data/
+eval/results/fsrs_review_log.csv

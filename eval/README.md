@@ -128,6 +128,25 @@ textbook, ADR-022). `story_service.py` ships only stories that pass all three an
 re-generates on a miss; wired into the reader via the server's `/api/story`. The
 eval prints coverage and naturalness per story.
 
+## Analysing the event log (`analyze_events.py`)
+
+Once learners opt in (GDPR consent — see [docs/PRIVACY.md](../docs/PRIVACY.md)),
+the app writes no-PII events to `prototype/data/events.jsonl`. This offline tool
+turns them into what we collected them for — no network, no LLM:
+
+```bash
+python analyze_events.py                 # report
+python analyze_events.py --write-log     # also export an FSRS optimiser review log (CSV)
+```
+
+- **FSRS** — review counts, grade distribution, and a **calibration** check
+  (predicted recall from stability+elapsed vs. actual success, binned) that tells
+  you whether the scheduler's parameters need re-optimising. `--write-log` exports
+  a `(user, card, date, elapsed_days, rating)` CSV an FSRS optimiser can train on.
+- **Content gate** — per-level on-band rate, avg coverage + naturalness, avg
+  generation attempts, library-vs-generated split (judge/gate calibration in the wild).
+- **Feedback** — first-try-correct rate, most common errors, most demonstrated skills.
+
 ## How to read the result
 
 The number that decides viability is the **false-positive rate on correct

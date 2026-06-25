@@ -240,7 +240,11 @@ not yet implemented. Not legal advice — needs DPO/lawyer review before launch.
 ---
 
 ## Open decisions / next up
-- Per-user **FSRS parameter optimisation** from review history (ADR-008).
+These are **calibration / data** tasks (not feature code). `analyze_events.py`
+already reports the readiness/calibration stats for them from consented event logs:
+- Per-user **FSRS parameter optimisation** from review history (ADR-008) — the
+  analysis exports an optimiser-ready review log + a predicted-vs-actual recall check.
+- **Calibrate the story judge** against human CEFR ratings (ADR-011); tune `ZIPF_BANDS`
+  (ADR-019) — the analysis reports per-level coverage/naturalness/on-band in the wild.
 - Theme/interest signal as a selector tiebreaker (ADR-013).
-- **Calibrate the story judge** against human CEFR ratings (ADR-011); tune `ZIPF_BANDS` (ADR-019).
 - Validate the **level→grammar map** against a real syllabus (ADR-007).
