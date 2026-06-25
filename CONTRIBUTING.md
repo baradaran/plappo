@@ -67,7 +67,10 @@ eval/          offline measurement + the LLM service layer (the "truth")
   run_compare.py     Pro-vs-Flash grammar eval
   story_level_eval.py story-in-level (drift) eval
   story_service.py   gated story generation + the on-disk library
+  vocab_coverage.py  deterministic per-level lexical-coverage gate (ADR-019)
+  build_vocab_bands.py  one-time bootstrap of data/vocab_bands.json
   library/stories.json   the growing story corpus
+  data/vocab_bands.json  per-level allowed vocabulary (bootstrap approximation)
 prototype/     the runnable app
   server.py          stdlib server: /api/feedback, /api/story (reuses eval/)
   index.html         the whole single-page UI (no build step)
