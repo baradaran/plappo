@@ -51,7 +51,7 @@ honest zero-state first run.
 | Error categories, corrections, explanations | Goal/streak gamification |
 | Level + vocab **measured** from your writing (skills only credited when exercised; vocab from content lemmas) | Persistence is `localStorage` |
 | Story generation, in-band gated, served from a library (with offline fallback) | |
-| Spaced review (FSRS-style) with **typed, verified** recall | |
+| Spaced review (**real FSRS-5**) with **typed, verified** recall | |
 | Drills + review cards built from your real mistakes | |
 
 Story generation staying inside a CEFR level is validated separately by the

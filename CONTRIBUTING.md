@@ -43,8 +43,8 @@ refactors later**. That comes from a few non-negotiables:
    (ADR-013). When in doubt, make the data right and keep the logic simple.
 7. **Comments explain _why_, not _what_.** The code says what. Comments carry the
    rationale, the pedagogy link, the caveat. Match the surrounding style.
-8. **Be honest in code and docs.** Label simplifications (`FSRS-style`, not
-   "FSRS"), note caveats, don't claim more than the evals measured.
+8. **Be honest in code and docs.** Label approximations (e.g. "Zipf frequency is an
+   imperfect CEFR proxy"), note caveats, don't claim more than the evals measured.
 
 ## Anti-patterns (do not do)
 

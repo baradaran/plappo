@@ -861,27 +861,35 @@ function renderFeedback(fb,original){const slot=document.getElementById('fbslot'
 function push(id){document.getElementById(id).classList.add('on');}
 function closePush(id){document.getElementById(id).classList.remove('on');stopSpeak();}
 
-/* ============ FSRS-style spaced repetition =================================
-   Faithful to the FSRS forgetting curve R(t,S)=(1+FACTOR·t/S)^DECAY and to its
-   retrieval-driven scheduling (review when recall is about to fade). The
-   stability update is a *simplified* version of FSRS's trained 19-weight model
-   — same shape (spacing effect: bigger gains when retrievability was lower),
-   not the exact optimised weights. ========================================= */
-const F_DECAY=-0.5, F_FACTOR=19/81, INIT_S={1:0.4,2:1.2,3:2.5,4:5};
+/* ============ FSRS-5 spaced repetition =====================================
+   The real FSRS-5 algorithm: official default parameters + the published
+   difficulty/stability update equations and forgetting curve. Implemented inline
+   because the app has zero build step / dependencies — the maths matches the
+   py-fsrs / ts-fsrs libraries with default weights (ADR-008). ============== */
+const FSRS_W=[0.40255,1.18385,3.173,15.69105,7.1949,0.5345,1.4604,0.0046,
+ 1.54575,0.1192,1.01925,1.9395,0.11,0.29605,2.2698,0.2315,2.9898,0.51655,0.6621];
+const F_DECAY=-0.5, F_FACTOR=19/81, REQUEST_R=0.9;   // 90% target retention
 function clamp(x,a,b){return Math.max(a,Math.min(b,x));}
-function retriev(S,days){return Math.pow(1+F_FACTOR*days/S, F_DECAY);}   // 0..1
+function retriev(S,days){return Math.pow(1+F_FACTOR*days/S, F_DECAY);}          // recall prob 0..1
+function fsrsInterval(S){return S/F_FACTOR*(Math.pow(REQUEST_R,1/F_DECAY)-1);}  // days until R=0.9
 function fmtIv(d){if(d<1)return d<0.05?'<1h':'<1d';if(d<30)return Math.round(d)+'d';
  if(d<365)return Math.round(d/30)+'mo';return (d/365).toFixed(1)+'y';}
-function computeNext(it,g){let S,D,now=Date.now();
- if(it.reps===0){S=INIT_S[g];D=clamp(5-(g-3)*0.8,1,10);}
- else if(g===1){S=Math.max(0.4,it.S*0.25);D=clamp(it.D+1,1,10);}        // lapse: stability collapses
- else{const days=Math.max(0.1,(now-it.last)/864e5),R=retriev(it.S,days);
-  const dfac=(11-it.D)/8, base=g===2?0.12:g===3?0.55:1.05;
-  S=it.S*(1+base*dfac*(1+(1-R)));D=clamp(it.D-(g-3)*0.15,1,10);}         // low R -> bigger jump
- return{S,D};}
+function _initD(g){return clamp(FSRS_W[4]-Math.exp(FSRS_W[5]*(g-1))+1,1,10);}
+function _nextD(D,g){const dp=D-FSRS_W[6]*(g-3)*(10-D)/9;                       // linear damping
+ return clamp(FSRS_W[7]*_initD(4)+(1-FSRS_W[7])*dp,1,10);}                      // mean reversion
+function _sSuccess(D,S,R,g){const hard=g===2?FSRS_W[15]:1,easy=g===4?FSRS_W[16]:1;
+ return S*(1+Math.exp(FSRS_W[8])*(11-D)*Math.pow(S,-FSRS_W[9])
+   *(Math.exp(FSRS_W[10]*(1-R))-1)*hard*easy);}
+function _sLapse(D,S,R){return FSRS_W[11]*Math.pow(D,-FSRS_W[12])
+   *(Math.pow(S+1,FSRS_W[13])-1)*Math.exp(FSRS_W[14]*(1-R));}
+function computeNext(it,g){const now=Date.now();
+ if(it.reps===0)return{S:FSRS_W[g-1],D:_initD(g)};                             // first review
+ const days=Math.max(0,(now-it.last)/864e5),R=retriev(it.S,Math.max(.01,days));
+ const S=g===1?Math.min(_sLapse(it.D,it.S,R),it.S):_sSuccess(it.D,it.S,R,g);   // lapse vs success
+ return{S:Math.max(0.01,S),D:_nextD(it.D,g)};}
 function gradeItem(it,g){const n=computeNext(it,g);it.S=n.S;it.D=n.D;it.reps++;
- it.last=Date.now();it.due=it.last+Math.max(0.007,n.S)*864e5;}
-function previewIv(it,g){return fmtIv(computeNext(it,g).S);}
+ it.last=Date.now();it.due=it.last+Math.max(0.007,fsrsInterval(n.S))*864e5;}
+function previewIv(it,g){return fmtIv(fsrsInterval(computeNext(it,g).S));}
 
 let deck;
 /* ADR-018: the deck is GRAMMAR-ONLY. Every card is a cloze whose blank is a

@@ -29,8 +29,8 @@ offline evals before any UI.
   rate** on correct sentences (the trust metric).
 - **Measured level** — grammar and vocabulary tracked as separate axes; level is
   earned, not set; you choose only a goal.
-- **FSRS spaced repetition** — real forgetting curve, retrieval-driven scheduling.
-  *(Direction: grammar-cloze review; vocabulary learned incidentally — ADR-018–022.)*
+- **Real FSRS-5 spaced repetition** — official default parameters; grammar-cloze
+  review only (vocabulary learned incidentally — ADR-018–022).
 - **Focused live feedback** — leads with the single most important error.
 - **Level-gated story generation** — stories are generated *and judged in-band*
   before they ship, and persisted to a growing shared library.

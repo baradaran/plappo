@@ -61,14 +61,18 @@ C1/C2 grammar coarse — rejected; would be dishonest. **Caveat:** The level→g
 mapping is a standard-progression *heuristic*, not an official CEFR syllabus
 (none is machine-readable). **Status:** Done.
 
-### ADR-008 — FSRS-style spaced repetition for review
+### ADR-008 — FSRS spaced repetition for review
 **Context:** Retention needs scheduled review, not re-reading. **Decision:** Use the
 real FSRS forgetting curve `R(t,S)=(1+FACTOR·t/S)^DECAY` and retrieval-driven
 scheduling; a *simplified* stability update (not the trained 19-weight model).
 **Why:** FSRS is the modern state of the art; the curve + scheduling are the core
 insight, the exact weights are an optimisation. **Alternatives:** SM-2 (older,
-worse) or full FSRS lib (drop-in later — the data model matches). **Status:** Done;
-labelled "FSRS-style" honestly.
+worse). **Status:** **Done — real FSRS-5.** The simplified update was replaced with
+the actual FSRS-5 algorithm: official default parameters (`FSRS_W`) + the published
+difficulty/stability equations. Implemented inline (no build step) but numerically
+matches py-fsrs / ts-fsrs defaults (initial intervals 0.40/1.18/3.17/15.69 d;
+mature growth 3→11→35→102→… d). Card shape (S, D, reps, last, due) unchanged.
+**Next:** per-user parameter optimisation from review history.
 
 ### ADR-009 — Level is *measured*, not set; track grammar and vocabulary separately
 **Context:** Should the user pick their level? **Decision:** No. Derive the current
@@ -222,7 +226,7 @@ The eval reports per-story naturalness + an average.
 ---
 
 ## Open decisions / next up
-- Drop-in **real FSRS** library (ADR-008) — data model already matches.
+- Per-user **FSRS parameter optimisation** from review history (ADR-008).
 - Theme/interest signal as a selector tiebreaker (ADR-013).
 - **Calibrate the story judge** against human CEFR ratings (ADR-011); tune `ZIPF_BANDS` (ADR-019).
 - Validate the **level→grammar map** against a real syllabus (ADR-007).
