@@ -139,3 +139,10 @@ are currently gameable, self-reported, or disconnected from real errors.
 - **Latency tracking (follow-up request)** — `/api/feedback` now times the LLM call
   and returns `latency_ms` (also logged server-side with the model); the UI shows a
   live elapsed timer during the wait and "checked in N s" on the feedback card.
+- **Latency fix (eval-gated)** — `eval/thinking_ab.py` A/B'd the model thinking
+  budget on the grammar dataset (24 cases, gemini-2.5-flash): **thinking off kept
+  100% recall and 0% false-positive (trust metric) while cutting median latency
+  ~4.9s→~1.0s**. So the app runtime now sets `TUTOR_THINKING_BUDGET=0`
+  (`server.py`); offline evals keep the full-thinking ceiling. Also warm the ADC
+  token at startup so the first answer isn't slowed by the gcloud subprocess
+  (first live call 4226ms→1083ms).

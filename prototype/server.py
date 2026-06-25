@@ -16,6 +16,13 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 # Reuse the validated Vertex backend from the eval harness.
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "eval"))
+
+# Runtime guard wants speed: disable model "thinking" for the per-sentence grammar
+# check. An A/B on the grammar eval (eval/thinking_ab.py) showed thinking off keeps
+# 100% recall and a 0% false-positive rate while cutting median latency ~4.9s→~1.0s.
+# Offline evals leave this unset (full-thinking ceiling). Override with the env var.
+os.environ.setdefault("TUTOR_THINKING_BUDGET", "0")
+
 from vertex_backend import VertexGeminiTutor  # noqa: E402
 
 HERE = os.path.dirname(__file__)
@@ -102,5 +109,13 @@ class Handler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     print(f"Plappo prototype on http://127.0.0.1:{PORT}   (model: {MODEL})")
+    # Warm the ADC token now so the FIRST answer isn't slowed by the gcloud
+    # subprocess (the token is cached ~50 min). Non-fatal if it can't.
+    try:
+        import vertex_backend
+        vertex_backend._adc_token()
+        print("ADC token warmed.")
+    except Exception as e:  # noqa: BLE001
+        print(f"(ADC not warmed: {e})")
     print("Open that URL in your browser. Ctrl-C to stop.")
     ThreadingHTTPServer(("127.0.0.1", PORT), Handler).serve_forever()

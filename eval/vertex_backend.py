@@ -116,16 +116,24 @@ class VertexGeminiTutor:
         )
 
     def get_feedback(self, level, sentence) -> TutorFeedback:
+        gen_cfg = {
+            "temperature": 0,
+            "maxOutputTokens": 16384,  # headroom for Gemini 2.5 Pro thinking tokens
+            "responseMimeType": "application/json",
+            "responseSchema": _RESPONSE_SCHEMA,
+        }
+        # Grammar feedback on ONE sentence rarely needs extended reasoning, and
+        # thinking tokens dominate latency. TUTOR_THINKING_BUDGET caps/disables it
+        # (0 = off) — validated against the grammar eval before lowering the default
+        # (see thinking_ab.py). Unset = provider default (full thinking).
+        budget = os.environ.get("TUTOR_THINKING_BUDGET")
+        if budget is not None and budget != "":
+            gen_cfg["thinkingConfig"] = {"thinkingBudget": int(budget)}
         body = {
             "systemInstruction": {"parts": [{"text": SYSTEM_PROMPT}]},
             "contents": [{"role": "user",
                           "parts": [{"text": f"Learner level: {level}\nSentence: {sentence}"}]}],
-            "generationConfig": {
-                "temperature": 0,
-                "maxOutputTokens": 16384,  # headroom for Gemini 2.5 Pro thinking tokens
-                "responseMimeType": "application/json",
-                "responseSchema": _RESPONSE_SCHEMA,
-            },
+            "generationConfig": gen_cfg,
         }
         data = self._post(body)
         text = self._extract_json_text(data)
