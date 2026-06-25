@@ -71,9 +71,9 @@ upstream knows what model answered.
   skills: { <taxonomy enum>: 0..100 } }      ← per-skill mastery
 ```
 
-**Deck item** (FSRS) — one review card:
+**Deck item** (FSRS) — one review card (grammar-only typed cloze, ADR-018):
 ```
-{ id, type: vocab|grammar, front, back/answer, cat?, S, D, reps, last, due }
+{ id, type:"grammar", front:"… ___ …", answer, cat:<taxonomy>, expl, S, D, reps, last, due }
 ```
 
 The error **taxonomy** (`taxonomy.py`, 20 categories) is the single source feeding
@@ -124,5 +124,8 @@ without touching generation. That's the "no big refactor later" payoff.
 - **Structured outputs everywhere** — the LLM returns schema-constrained JSON, so
   the harness and UI always get parseable, enum-constrained data (ADR-002).
 - **Browser speech synthesis** for listening input — free, offline, no service.
+- **Real NLP for the vocab gate** — `simplemma` (lemmatisation) + `wordfreq` (Zipf
+  frequency) power `vocab_coverage.py`, so the lexical gate and the content-vocab
+  axis are deterministic and data-driven, not hand-rolled heuristics (ADR-019).
 - **Persistence today** is `localStorage` (client) + a JSON file (library). The
   data *shapes* are DB-ready; only the storage swaps.

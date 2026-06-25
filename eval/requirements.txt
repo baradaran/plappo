@@ -1,0 +1,5 @@
+# Runtime + eval dependencies (Python 3.10+).
+pydantic>=2          # structured tutor schema
+wordfreq>=3          # German Zipf frequency for the lexical-coverage gate (ADR-019)
+simplemma>=1         # German lemmatisation for the coverage gate / content-vocab axis
+anthropic>=0.40      # only for the optional Claude path (run_eval.py); not needed for Gemini

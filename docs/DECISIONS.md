@@ -155,7 +155,9 @@ preposition…), tagged by taxonomy category; the cue supplies meaning (base for
 grading is exact-match, and it feeds the grammar profile. **Why:** the moat is
 German grammatical accuracy; vocab recall is a different, crowded product.
 **Supersedes:** the vocabulary half of ADR-008 (FSRS schedules *grammar* items now).
-**Status:** Decided; deck is currently mixed — implementation pending.
+**Status:** **Done.** The review deck is grammar-only typed cloze; vocab cards
+removed; `mintErrorCards` turns each corrected mistake into a cloze from the
+learner's own sentence; exact-match grading feeds `profile.skills[category]`.
 See [PEDAGOGY_ROADMAP.md → Content design #1](PEDAGOGY_ROADMAP.md).
 
 ### ADR-019 — Vocabulary is capped per level (controlled vocabulary)
@@ -165,20 +167,24 @@ Goethe lists) + a small glossed i+1 budget; the story gate adds a **measurable
 lexical-coverage check** (in-band lemma fraction), not just the LLM judge. **Why:**
 ~95–98% known-word coverage is required for comprehension (Hu & Nation 2000); the
 cap *is* the i+1 mechanism, and coverage is measurable where the judge is not.
-**Status:** **Done.** `build_vocab_bands.py` bootstraps per-level lexicons
-(`data/vocab_bands.json`); `vocab_coverage.py` computes coverage (function-word
-whitelist + heuristic stemmer + glossary support); the story gate now requires
-`judge_ok AND coverage≥0.80` and reports `coverage`/`uncovered_words` in `check`.
-**Caveat:** bands are an LLM bootstrap (not Goethe/corpus) and the stemmer is
-heuristic — the threshold is lenient to catch *gross* drift; tighten toward ~0.98
-with a real list + lemmatiser.
+**Status:** **Done, on real data.** `vocab_coverage.py` lemmatises with `simplemma`
+(handles irregulars: fuhr→fahren) and bands by `wordfreq` Zipf frequency (lexical
+frequency profiling, Laufer & Nation 1995) — replacing the earlier bootstrap-band +
+heuristic-stemmer approach (both deleted). Story gate requires `judge_ok AND
+coverage≥0.85`, reporting `coverage`/`uncovered_words` in `check`; the same module
+powers the content-vocabulary axis (`classify_vocab`, ADR-009). **Caveat:** Zipf
+frequency is a principled but imperfect CEFR proxy (some basic-but-rare words
+mis-rate), so the threshold stays lenient and the gate's job is *gross* drift; the
+LLM judge handles nuance. Tunable: `ZIPF_BANDS` thresholds.
 
 ### ADR-020 — Meaning is a subtle comprehension aid, never trained or featured
 **Context:** How prominent should word meaning be? **Decision:** A lookup is an
 ephemeral, quiet gloss — no flashcard, no XP, no "added to deck." It exists only to
 make the current sentence comprehensible. **Why:** incidental acquisition via input
 (Krashen; Webb), not deliberate study; meaning is plumbing, not a feature.
-**Status:** Decided; removes the gloss→deck wiring added earlier — pending.
+**Status:** **Done.** The gloss sheet is view-only (Hear-it remains); the
+"add to review" affordance and all gloss→deck enrolment are removed. A lookup only
+increments an ephemeral `encounters` counter (the ADR-021 signal).
 
 ### ADR-021 — Vocabulary acquired incidentally via grammar-cloze carrier frequency
 **Context:** If we don't test vocab, how is it learned? **Decision:** A gloss-tap is
@@ -188,7 +194,8 @@ decays as the learner stops looking the word up. **Why:** ~8–12 meaningful
 encounters drive uptake (Nation; Webb); this routes them through the grammar loop
 and uses the lookup as a free implicit mastery signal. **Caveat:** the
 no-lookup→known signal is noisy — soft prior over several encounters, not a verdict.
-**Status:** Decided; implementation pending.
+**Status:** Partial. Lookups are tracked (`profile.encounters`); the carrier-word
+selection (bias unknown words into upcoming cloze) is the remaining build.
 
 ### ADR-022 — Native-authentic German *within* the cap; naturalness as a 2nd judge axis
 **Context:** Capping vocabulary risks stilted "Lehrbuchdeutsch". **Decision:** Treat
@@ -203,8 +210,10 @@ judge naturalness axis pending.
 ---
 
 ## Open decisions / next up
+- **Carrier-word selection** (ADR-021): bias looked-up words into upcoming cloze.
+- **Naturalness axis** in the story generator + judge (ADR-022).
 - Ranked **focused-feedback on the engine side** (ADR-010 is UI-only today).
 - The **per-user story selector** in `select_from_library()` (ADR-013).
 - Drop-in **real FSRS** library (ADR-008) — data model already matches.
-- **Calibrate the story judge** against human CEFR ratings / a Goethe word-list (ADR-011).
+- **Calibrate the story judge** against human CEFR ratings (ADR-011); tune `ZIPF_BANDS` (ADR-019).
 - Validate the **level→grammar map** against a real syllabus (ADR-007).

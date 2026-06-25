@@ -427,8 +427,6 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
         <svg viewBox="0 0 24 24" width="18" fill="none" stroke="currentColor" stroke-width="1.9"
           stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
         Hear it</button>
-      <button class="btn quiet" id="addVocabBtn" style="flex:1;min-height:0;padding:9px 12px"
-        onclick="addCurrentVocab()">+ Add to review</button>
     </div>
   </div>
 
@@ -631,10 +629,9 @@ function renderLearn(){const p=levelProgress(),ga=grammarAchieved(),va=vocabAchi
 
 /* ============ REVIEW ============ */
 function renderReview(){const now=Date.now();
- const dueV=deck.filter(it=>it.type==='vocab'&&it.due<=now).length;
  const byCat={};deck.filter(it=>it.type==='grammar'&&it.due<=now).forEach(it=>byCat[it.cat]=(byCat[it.cat]||0)+1);
- const total=dueV+Object.values(byCat).reduce((a,b)=>a+b,0);
- const rows=[];if(dueV)rows.push(['Vocabulary',dueV+' word'+(dueV!==1?'s':'')+' due','#7a86b8',dueV]);
+ const total=Object.values(byCat).reduce((a,b)=>a+b,0);
+ const rows=[];
  Object.entries(byCat).forEach(([c,n])=>rows.push([CAT[c].l,'grammar point','#'+CAT[c].c.slice(1),n]));
  document.getElementById('dueList').innerHTML=total?rows.map(([t,sub,c,n])=>
   `<div class="due" onclick="startReview()"><div class="n">${n}</div>
@@ -720,27 +717,17 @@ function paintProgress(){const dots=document.getElementById('dots');if(!dots||!s
  const lit=max<=4?n:Math.min(n,Math.max(1,Math.ceil(frac*n)));
  [...dots.children].forEach((d,i)=>d.classList.toggle('on',i<lit));}
 function closeReader(){document.getElementById('p-reader').classList.remove('on');stopSpeak();}
-let sheetGloss={back:'',en:''};
 function openSheet(w){const k=w.replace(/[.,„":!?»«]/g,'').toLowerCase();
  const g=(story&&story.gloss[k])||null,disp=g?g[0]:w.replace(/[.,„":!?»«]/g,'');
  document.getElementById('shWord').textContent=disp;document.getElementById('shPos').textContent=g?g[1]:'';
  document.getElementById('shMean').textContent=(g&&g[2])||'— no gloss —';sheetWord=disp;
- // P3: looking a word up is NOT the same as wanting to drill it forever. We only
- // count the encounter; enrolling in spaced review is a deliberate tap. After a
- // 2nd encounter of a still-unknown word we nudge (but never auto-add).
- sheetGloss={back:disp,en:(g&&g[2])||''};
+ // ADR-018/020/021: a lookup is an EPHEMERAL comprehension aid, never a trained
+ // card — this app trains grammar, not word meaning. We only COUNT the encounter:
+ // an "I don't know this word" signal that will bias which words recur as carriers
+ // in grammar cloze (ADR-021). Nothing is enrolled in review.
  if(g&&g[2]){profile.encounters=profile.encounters||{};
   profile.encounters[k]=(profile.encounters[k]||0)+1;saveProfile();}
- const btn=document.getElementById('addVocabBtn');
- const already=g&&g[2]&&deck&&deck.some(it=>it.type==='vocab'&&it.back===disp);
- const seen=(profile.encounters&&profile.encounters[k])||0;
- btn.disabled=!(g&&g[2]);
- btn.textContent=!(g&&g[2])?'No gloss':already?'✓ In your reviews'
-  :seen>=2?'+ Add to review (seen '+seen+'×)':'+ Add to review';
  document.getElementById('sheet').classList.add('on');document.getElementById('scrim').classList.add('on');}
-function addCurrentVocab(){if(!sheetGloss.en)return;
- addVocabFromGloss(sheetGloss.back,sheetGloss.en);
- const btn=document.getElementById('addVocabBtn');if(btn){btn.textContent='✓ In your reviews';}}
 function closeSheet(){document.getElementById('sheet').classList.remove('on');
  document.getElementById('scrim').classList.remove('on');}
 
@@ -862,32 +849,27 @@ function gradeItem(it,g){const n=computeNext(it,g);it.S=n.S;it.D=n.D;it.reps++;
 function previewIv(it,g){return fmtIv(computeNext(it,g).S);}
 
 let deck;
+/* ADR-018: the deck is GRAMMAR-ONLY. Every card is a cloze whose blank is a
+   grammatical function (case ending, verb form/position, aux, separable prefix…).
+   Seed items are starters for demo mode; real cards come from the learner's own
+   corrected mistakes (mintErrorCards). There are no vocabulary cards. */
 function seedDeck(){const now=Date.now(),d=864e5;let id=0;
  const mk=o=>({id:id++,reps:0,S:2,D:5,last:0,due:now,...o});
- const V=[['the key','der Schlüssel'],['the door','die Tür'],['tired','müde'],
-   ['worried','besorgt'],['the brother','der Bruder'],['to look for','suchen']];
  const G=[['…, weil ich müde ___ (sein).','bin','VERB_POSITION','After “weil”, the conjugated verb goes to the very end of the clause.'],
    ['Ich sehe ___ Mann. (the)','den','CASE','Direct object of sehen → Akkusativ: der becomes den.'],
    ['Ich ___ gestern nach Hause gegangen.','bin','AUX_CHOICE','Verbs of motion like gehen form the perfect with sein, not haben.'],
    ['Ich rufe meine Mutter jeden Tag ___.','an','SEPARABLE_VERB','anrufen is separable — the prefix “an” moves to the end.']];
- return [
-   ...V.map((v,i)=>mk({type:'vocab',front:v[0],back:v[1],due:now-(i<4?d:-2*d)})),
-   ...G.map((g,i)=>mk({type:'grammar',front:g[0],answer:g[1],cat:g[2],expl:g[3],due:now-(i<3?d:-2*d)}))];}
+ return G.map((g,i)=>mk({type:'grammar',front:g[0],answer:g[1],cat:g[2],expl:g[3],due:now-(i<3?d:-2*d)}));}
 function loadDeck(){
  // Demo mode shows a pre-populated deck; a real new user starts empty and the
- // deck fills from what they actually read and get wrong (P3/P6) — no fake "due".
+ // deck fills from what they actually get wrong (P3/P6) — no fake "due".
  if(new URLSearchParams(location.search).has('demo')){deck=seedDeck();return;}
  try{deck=JSON.parse(localStorage.getItem('plappo_deck'));}catch(e){}
- if(!deck)deck=[];}
+ if(!deck)deck=[]; else deck=deck.filter(it=>it.type==='grammar');  // drop legacy vocab cards
+}
 function saveDeck(){localStorage.setItem('plappo_deck',JSON.stringify(deck));}
 function updateDue(){const n=deck.filter(it=>it.due<=Date.now()).length;
  const b=document.getElementById('dueBadge');b.textContent=n;b.style.display=n?'':'none';}
-/* closes the input→retention loop: a word you look up while reading enters
-   spaced repetition automatically, due in a few hours. */
-function addVocabFromGloss(back,en){if(!en||!deck||!back)return;
- if(deck.some(it=>it.type==='vocab'&&it.back===back)){toast('“'+back+'” is already in your reviews');return;}
- deck.push({id:'g'+Date.now(),type:'vocab',front:en,back,reps:0,S:2,D:5,last:0,due:Date.now()+6*36e5});
- saveDeck();updateDue();toast('Added “'+back+'” to your reviews');}
 
 /* ===== review session ===== */
 let rqueue=[],rpos=0,rrev=0;
@@ -905,17 +887,14 @@ let rStart=0;
 function normAns(s){return (s||'').toString().toLowerCase().trim()
  .replace(/[.,!?;:„""»«]/g,'').replace(/\s+/g,' ')
  .replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss');}
-function acceptsFor(it){const a=it.type==='vocab'?it.back:it.answer;const set=new Set([normAns(a)]);
- const m=(a||'').match(/^(der|die|das)\s+(.+)/i);if(m)set.add(normAns(m[2]));  // vocab w/o article
+function acceptsFor(it){const set=new Set([normAns(it.answer)]);
  (it.accept||[]).forEach(x=>set.add(normAns(x)));return set;}
 function showCard(){const it=rqueue[rpos];rStart=Date.now();
  document.getElementById('rprog').style.width=(100*rpos/rqueue.length)+'%';
  const body=document.getElementById('rbody');
- if(it.type==='vocab'){body.innerHTML=`<div class="rcard"><div class="rkind">Vocabulary · ${rpos+1}/${rqueue.length}</div>
-   <div class="rfront">${it.front}</div><div class="rprompt">Recall it in German</div><div id="rback"></div></div>`;}
- else{body.innerHTML=`<div class="rcard"><div class="rkind">Grammar · ${CAT[it.cat].l} · ${rpos+1}/${rqueue.length}</div>
+ body.innerHTML=`<div class="rcard"><div class="rkind">Grammar · ${CAT[it.cat].l} · ${rpos+1}/${rqueue.length}</div>
    <div class="rcloze">${it.front.replace('___','<b style="color:var(--brand)">＿＿＿</b>')}</div>
-   <div class="rprompt">Type the missing word</div><div id="rback"></div></div>`;}
+   <div class="rprompt">Type the missing word</div><div id="rback"></div></div>`;
  document.getElementById('rfoot').innerHTML=
   `<input id="rinput" class="rin" autocomplete="off" autocapitalize="off" spellcheck="false"
      aria-label="Your answer" placeholder="Type your answer"
@@ -925,13 +904,13 @@ function showCard(){const it=rqueue[rpos];rStart=Date.now();
  setTimeout(()=>{const i=document.getElementById('rinput');if(i)i.focus();},60);}
 function checkRecall(){const it=rqueue[rpos];const i=document.getElementById('rinput');if(!i)return;
  reveal(acceptsFor(it).has(normAns(i.value)));}
-function reveal(correct){const it=rqueue[rpos];const ans=it.type==='vocab'?it.back:it.answer;
+function reveal(correct){const it=rqueue[rpos];const ans=it.answer;
  const verdict=correct===true?'<span style="color:var(--good)">✓ Correct</span>'
    :correct===false?'<span style="color:#b4502f">✗ Not quite</span>':'';
  document.getElementById('rback').innerHTML=`<div class="rback">
    ${verdict?`<div style="font-weight:700;margin-bottom:6px">${verdict}</div>`:''}
    <div class="ans">${ans}</div>
-   ${it.type==='grammar'?`<div class="ex">${it.expl}</div>`:''}
+   ${it.expl?`<div class="ex">${it.expl}</div>`:''}
    <button class="hear" style="margin-top:14px" onclick="speak(${JSON.stringify(ans)})">
      <svg viewBox="0 0 24 24" width="16" fill="none" stroke="currentColor" stroke-width="1.9"
        stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>

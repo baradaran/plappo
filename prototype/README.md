@@ -24,8 +24,9 @@ honest zero-state first run.
 
 1. **Home** — your level is *measured*, not picked; weak spots fill in as you write.
 2. **Story** — read a level-appropriate story (generated and in-band-gated server-
-   side, served from a growing library); tap any word for a gloss, and add it to
-   review deliberately (lookups don't auto-enrol).
+   side, served from a growing library); tap any word for a quiet gloss — an
+   ephemeral reading aid. Meaning is never trained: this app trains **grammar**,
+   and a lookup only signals "unknown word" (ADR-018/020/021).
 3. **Questions** — type a free German answer, hit **Check my German**. This calls
    the real grammar engine and renders the **feedback card**: your sentence with the
    wrong bit struck through (with the fix), one focused error chip (the rest collapse),

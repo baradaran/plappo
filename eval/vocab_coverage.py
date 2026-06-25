@@ -1,111 +1,89 @@
 """Deterministic lexical-coverage check (ADR-019).
 
-Given a German text and a target CEFR level, compute what fraction of its words
-fall within that level's vocabulary band (data/vocab_bands.json), counting glossed
-words as supported (the i+1 budget). No LLM call — fast, free, repeatable. This is
-the *measurable* half of the story gate, complementing the LLM judge.
+Given a German text and a target CEFR level, compute what fraction of its content
+words fall within that level's vocabulary band, counting glossed words as supported
+(the i+1 budget). No LLM call — fast, free, repeatable. The *measurable* half of the
+story gate, complementing the LLM judge; also exposes the learner's *content*
+vocabulary for the measured-level axis (ADR-009).
 
-Quality is bounded by the band list (a bootstrap approximation — see
-build_vocab_bands.py) and by a heuristic stemmer that approximates German
-inflection without a morphology library. Both are swappable without changing the
-interface. Threshold is deliberately lenient for now; with a real Goethe/corpus
-list + a proper lemmatiser you'd raise it toward the ~98% comprehension figure
-(Hu & Nation 2000).
+Built on real data, not a bootstrap:
+  - lemmatisation via `simplemma` (handles irregulars: fuhr→fahren, teuren→teuer)
+  - frequency via `wordfreq` Zipf scale (der≈7.5, haus≈5.4, sandburg≈2.2)
+A lemma is "within level L" if its Zipf frequency ≥ the band threshold. This is
+lexical-frequency profiling (Laufer & Nation 1995). Frequency is a principled but
+imperfect proxy for CEFR — so the gate threshold stays lenient (catch *gross* drift;
+the judge handles nuance). Thresholds are the one tunable; everything else is data.
 """
 
-import json
-import os
 import re
 
-_BANDS_PATH = os.path.join(os.path.dirname(__file__), "data", "vocab_bands.json")
-# Deliberately lenient: the band list + heuristic stemmer are an approximation, so
-# this gate's job is to catch *gross* out-of-band drift (e.g. "Industrialisierung"
-# in an A2 story) cheaply, while the LLM judge handles the nuance. Raise toward the
-# ~0.98 comprehension figure once a real Goethe/corpus list + lemmatiser are in.
-COVERAGE_THRESHOLD = 0.80
+from simplemma import lemmatize
+from wordfreq import zipf_frequency
 
-# Closed-class function words + the most common irregular/contracted forms. These
-# are A1 by definition and the band-list+stemmer can't reach them (der≠article
-# lemma, war≠sein, zur=contraction). Without this the gate flags the commonest
-# German words. Finite and high-value; this is the bulk of the fix.
-_FUNCTION_WORDS = set("""
-der die das den dem des ein eine einen einem einer eines kein keine keinen keinem keiner
+# Zipf threshold a lemma must clear to count as "within" each level (cumulative:
+# higher level → lower bar → more words allowed). Calibrated so everyday words pass
+# at A1–A2 while low-frequency/technical words (Industrialisierung, Sandburg) fall
+# out. Tune here if the gate is too strict/loose.
+ZIPF_BANDS = {"A1": 4.0, "A2": 3.6, "B1": 3.2, "B2": 2.8, "C1": 2.4, "C2": 2.0}
+_ORDER = ["A1", "A2", "B1", "B2", "C1", "C2"]
+COVERAGE_THRESHOLD = 0.85
+
+# Small closed-class stoplist so classify_vocab() reports *content* words only.
+# (Coverage doesn't need it — function words have very high Zipf and pass anyway.)
+_STOP = set("""
+der die das den dem des ein eine einen einem einer eines kein keine
 ich du er sie es wir ihr man mich dich sich uns euch mir dir ihm ihnen
-mein meine meinen meinem meiner dein deine sein seine seinen seinem ihre ihren ihrem unser unsere euer
-dieser diese dieses diesen diesem jener jene welche welcher welches alle alles jeder jede jedes
-in an auf über unter vor hinter neben zwischen mit ohne für gegen um durch bei nach zu von aus seit bis
-trotz während wegen statt gegenüber innerhalb außerhalb entlang
-im am beim zum zur ins ans aufs vom fürs durchs ums
-und oder aber denn weil dass daß wenn als ob obwohl damit sondern sowie sowohl weder noch
-nicht auch nur noch schon dann da dort hier so sehr mehr ganz immer wieder ja nein doch mal eben halt
-hin her heraus hinein zurück
-bin bist ist sind seid war warst waren gewesen sei
-habe hast hat haben hatte hattest hatten gehabt
-werde wirst wird werden wurde wurden geworden worden
-kann kannst können konnte konnten muss musst müssen musste mussten
-will willst wollen wollte wollten soll sollst sollen sollte sollten darf dürfen mag möchte möchten
-geht ging gehen kommt kam kommen sah sehen gab geben fand finden
-sehr viel viele wenig etwas nichts alles jemand niemand
-am am
+mein dein sein unser euer dieser diese dieses jener welche welcher alle jeder
+in an auf über unter vor hinter neben zwischen mit ohne für gegen um durch bei
+nach zu von aus seit bis trotz während wegen im am beim zum zur ins ans vom
+und oder aber denn weil dass wenn als ob obwohl damit sondern sowie weder noch
+nicht auch nur noch schon dann da dort hier so sehr mehr ganz immer wieder ja nein doch mal
+sein haben werden können müssen wollen sollen dürfen mögen
 """.split())
 
-# Longest suffixes first; crude German inflection stripping.
-_SUFFIXES = ["lichen", "ischen", "ische", "ungen", "keit", "heit", "lich", "isch",
-             "bar", "ung", "ern", "est", "end", "en", "em", "er", "es", "st",
-             "et", "te", "e", "n", "s", "t"]
+_lemma_cache = {}
 
 
-def _stem(w):
-    # iterate so multi-suffix inflections reduce consistently:
-    # spielten -> spiel, spielen -> spiel (the band and the token must agree)
-    prev = None
-    while w != prev and len(w) > 3:
-        prev = w
-        for s in _SUFFIXES:
-            if w.endswith(s) and len(w) - len(s) >= 3:
-                w = w[: -len(s)]
-                break
-    return w
+def _lemma(w):
+    v = _lemma_cache.get(w)
+    if v is None:
+        v = lemmatize(w, lang="de")
+        _lemma_cache[w] = v
+    return v
 
 
-_bands = None
-_stemmed = None
+def _zipf(lemma, surface):
+    # lemma frequency is more stable, but fall back to the surface form.
+    return max(zipf_frequency(lemma, "de"), zipf_frequency(surface, "de"))
 
 
-def _load():
-    global _bands, _stemmed
-    if _bands is None:
-        try:
-            with open(_BANDS_PATH, encoding="utf-8") as f:
-                _bands = json.load(f)
-        except (OSError, json.JSONDecodeError):
-            _bands = {}
-        _stemmed = {lvl: {_stem(w) for w in words} for lvl, words in _bands.items()}
-    return _bands, _stemmed
+def band_of(lemma, surface=None):
+    """Lowest CEFR level whose threshold this lemma clears, or None (beyond C2)."""
+    z = _zipf(lemma, surface or lemma)
+    for lvl in _ORDER:
+        if z >= ZIPF_BANDS[lvl]:
+            return lvl
+    return None
 
 
 def coverage(text, level, gloss_forms=()):
     """Return {coverage, total, covered, uncovered[], in_band}."""
-    bands, stemmed = _load()
-    allowed = set(bands.get(level, []))
-    allowed_st = stemmed.get(level, set())
+    threshold = ZIPF_BANDS.get(level, ZIPF_BANDS["C2"])
     gloss = {g.lower() for g in gloss_forms}
-    gloss_st = {_stem(g) for g in gloss}
+    gloss_lem = {_lemma(g) for g in gloss}
 
-    tokens = re.findall(r"[a-zäöüß]+", text.lower())
+    tokens = re.findall(r"[a-zA-ZäöüÄÖÜß]+", text.lower())
     if not tokens:
         return {"coverage": 1.0, "total": 0, "covered": 0, "uncovered": [], "in_band": True}
 
     uncovered, covered = [], 0
     for t in tokens:
-        st = _stem(t)
-        if (t in _FUNCTION_WORDS or t in allowed or st in allowed_st
-                or t in gloss or st in gloss_st):
+        lem = _lemma(t)
+        if _zipf(lem, t) >= threshold or t in gloss or lem in gloss_lem:
             covered += 1
         else:
             uncovered.append(t)
     cov = covered / len(tokens)
-    # de-dup uncovered, preserve order
     seen, uniq = set(), []
     for w in uncovered:
         if w not in seen:
@@ -115,45 +93,24 @@ def coverage(text, level, gloss_forms=()):
             "uncovered": uniq, "in_band": cov >= COVERAGE_THRESHOLD}
 
 
-_ORDER = ["A1", "A2", "B1", "B2", "C1", "C2"]
-_stem_level = None
-
-
-def _band_index():
-    """stem -> lowest CEFR band that contains it (built once, cached)."""
-    global _stem_level
-    if _stem_level is None:
-        _, stemmed = _load()
-        _stem_level = {}
-        for lvl in _ORDER:               # A1 first, so the lowest band wins
-            for st in stemmed.get(lvl, set()):
-                _stem_level.setdefault(st, lvl)
-    return _stem_level
-
-
 def classify_vocab(text):
-    """The *content* vocabulary a learner produced in `text`.
-
-    Returns distinct non-function-word lemmas (stems), each tagged with the
-    lowest CEFR band it falls in (None if not in our bootstrap list). Deterministic
-    and LLM-free — reuses the same stemmer, function-word list, and bands as the
-    coverage gate (one source of truth). Used to measure the vocabulary axis from
-    *content* words, so function words and verbosity don't inflate it (ADR-009).
-    """
-    level_of = _band_index()
+    """The *content* vocabulary a learner produced in `text`: distinct content
+    lemmas, each tagged with the lowest CEFR band it falls in (None if beyond C2).
+    Deterministic and LLM-free; used to measure the vocabulary axis from content
+    words so function words and verbosity don't inflate it (ADR-009)."""
     out = {}
-    for t in re.findall(r"[a-zäöüß]+", text.lower()):
-        if len(t) <= 1 or t in _FUNCTION_WORDS:
+    for t in re.findall(r"[a-zA-ZäöüÄÖÜß]+", text.lower()):
+        if len(t) <= 1:
             continue
-        st = _stem(t)
-        if st in out:
+        lem = _lemma(t)
+        if lem in _STOP or t in _STOP or lem in out:
             continue
-        out[st] = {"lemma": st, "surface": t, "band": level_of.get(st)}
+        out[lem] = {"lemma": lem, "surface": t, "band": band_of(lem, t)}
     return list(out.values())
 
 
-if __name__ == "__main__":  # quick manual check
+if __name__ == "__main__":
     import sys
     lvl = sys.argv[1] if len(sys.argv) > 1 else "A2"
-    txt = sys.argv[2] if len(sys.argv) > 2 else "Das Museum wurde im 19. Jahrhundert gebaut."
+    txt = sys.argv[2] if len(sys.argv) > 2 else "Die Industrialisierung beschleunigte den Wandel."
     print(coverage(txt, lvl))

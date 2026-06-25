@@ -192,5 +192,102 @@
     "created_at": "2026-06-25T08:11:02Z",
     "gen_model": "gemini-2.5-flash",
     "source": "generated"
+  },
+  {
+    "title": "Ein schöner Tag im Park",
+    "sentences": [
+      "Am Samstag geht Anna in den großen Stadtpark.",
+      "Die Sonne scheint hell und es ist schon warm.",
+      "Viele Leute sind schon dort: Familien, Freunde und Paare.",
+      "Kinder spielen Fußball und lachen laut auf dem Spielplatz.",
+      "Anna kauft ein leckeres Eis am kleinen Kiosk.",
+      "Sie setzt sich auf eine freie Bank unter einen alten Baum.",
+      "Dort liest sie ihr Lieblingsbuch und genießt die frische Luft.",
+      "Der Tag im Park ist für Anna sehr entspannend."
+    ],
+    "glossary": [
+      {
+        "word": "scheint",
+        "lemma": "scheinen",
+        "pos": "verb",
+        "en": "shines"
+      },
+      {
+        "word": "lachen",
+        "lemma": "lachen",
+        "pos": "verb",
+        "en": "laugh"
+      },
+      {
+        "word": "Kiosk",
+        "lemma": "Kiosk",
+        "pos": "noun",
+        "en": "kiosk"
+      },
+      {
+        "word": "setzt sich",
+        "lemma": "sich setzen",
+        "pos": "verb",
+        "en": "sits down"
+      },
+      {
+        "word": "Bank",
+        "lemma": "Bank",
+        "pos": "noun",
+        "en": "bench"
+      },
+      {
+        "word": "genießt",
+        "lemma": "genießen",
+        "pos": "verb",
+        "en": "enjoys"
+      },
+      {
+        "word": "entspannend",
+        "lemma": "entspannend",
+        "pos": "adjective",
+        "en": "relaxing"
+      }
+    ],
+    "questions": [
+      "Wann geht Anna in den Park?",
+      "Was machen die Kinder im Park?",
+      "Was kauft Anna am Kiosk?"
+    ],
+    "task": {
+      "prompt": "Stell dir vor, du gehst auch gerne in den Park. Was machst du dort am liebsten? Schreibe drei bis vier Sätze.",
+      "en": "Imagine you also like to go to the park. What do you like to do there most? Write three to four sentences."
+    },
+    "grammar_points": [
+      "CASE",
+      "GENDER",
+      "ADJ_ENDING",
+      "VERB_CONJUGATION",
+      "VERB_POSITION",
+      "PREPOSITION",
+      "WORD_ORDER",
+      "PLURAL"
+    ],
+    "theme": "everyday",
+    "check": {
+      "target": "A2",
+      "estimated": "A2",
+      "class": "on",
+      "over_words": [],
+      "unsupported_over_words": [],
+      "coverage": 0.973,
+      "uncovered_words": [
+        "stadtpark",
+        "lieblingsbuch"
+      ],
+      "in_band": true,
+      "attempts": 1
+    },
+    "level": "A2",
+    "topic": "ein Tag im Park",
+    "id": "st_A2_1782380568026",
+    "created_at": "2026-06-25T09:42:48Z",
+    "gen_model": "gemini-2.5-flash",
+    "source": "generated"
   }
 ]
