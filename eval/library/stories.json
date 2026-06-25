@@ -1,0 +1,91 @@
+[
+  {
+    "title": "Ein schöner Tag am Meer",
+    "sentences": [
+      "Heute Morgen war das Wetter sehr schön.",
+      "Meine Familie und ich sind zum Meer gefahren.",
+      "Am Strand war viel Sand und das Wasser war warm.",
+      "Wir haben im Meer geschwommen und in der Sonne gelegen.",
+      "Zum Mittagessen gab es leckere Fischbrötchen.",
+      "Meine kleine Schwester hat viele Muscheln gesammelt.",
+      "Der Tag am Meer war sehr entspannend und lustig.",
+      "Wir möchten bald wieder dorthin fahren."
+    ],
+    "glossary": [
+      {
+        "word": "Meer",
+        "lemma": "Meer",
+        "pos": "N",
+        "en": "sea"
+      },
+      {
+        "word": "Strand",
+        "lemma": "Strand",
+        "pos": "N",
+        "en": "beach"
+      },
+      {
+        "word": "geschwommen",
+        "lemma": "schwimmen",
+        "pos": "V",
+        "en": "swum"
+      },
+      {
+        "word": "gelegen",
+        "lemma": "liegen",
+        "pos": "V",
+        "en": "lain"
+      },
+      {
+        "word": "Fischbrötchen",
+        "lemma": "Fischbrötchen",
+        "pos": "N",
+        "en": "fish sandwich"
+      },
+      {
+        "word": "Muscheln",
+        "lemma": "Muschel",
+        "pos": "N",
+        "en": "shells"
+      },
+      {
+        "word": "entspannend",
+        "lemma": "entspannend",
+        "pos": "ADJ",
+        "en": "relaxing"
+      }
+    ],
+    "questions": [
+      "Wohin ist die Familie gefahren?",
+      "Was haben sie im Meer gemacht?",
+      "Was hat die kleine Schwester am Strand gesammelt?"
+    ],
+    "grammar_points": [
+      "CASE",
+      "GENDER",
+      "ADJ_ENDING",
+      "VERB_CONJUGATION",
+      "VERB_POSITION",
+      "AUX_CHOICE",
+      "PREPOSITION",
+      "WORD_ORDER",
+      "PLURAL"
+    ],
+    "theme": "everyday",
+    "check": {
+      "target": "A2",
+      "estimated": "A2",
+      "class": "on",
+      "over_words": [],
+      "unsupported_over_words": [],
+      "in_band": true,
+      "attempts": 1
+    },
+    "level": "A2",
+    "topic": "ein Tag am Meer",
+    "id": "st_A2_1782336104866",
+    "created_at": "2026-06-24T21:21:44Z",
+    "gen_model": "gemini-2.5-flash",
+    "source": "generated"
+  }
+]

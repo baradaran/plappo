@@ -1,0 +1,85 @@
+{
+  "generator": "gemini-2.5-flash",
+  "judge": "gemini-2.5-pro",
+  "drift_rate": 0.0,
+  "stories": [
+    {
+      "target": "A1",
+      "topic": "der erste Schultag",
+      "title": "Mias erster Schultag",
+      "text": "Mia hat heute Schultag. Sie ist ein bisschen aufgeregt. Die Schule ist groß und hell. Mia trifft neue Kinder. Der Tag ist schön.",
+      "estimated": "A1",
+      "over_words": [],
+      "over_grammar": [],
+      "stays_in_level": true,
+      "in_band": true,
+      "note": "The text is a perfect example of A1 level. It uses simple present tense, basic vocabulary related to daily life (school), and common adjectives. The sentence structures are simple main clauses.",
+      "latency_s": 15.5
+    },
+    {
+      "target": "A1",
+      "topic": "ein verlorener Hund im Park",
+      "title": "Rex im Park",
+      "text": "Rex ist ein Hund. Er ist im Park. Rex ist allein und traurig. Eine Frau sieht Rex. Sie hilft dem Hund.",
+      "estimated": "A1",
+      "over_words": [],
+      "over_grammar": [],
+      "stays_in_level": true,
+      "in_band": true,
+      "note": "The text is a perfect example of A1 level. It uses simple sentences, core A1 vocabulary, and fundamental A1 grammar, including the dative case with the preposition 'in' (im) and the verb 'helfen'.",
+      "latency_s": 11.1
+    },
+    {
+      "target": "A2",
+      "topic": "der erste Schultag",
+      "title": "Lenas erster Schultag",
+      "text": "Heute ist ein besonderer Tag. Lena hat heute ihren ersten Schultag. Sie ist ein bisschen nervös, aber auch froh. Ihre Mutter geht mit ihr zur Schule. Dort trifft Lena ihre neue Lehrerin und viele Kinder.",
+      "estimated": "A2",
+      "over_words": [],
+      "over_grammar": [],
+      "stays_in_level": true,
+      "in_band": true,
+      "note": "The text is a very good example of the A2 level. It uses simple sentences, common vocabulary, and grammatical structures that are characteristic of A2, such as adjective declension (besonderer, ersten, neue) and the use of prepositions with the correct case (mit ihr, zur Schule).",
+      "latency_s": 14.0
+    },
+    {
+      "target": "A2",
+      "topic": "ein verlorener Hund im Park",
+      "title": "Der verlorene Hund",
+      "text": "Ein kleiner Hund ist im Park. Er ist allein und sucht seinen Besitzer. Eine nette Frau sieht den Hund. Sie ruft: \"Komm her, kleiner Hund!\". Der Hund läuft zu ihr und ist froh.",
+      "estimated": "A2",
+      "over_words": [],
+      "over_grammar": [],
+      "stays_in_level": true,
+      "in_band": true,
+      "note": "The text is a perfect example of A2 level. It uses simple sentences in the present tense, common vocabulary, and grammatical structures appropriate for A2, such as adjective declension and prepositions with dative and accusative cases.",
+      "latency_s": 11.1
+    },
+    {
+      "target": "B1",
+      "topic": "der erste Schultag",
+      "title": "Lukas' erster Schultag",
+      "text": "Heute war Lukas' erster Schultag in der Grundschule. Er war sehr aufgeregt, aber auch ein bisschen nervös. Zusammen mit seinen Eltern ging er am Morgen zur Schule. Dort begrüßte ihn seine neue Lehrerin, Frau Schmidt, sehr freundlich. Lukas spielte mit den anderen Kindern und hatte viel Spaß.",
+      "estimated": "A2",
+      "over_words": [],
+      "over_grammar": [],
+      "stays_in_level": true,
+      "in_band": true,
+      "note": "The text is very simple and uses basic vocabulary and sentence structures. The use of the Präteritum (war, ging, begrüßte, spielte, hatte) is introduced at A2 and consolidated at B1. Given the overall simplicity, the text is more representative of a solid A2 level, but it is perfectly suitable and not at all challenging for a B1 learner.",
+      "latency_s": 13.8
+    },
+    {
+      "target": "B1",
+      "topic": "ein verlorener Hund im Park",
+      "title": "Der verlorene Hund im Park",
+      "text": "Frau Schmidt ging jeden Morgen mit ihrem Hund Bello im Park spazieren. Eines Tages sah Bello einen Hasen und rannte ihm schnell hinterher. Frau Schmidt rief seinen Namen, aber Bello kam nicht zurück. Sie suchte lange Zeit überall im Park, aber sie fand ihn nicht. Glücklicherweise kam Bello später alleine nach Hause, müde und hungrig.",
+      "estimated": "B1",
+      "over_words": [],
+      "over_grammar": [],
+      "stays_in_level": true,
+      "in_band": true,
+      "note": "The text is a perfect example of a B1-level narrative. It consistently uses the Präteritum of common verbs for storytelling, which is a key skill at this level. The vocabulary is appropriate, and the sentence structures (main clauses with conjunctions, separable verbs) are all well within the B1 scope.",
+      "latency_s": 17.6
+    }
+  ]
+}

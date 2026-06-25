@@ -1,0 +1,876 @@
+{
+  "models": [
+    "gemini-2.5-pro",
+    "gemini-2.5-flash"
+  ],
+  "runs": [
+    {
+      "model": "gemini-2.5-pro",
+      "aggregate": {
+        "n_cases": 26,
+        "n_correct_sentences": 12,
+        "n_error_sentences": 14,
+        "detection": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "errors_caught": 14,
+          "errors_missed": 0,
+          "false_positive_rate_on_correct": 0.0,
+          "invented_errors": 0,
+          "clean_pass_rate": 1.0
+        },
+        "category": {
+          "precision": 0.929,
+          "recall": 0.867,
+          "f1": 0.897,
+          "tp": 13,
+          "fp": 1,
+          "fn": 2
+        },
+        "correction": {
+          "accuracy_on_error_sentences": 1.0,
+          "unchanged_on_correct_sentences": 1.0
+        },
+        "by_level": {
+          "A1": {
+            "n": 7,
+            "detect_f1": 1.0,
+            "false_positives": 0,
+            "n_correct": 3,
+            "correction_acc": 1.0
+          },
+          "A2": {
+            "n": 7,
+            "detect_f1": 1.0,
+            "false_positives": 0,
+            "n_correct": 3,
+            "correction_acc": 1.0
+          },
+          "B1": {
+            "n": 8,
+            "detect_f1": 1.0,
+            "false_positives": 0,
+            "n_correct": 3,
+            "correction_acc": 1.0
+          },
+          "B2": {
+            "n": 4,
+            "detect_f1": 1.0,
+            "false_positives": 0,
+            "n_correct": 3,
+            "correction_acc": 1.0
+          }
+        }
+      },
+      "cases": [
+        {
+          "id": "a01",
+          "level": "A1",
+          "text": "Ich habe einen Hund.",
+          "gold_correct": "Ich habe einen Hund.",
+          "gold_cats": [],
+          "pred_corrected": "Ich habe einen Hund.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 7.08
+        },
+        {
+          "id": "a02",
+          "level": "A1",
+          "text": "Ich heiße Anna und komme aus Spanien.",
+          "gold_correct": "Ich heiße Anna und komme aus Spanien.",
+          "gold_cats": [],
+          "pred_corrected": "Ich heiße Anna und komme aus Spanien.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 4.33
+        },
+        {
+          "id": "a03",
+          "level": "A1",
+          "text": "Er trinken Wasser.",
+          "gold_correct": "Er trinkt Wasser.",
+          "gold_cats": [
+            "VERB_CONJUGATION"
+          ],
+          "pred_corrected": "Er trinkt Wasser.",
+          "pred_cats": [
+            "VERB_CONJUGATION"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 5.35
+        },
+        {
+          "id": "a04",
+          "level": "A1",
+          "text": "Das ist eine Tisch.",
+          "gold_correct": "Das ist ein Tisch.",
+          "gold_cats": [
+            "GENDER"
+          ],
+          "pred_corrected": "Das ist ein Tisch.",
+          "pred_cats": [
+            "GENDER"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 7.85
+        },
+        {
+          "id": "a05",
+          "level": "A1",
+          "text": "Ich sehe der Mann.",
+          "gold_correct": "Ich sehe den Mann.",
+          "gold_cats": [
+            "CASE"
+          ],
+          "pred_corrected": "Ich sehe den Mann.",
+          "pred_cats": [
+            "CASE"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 4.21
+        },
+        {
+          "id": "a06",
+          "level": "A1",
+          "text": "ich wohne in berlin.",
+          "gold_correct": "Ich wohne in Berlin.",
+          "gold_cats": [
+            "SPELLING"
+          ],
+          "pred_corrected": "Ich wohne in Berlin.",
+          "pred_cats": [
+            "SPELLING",
+            "SPELLING"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 7.23
+        },
+        {
+          "id": "a07",
+          "level": "A1",
+          "text": "Wir spielen am Samstag Fußball.",
+          "gold_correct": "Wir spielen am Samstag Fußball.",
+          "gold_cats": [],
+          "pred_corrected": "Wir spielen am Samstag Fußball.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 4.44
+        },
+        {
+          "id": "a08",
+          "level": "A2",
+          "text": "Ich habe gestern nach Hause gegangen.",
+          "gold_correct": "Ich bin gestern nach Hause gegangen.",
+          "gold_cats": [
+            "AUX_CHOICE"
+          ],
+          "pred_corrected": "Ich bin gestern nach Hause gegangen.",
+          "pred_cats": [
+            "AUX_CHOICE"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 6.61
+        },
+        {
+          "id": "a09",
+          "level": "A2",
+          "text": "Sie hat ein Buch gelest.",
+          "gold_correct": "Sie hat ein Buch gelesen.",
+          "gold_cats": [
+            "VERB_CONJUGATION"
+          ],
+          "pred_corrected": "Sie hat ein Buch gelesen.",
+          "pred_cats": [
+            "VERB_CONJUGATION"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 4.63
+        },
+        {
+          "id": "a10",
+          "level": "A2",
+          "text": "Ich rufe an meine Mutter jeden Tag.",
+          "gold_correct": "Ich rufe meine Mutter jeden Tag an.",
+          "gold_cats": [
+            "SEPARABLE_VERB"
+          ],
+          "pred_corrected": "Ich rufe meine Mutter jeden Tag an.",
+          "pred_cats": [
+            "SEPARABLE_VERB"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 13.76
+        },
+        {
+          "id": "a11",
+          "level": "A2",
+          "text": "Wir fahren mit dem Auto zur Arbeit.",
+          "gold_correct": "Wir fahren mit dem Auto zur Arbeit.",
+          "gold_cats": [],
+          "pred_corrected": "Wir fahren mit dem Auto zur Arbeit.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 4.01
+        },
+        {
+          "id": "a12",
+          "level": "A2",
+          "text": "Ich gebe der Frau das Buch.",
+          "gold_correct": "Ich gebe der Frau das Buch.",
+          "gold_cats": [],
+          "pred_corrected": "Ich gebe der Frau das Buch.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 3.5
+        },
+        {
+          "id": "a13",
+          "level": "A2",
+          "text": "Ich helfe meinen Bruder.",
+          "gold_correct": "Ich helfe meinem Bruder.",
+          "gold_cats": [
+            "CASE"
+          ],
+          "pred_corrected": "Ich helfe meinem Bruder.",
+          "pred_cats": [
+            "CASE"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 4.56
+        },
+        {
+          "id": "a14",
+          "level": "A2",
+          "text": "Er ist größer als ich.",
+          "gold_correct": "Er ist größer als ich.",
+          "gold_cats": [],
+          "pred_corrected": "Er ist größer als ich.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 3.6
+        },
+        {
+          "id": "b01",
+          "level": "B1",
+          "text": "Ich weiß, dass er kommt morgen.",
+          "gold_correct": "Ich weiß, dass er morgen kommt.",
+          "gold_cats": [
+            "VERB_POSITION"
+          ],
+          "pred_corrected": "Ich weiß, dass er morgen kommt.",
+          "pred_cats": [
+            "VERB_POSITION"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 5.79
+        },
+        {
+          "id": "b02",
+          "level": "B1",
+          "text": "Weil ich bin müde, gehe ich ins Bett.",
+          "gold_correct": "Weil ich müde bin, gehe ich ins Bett.",
+          "gold_cats": [
+            "VERB_POSITION"
+          ],
+          "pred_corrected": "Weil ich müde bin, gehe ich ins Bett.",
+          "pred_cats": [
+            "VERB_POSITION"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 7.04
+        },
+        {
+          "id": "b03",
+          "level": "B1",
+          "text": "Ich habe ein schönes Auto gekauft.",
+          "gold_correct": "Ich habe ein schönes Auto gekauft.",
+          "gold_cats": [],
+          "pred_corrected": "Ich habe ein schönes Auto gekauft.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 4.07
+        },
+        {
+          "id": "b04",
+          "level": "B1",
+          "text": "Ich interessiere mich für Politik.",
+          "gold_correct": "Ich interessiere mich für Politik.",
+          "gold_cats": [],
+          "pred_corrected": "Ich interessiere mich für Politik.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 3.74
+        },
+        {
+          "id": "b05",
+          "level": "B1",
+          "text": "Ich warte auf dem Bus.",
+          "gold_correct": "Ich warte auf den Bus.",
+          "gold_cats": [
+            "PREPOSITION"
+          ],
+          "pred_corrected": "Ich warte auf den Bus.",
+          "pred_cats": [
+            "CASE"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 13.89
+        },
+        {
+          "id": "b06",
+          "level": "B1",
+          "text": "Mit ein guter Freund gehe ich ins Kino.",
+          "gold_correct": "Mit einem guten Freund gehe ich ins Kino.",
+          "gold_cats": [
+            "CASE",
+            "ADJ_ENDING"
+          ],
+          "pred_corrected": "Mit einem guten Freund gehe ich ins Kino.",
+          "pred_cats": [
+            "CASE"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 13.98
+        },
+        {
+          "id": "b07",
+          "level": "B1",
+          "text": "Das ist das Auto von mein Vater.",
+          "gold_correct": "Das ist das Auto von meinem Vater.",
+          "gold_cats": [
+            "CASE"
+          ],
+          "pred_corrected": "Das ist das Auto von meinem Vater.",
+          "pred_cats": [
+            "CASE"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 7.18
+        },
+        {
+          "id": "b08",
+          "level": "B1",
+          "text": "Ich habe keine Zeit.",
+          "gold_correct": "Ich habe keine Zeit.",
+          "gold_cats": [],
+          "pred_corrected": "Ich habe keine Zeit.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 3.53
+        },
+        {
+          "id": "b09",
+          "level": "B2",
+          "text": "Wenn ich Zeit hätte, würde ich dich besuchen.",
+          "gold_correct": "Wenn ich Zeit hätte, würde ich dich besuchen.",
+          "gold_cats": [],
+          "pred_corrected": "Wenn ich Zeit hätte, würde ich dich besuchen.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 4.9
+        },
+        {
+          "id": "b10",
+          "level": "B2",
+          "text": "Der Mann, den ich gestern gesehen habe, ist mein Lehrer.",
+          "gold_correct": "Der Mann, den ich gestern gesehen habe, ist mein Lehrer.",
+          "gold_cats": [],
+          "pred_corrected": "Der Mann, den ich gestern gesehen habe, ist mein Lehrer.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 4.62
+        },
+        {
+          "id": "b11",
+          "level": "B2",
+          "text": "Obwohl es regnet, wir gehen spazieren.",
+          "gold_correct": "Obwohl es regnet, gehen wir spazieren.",
+          "gold_cats": [
+            "VERB_POSITION"
+          ],
+          "pred_corrected": "Obwohl es regnet, gehen wir spazieren.",
+          "pred_cats": [
+            "VERB_POSITION"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 5.85
+        },
+        {
+          "id": "b12",
+          "level": "B2",
+          "text": "Ich freue mich auf das Wochenende.",
+          "gold_correct": "Ich freue mich auf das Wochenende.",
+          "gold_cats": [],
+          "pred_corrected": "Ich freue mich auf das Wochenende.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 4.07
+        }
+      ],
+      "call_errors": 0,
+      "avg_latency_s": 6.15
+    },
+    {
+      "model": "gemini-2.5-flash",
+      "aggregate": {
+        "n_cases": 26,
+        "n_correct_sentences": 12,
+        "n_error_sentences": 14,
+        "detection": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "errors_caught": 14,
+          "errors_missed": 0,
+          "false_positive_rate_on_correct": 0.0,
+          "invented_errors": 0,
+          "clean_pass_rate": 1.0
+        },
+        "category": {
+          "precision": 0.929,
+          "recall": 0.867,
+          "f1": 0.897,
+          "tp": 13,
+          "fp": 1,
+          "fn": 2
+        },
+        "correction": {
+          "accuracy_on_error_sentences": 1.0,
+          "unchanged_on_correct_sentences": 1.0
+        },
+        "by_level": {
+          "A1": {
+            "n": 7,
+            "detect_f1": 1.0,
+            "false_positives": 0,
+            "n_correct": 3,
+            "correction_acc": 1.0
+          },
+          "A2": {
+            "n": 7,
+            "detect_f1": 1.0,
+            "false_positives": 0,
+            "n_correct": 3,
+            "correction_acc": 1.0
+          },
+          "B1": {
+            "n": 8,
+            "detect_f1": 1.0,
+            "false_positives": 0,
+            "n_correct": 3,
+            "correction_acc": 1.0
+          },
+          "B2": {
+            "n": 4,
+            "detect_f1": 1.0,
+            "false_positives": 0,
+            "n_correct": 3,
+            "correction_acc": 1.0
+          }
+        }
+      },
+      "cases": [
+        {
+          "id": "a01",
+          "level": "A1",
+          "text": "Ich habe einen Hund.",
+          "gold_correct": "Ich habe einen Hund.",
+          "gold_cats": [],
+          "pred_corrected": "Ich habe einen Hund.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 3.18
+        },
+        {
+          "id": "a02",
+          "level": "A1",
+          "text": "Ich heiße Anna und komme aus Spanien.",
+          "gold_correct": "Ich heiße Anna und komme aus Spanien.",
+          "gold_cats": [],
+          "pred_corrected": "Ich heiße Anna und komme aus Spanien.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 2.12
+        },
+        {
+          "id": "a03",
+          "level": "A1",
+          "text": "Er trinken Wasser.",
+          "gold_correct": "Er trinkt Wasser.",
+          "gold_cats": [
+            "VERB_CONJUGATION"
+          ],
+          "pred_corrected": "Er trinkt Wasser.",
+          "pred_cats": [
+            "VERB_CONJUGATION"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 2.33
+        },
+        {
+          "id": "a04",
+          "level": "A1",
+          "text": "Das ist eine Tisch.",
+          "gold_correct": "Das ist ein Tisch.",
+          "gold_cats": [
+            "GENDER"
+          ],
+          "pred_corrected": "Das ist ein Tisch.",
+          "pred_cats": [
+            "GENDER"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 2.72
+        },
+        {
+          "id": "a05",
+          "level": "A1",
+          "text": "Ich sehe der Mann.",
+          "gold_correct": "Ich sehe den Mann.",
+          "gold_cats": [
+            "CASE"
+          ],
+          "pred_corrected": "Ich sehe den Mann.",
+          "pred_cats": [
+            "CASE"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 2.71
+        },
+        {
+          "id": "a06",
+          "level": "A1",
+          "text": "ich wohne in berlin.",
+          "gold_correct": "Ich wohne in Berlin.",
+          "gold_cats": [
+            "SPELLING"
+          ],
+          "pred_corrected": "Ich wohne in Berlin.",
+          "pred_cats": [
+            "SPELLING",
+            "SPELLING"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 7.08
+        },
+        {
+          "id": "a07",
+          "level": "A1",
+          "text": "Wir spielen am Samstag Fußball.",
+          "gold_correct": "Wir spielen am Samstag Fußball.",
+          "gold_cats": [],
+          "pred_corrected": "Wir spielen am Samstag Fußball.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 3.52
+        },
+        {
+          "id": "a08",
+          "level": "A2",
+          "text": "Ich habe gestern nach Hause gegangen.",
+          "gold_correct": "Ich bin gestern nach Hause gegangen.",
+          "gold_cats": [
+            "AUX_CHOICE"
+          ],
+          "pred_corrected": "Ich bin gestern nach Hause gegangen.",
+          "pred_cats": [
+            "AUX_CHOICE"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 2.51
+        },
+        {
+          "id": "a09",
+          "level": "A2",
+          "text": "Sie hat ein Buch gelest.",
+          "gold_correct": "Sie hat ein Buch gelesen.",
+          "gold_cats": [
+            "VERB_CONJUGATION"
+          ],
+          "pred_corrected": "Sie hat ein Buch gelesen.",
+          "pred_cats": [
+            "VERB_CONJUGATION"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 2.8
+        },
+        {
+          "id": "a10",
+          "level": "A2",
+          "text": "Ich rufe an meine Mutter jeden Tag.",
+          "gold_correct": "Ich rufe meine Mutter jeden Tag an.",
+          "gold_cats": [
+            "SEPARABLE_VERB"
+          ],
+          "pred_corrected": "Ich rufe meine Mutter jeden Tag an.",
+          "pred_cats": [
+            "SEPARABLE_VERB"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 3.86
+        },
+        {
+          "id": "a11",
+          "level": "A2",
+          "text": "Wir fahren mit dem Auto zur Arbeit.",
+          "gold_correct": "Wir fahren mit dem Auto zur Arbeit.",
+          "gold_cats": [],
+          "pred_corrected": "Wir fahren mit dem Auto zur Arbeit.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 3.5
+        },
+        {
+          "id": "a12",
+          "level": "A2",
+          "text": "Ich gebe der Frau das Buch.",
+          "gold_correct": "Ich gebe der Frau das Buch.",
+          "gold_cats": [],
+          "pred_corrected": "Ich gebe der Frau das Buch.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 2.36
+        },
+        {
+          "id": "a13",
+          "level": "A2",
+          "text": "Ich helfe meinen Bruder.",
+          "gold_correct": "Ich helfe meinem Bruder.",
+          "gold_cats": [
+            "CASE"
+          ],
+          "pred_corrected": "Ich helfe meinem Bruder.",
+          "pred_cats": [
+            "CASE"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 3.23
+        },
+        {
+          "id": "a14",
+          "level": "A2",
+          "text": "Er ist größer als ich.",
+          "gold_correct": "Er ist größer als ich.",
+          "gold_cats": [],
+          "pred_corrected": "Er ist größer als ich.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 3.24
+        },
+        {
+          "id": "b01",
+          "level": "B1",
+          "text": "Ich weiß, dass er kommt morgen.",
+          "gold_correct": "Ich weiß, dass er morgen kommt.",
+          "gold_cats": [
+            "VERB_POSITION"
+          ],
+          "pred_corrected": "Ich weiß, dass er morgen kommt.",
+          "pred_cats": [
+            "VERB_POSITION"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 2.71
+        },
+        {
+          "id": "b02",
+          "level": "B1",
+          "text": "Weil ich bin müde, gehe ich ins Bett.",
+          "gold_correct": "Weil ich müde bin, gehe ich ins Bett.",
+          "gold_cats": [
+            "VERB_POSITION"
+          ],
+          "pred_corrected": "Weil ich müde bin, gehe ich ins Bett.",
+          "pred_cats": [
+            "VERB_POSITION"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 2.34
+        },
+        {
+          "id": "b03",
+          "level": "B1",
+          "text": "Ich habe ein schönes Auto gekauft.",
+          "gold_correct": "Ich habe ein schönes Auto gekauft.",
+          "gold_cats": [],
+          "pred_corrected": "Ich habe ein schönes Auto gekauft.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 2.84
+        },
+        {
+          "id": "b04",
+          "level": "B1",
+          "text": "Ich interessiere mich für Politik.",
+          "gold_correct": "Ich interessiere mich für Politik.",
+          "gold_cats": [],
+          "pred_corrected": "Ich interessiere mich für Politik.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 3.1
+        },
+        {
+          "id": "b05",
+          "level": "B1",
+          "text": "Ich warte auf dem Bus.",
+          "gold_correct": "Ich warte auf den Bus.",
+          "gold_cats": [
+            "PREPOSITION"
+          ],
+          "pred_corrected": "Ich warte auf den Bus.",
+          "pred_cats": [
+            "CASE"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 2.63
+        },
+        {
+          "id": "b06",
+          "level": "B1",
+          "text": "Mit ein guter Freund gehe ich ins Kino.",
+          "gold_correct": "Mit einem guten Freund gehe ich ins Kino.",
+          "gold_cats": [
+            "CASE",
+            "ADJ_ENDING"
+          ],
+          "pred_corrected": "Mit einem guten Freund gehe ich ins Kino.",
+          "pred_cats": [
+            "CASE"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 3.99
+        },
+        {
+          "id": "b07",
+          "level": "B1",
+          "text": "Das ist das Auto von mein Vater.",
+          "gold_correct": "Das ist das Auto von meinem Vater.",
+          "gold_cats": [
+            "CASE"
+          ],
+          "pred_corrected": "Das ist das Auto von meinem Vater.",
+          "pred_cats": [
+            "CASE"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 3.24
+        },
+        {
+          "id": "b08",
+          "level": "B1",
+          "text": "Ich habe keine Zeit.",
+          "gold_correct": "Ich habe keine Zeit.",
+          "gold_cats": [],
+          "pred_corrected": "Ich habe keine Zeit.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 3.97
+        },
+        {
+          "id": "b09",
+          "level": "B2",
+          "text": "Wenn ich Zeit hätte, würde ich dich besuchen.",
+          "gold_correct": "Wenn ich Zeit hätte, würde ich dich besuchen.",
+          "gold_cats": [],
+          "pred_corrected": "Wenn ich Zeit hätte, würde ich dich besuchen.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 3.92
+        },
+        {
+          "id": "b10",
+          "level": "B2",
+          "text": "Der Mann, den ich gestern gesehen habe, ist mein Lehrer.",
+          "gold_correct": "Der Mann, den ich gestern gesehen habe, ist mein Lehrer.",
+          "gold_cats": [],
+          "pred_corrected": "Der Mann, den ich gestern gesehen habe, ist mein Lehrer.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 2.48
+        },
+        {
+          "id": "b11",
+          "level": "B2",
+          "text": "Obwohl es regnet, wir gehen spazieren.",
+          "gold_correct": "Obwohl es regnet, gehen wir spazieren.",
+          "gold_cats": [
+            "VERB_POSITION"
+          ],
+          "pred_corrected": "Obwohl es regnet, gehen wir spazieren.",
+          "pred_cats": [
+            "VERB_POSITION"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 3.85
+        },
+        {
+          "id": "b12",
+          "level": "B2",
+          "text": "Ich freue mich auf das Wochenende.",
+          "gold_correct": "Ich freue mich auf das Wochenende.",
+          "gold_cats": [],
+          "pred_corrected": "Ich freue mich auf das Wochenende.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 3.57
+        }
+      ],
+      "call_errors": 0,
+      "avg_latency_s": 3.22
+    }
+  ]
+}

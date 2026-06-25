@@ -1,0 +1,40 @@
+# --- Secrets / credentials (never commit) ---
+.env
+.env.*
+*.env
+**/.env
+credentials.json
+*-credentials.json
+service-account*.json
+*.pem
+*.key
+adc.json
+application_default_credentials.json
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- IDE / tooling ---
+.qodo/
+.idea/
+.vscode/
+*.swp
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+desktop.ini

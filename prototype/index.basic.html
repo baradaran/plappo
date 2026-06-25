@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plappo — prototype</title>
+<style>
+  :root{
+    --bg:#F4F1EA; --card:#FCFAF5; --ink:#2b2722; --muted:#8a8170;
+    --line:#e4ddcf; --accent:#b5562f; --ok:#4f7a4d;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#ece7db;color:var(--ink);
+    font-family:"Segoe UI",system-ui,sans-serif;display:flex;justify-content:center;
+    min-height:100vh;padding:18px}
+  .phone{width:390px;max-width:100%;background:var(--bg);border-radius:26px;
+    box-shadow:0 16px 50px rgba(60,50,35,.22);overflow:hidden;display:flex;
+    flex-direction:column;min-height:760px;position:relative}
+  header{display:flex;align-items:center;gap:10px;padding:14px 18px;
+    border-bottom:1px solid var(--line);font-size:14px}
+  header .back{cursor:pointer;color:var(--muted);font-size:18px;width:20px}
+  header .title{font-weight:600;flex:1}
+  header .stat{color:var(--muted);font-size:13px}
+  main{flex:1;overflow:auto;padding:18px}
+  .view{display:none;animation:fade .25s ease}
+  .view.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+  h1{font-family:Georgia,serif;font-size:22px;margin:.2em 0 .6em}
+  .story{font-family:Georgia,serif;font-size:18px;line-height:1.7}
+  .story .w{cursor:pointer;border-bottom:1px dotted transparent}
+  .story .w:hover{border-bottom-color:var(--muted)}
+  .story .hard{background:#f3e7cf;border-radius:3px;padding:0 2px}
+  .gloss{margin-top:14px;min-height:22px;color:var(--accent);font-size:14px;
+    font-family:"Segoe UI",sans-serif}
+  .q{font-family:Georgia,serif;font-size:19px;margin-bottom:2px}
+  .q .en{display:block;color:var(--muted);font-size:14px;font-family:sans-serif;margin-top:4px}
+  textarea{width:100%;min-height:96px;border:1px solid var(--line);border-radius:12px;
+    background:var(--card);padding:12px;font-size:17px;font-family:Georgia,serif;
+    color:var(--ink);resize:vertical;margin-top:14px}
+  textarea:focus{outline:2px solid #d9c7a5}
+  .btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+    background:var(--accent);color:#fff;font-size:16px;font-weight:600;cursor:pointer;
+    margin-top:14px}
+  .btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--line)}
+  .btn:disabled{opacity:.5;cursor:wait}
+  .row{display:flex;gap:10px}
+  .row .btn{margin-top:14px}
+  .hint{color:var(--muted);font-size:13px;margin-top:8px;min-height:18px}
+
+  /* feedback card */
+  .fb{background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:16px;margin-top:16px}
+  .fb h3{margin:0 0 10px;font-size:17px}
+  .fb .wrote{font-family:Georgia,serif;font-size:17px;line-height:1.6}
+  .fb del{color:#b14;text-decoration:line-through;text-decoration-thickness:2px}
+  .chip{display:flex;gap:10px;align-items:flex-start;margin:12px 0;padding:10px 12px;
+    border-radius:10px;background:#fff;border:1px solid var(--line)}
+  .chip .dot{width:10px;height:10px;border-radius:50%;margin-top:5px;flex:none}
+  .chip .ctag{font-size:11px;letter-spacing:.04em;font-weight:700;text-transform:uppercase}
+  .chip .cfix b{color:var(--ok)}
+  .chip .cex{color:var(--muted);font-size:13px;margin-top:2px}
+  .correct{margin-top:12px;padding:10px 12px;border-radius:10px;background:#eef4ec;
+    border:1px solid #d4e3d0;font-family:Georgia,serif;font-size:17px}
+  .correct .lab{display:block;font-family:sans-serif;font-size:12px;color:var(--ok);
+    font-weight:700;margin-bottom:3px}
+  .perfect{text-align:center;padding:8px 0}
+  .perfect .big{font-size:40px}
+
+  /* drill */
+  .tokrow{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+  .tok{padding:9px 13px;border:1px solid var(--line);border-radius:10px;background:#fff;
+    cursor:pointer;font-size:16px;font-family:Georgia,serif}
+  .tok.used{opacity:.25;pointer-events:none}
+  .build{min-height:48px;border:1px dashed var(--line);border-radius:10px;padding:10px;
+    background:var(--card);font-family:Georgia,serif;font-size:17px;display:flex;
+    flex-wrap:wrap;gap:6px;align-items:center}
+  .build .slot{color:var(--muted)}
+  .build .placed{cursor:pointer}
+
+  /* home / weak spots */
+  .lvlpick{display:flex;gap:8px;margin:6px 0 18px}
+  .lvlpick span{padding:6px 12px;border:1px solid var(--line);border-radius:20px;
+    font-size:14px;cursor:pointer;background:#fff}
+  .lvlpick span.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .weak{margin-top:8px}
+  .weak .bar{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:13px}
+  .weak .bar .nm{width:120px;color:var(--muted)}
+  .weak .bar .track{flex:1;height:10px;background:#e9e1d2;border-radius:6px;overflow:hidden}
+  .weak .bar .fill{height:100%}
+  .small{color:var(--muted);font-size:13px;margin-top:6px}
+  .pill{display:inline-block;background:#f3e7cf;border-radius:20px;padding:2px 10px;
+    font-size:12px;color:var(--accent)}
+  .avatar{width:30px;height:30px;border-radius:50%;background:#e7ddc9;display:flex;
+    align-items:center;justify-content:center;cursor:pointer;font-size:16px}
+
+  /* profile summary card on home */
+  .summary{display:flex;gap:14px;align-items:center;background:var(--card);
+    border:1px solid var(--line);border-radius:16px;padding:14px;cursor:pointer;margin-bottom:18px}
+  .summary .badge{width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;
+    font-size:21px;font-weight:700;flex:none}
+  .summary .pbar{height:8px;background:#e9e1d2;border-radius:6px;overflow:hidden;margin-top:7px}
+  .summary .pbar .pf{height:100%;background:var(--accent)}
+  .summary .chev{color:var(--muted);font-size:22px}
+
+  /* profile screen */
+  .ringwrap{position:relative;width:150px;height:150px;margin:6px auto 4px}
+  .ringwrap svg{transform:rotate(-90deg)}
+  .ringwrap .center{position:absolute;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center}
+  .ringwrap .center .lv{font-family:Georgia,serif;font-size:34px;font-weight:700;line-height:1}
+  .ringwrap .center .to{font-size:12px;color:var(--muted);margin-top:2px}
+  .ringpct{text-align:center;font-size:14px;color:var(--muted);margin-bottom:14px}
+  .ringpct b{color:var(--ink)}
+  .skill{display:flex;align-items:center;gap:10px;margin:9px 0;font-size:13px}
+  .skill .nm{width:128px}
+  .skill .nm .ck{color:var(--ok);font-weight:700}
+  .skill .track{flex:1;height:9px;background:#e9e1d2;border-radius:6px;overflow:hidden}
+  .skill .fill{height:100%}
+  .skill .pc{width:42px;text-align:right;color:var(--muted)}
+  .seclabel{font-weight:600;margin:18px 0 6px;font-size:14px}
+  .levelup{background:#eef4ec;border:1px solid #d4e3d0;border-radius:12px;padding:12px;
+    margin:12px 0;color:var(--ok)}
+  .nextstep{background:#f7f1e4;border:1px solid var(--line);border-radius:12px;padding:12px;
+    margin-top:14px;font-size:13px}
+</style>
+</head>
+<body>
+<div class="phone">
+  <header>
+    <span class="back" id="back" onclick="goBack()">‹</span>
+    <span class="title" id="htitle">Plappo</span>
+    <span class="stat" id="hstat">🔥 5 &nbsp; ⭐ <span id="xp">240</span></span>
+    <span class="avatar" onclick="show('profile')" title="Profil">🧑</span>
+  </header>
+  <main>
+
+    <!-- HOME -->
+    <section class="view active" id="home">
+      <h1>Willkommen zurück 👋</h1>
+
+      <div class="summary" id="homesummary" onclick="show('profile')"></div>
+
+      <div class="small">Practice level</div>
+      <div class="lvlpick" id="lvlpick">
+        <span data-l="A1">A1</span><span data-l="A2" class="on">A2</span>
+        <span data-l="B1">B1</span><span data-l="B2">B2</span>
+        <span data-l="C1">C1</span><span data-l="C2">C2</span>
+      </div>
+      <div class="pill">Today's story · A2</div>
+      <h1 style="margin-top:14px">Der verlorene Schlüssel</h1>
+      <div class="small">A short story · 5 paragraphs · then questions</div>
+      <button class="btn" onclick="show('story')">Geschichte lesen →</button>
+
+      <div class="weak">
+        <div class="small" style="margin-top:22px;font-weight:600;color:var(--ink)">
+          Your weak spots</div>
+        <div id="weakbars"><div class="small">Answer some questions and your top
+          error types show up here.</div></div>
+      </div>
+    </section>
+
+    <!-- PROFILE -->
+    <section class="view" id="profile">
+      <div id="profilebody"></div>
+    </section>
+
+    <!-- STORY -->
+    <section class="view" id="story">
+      <h1>Der verlorene Schlüssel</h1>
+      <div class="story" id="storytext"></div>
+      <div class="gloss" id="gloss">tap a word for its meaning</div>
+      <button class="btn" onclick="startQuestions()">Fragen beantworten →</button>
+    </section>
+
+    <!-- QUESTION -->
+    <section class="view" id="question">
+      <div class="small" id="qcount"></div>
+      <div class="q" id="qtext"></div>
+      <textarea id="answer" placeholder="Schreibe deine Antwort auf Deutsch…"></textarea>
+      <div class="hint" id="qhint"></div>
+      <button class="btn" id="checkbtn" onclick="checkAnswer()">Prüfen</button>
+      <div id="fbslot"></div>
+    </section>
+
+    <!-- DRILL -->
+    <section class="view" id="drill">
+      <div class="pill" id="drilltag">Mini-Übung</div>
+      <h1 id="drillwhy" style="font-size:18px"></h1>
+      <div class="small" id="drillprompt"></div>
+      <div class="build" id="build"><span class="slot">tap words below to build the sentence…</span></div>
+      <div class="tokrow" id="toks"></div>
+      <div class="hint" id="drillresult"></div>
+      <div class="row">
+        <button class="btn ghost" onclick="resetDrill()">Reset</button>
+        <button class="btn" onclick="checkDrill()">Prüfen</button>
+      </div>
+      <button class="btn ghost" onclick="nextQuestion()">Weiter zur nächsten Frage →</button>
+    </section>
+
+  </main>
+</div>
+
+<script>
+const LEVELS = ['A1','A2','B1','B2'];
+const state = {level:'A2', view:'home', qi:0, stack:[], weak:{}};
+
+// ---- category metadata (drives the feedback card colours) ----
+const CAT = {
+  CASE:{label:'Case', c:'#c47a3d'}, GENDER:{label:'Gender', c:'#7a86b8'},
+  ADJ_ENDING:{label:'Adj. ending', c:'#b8748f'}, VERB_CONJUGATION:{label:'Verb form', c:'#5b9aa0'},
+  VERB_POSITION:{label:'Verb position', c:'#c98b2e'}, AUX_CHOICE:{label:'sein/haben', c:'#9a6b4f'},
+  SEPARABLE_VERB:{label:'Separable verb', c:'#6f9e6c'}, PREPOSITION:{label:'Preposition', c:'#4f7a4d'},
+  WORD_ORDER:{label:'Word order', c:'#a0793f'}, PLURAL:{label:'Plural', c:'#8a86a8'},
+  NEGATION:{label:'Negation', c:'#b06a6a'}, SPELLING:{label:'Spelling', c:'#9090a0'},
+  RELATIVE_CLAUSE:{label:'Relativsätze', c:'#c08a5b'}, CONNECTOR:{label:'Konnektoren', c:'#b58a3e'},
+  SUBJUNCTIVE_II:{label:'Konjunktiv II', c:'#7e9b86'}, SUBJUNCTIVE_I:{label:'Konjunktiv I', c:'#5f8a7a'},
+  PASSIVE:{label:'Passiv', c:'#9c7bb0'}, NOMINALIZATION:{label:'Nominalstil', c:'#7d8aa6'},
+  PARTICIPIAL:{label:'Partizipialattribute', c:'#a97da0'}, MODAL_PARTICLE:{label:'Modalpartikeln', c:'#8c97a8'}
+};
+
+// ---- learner profile + level progression -------------------------------------
+// Each level targets a set of grammar skills (the same categories the engine
+// tags) plus a vocab count. Progress to the next level = 70% grammar mastery +
+// 30% vocab. A skill is "mastered" at strength >= 80. Every answer the learner
+// submits nudges these, so the profile is fed by the real engine — not a fake bar.
+// Skill lists follow the standard Goethe/CEFR grammar progression: each level's
+// list is the grammar that *defines competence at that level* (new points it
+// introduces + the ones it consolidates). Vocab targets are the commonly-cited
+// cumulative active-vocabulary milestones.
+const LEVELCFG = {
+  // A1: present tense, gender/articles, Nom+Akk, basic negation, capitalisation
+  A1:{next:'A2', vocab:600,
+      skills:['GENDER','CASE','VERB_CONJUGATION','NEGATION','SPELLING']},
+  // A2: Perfekt (haben/sein), Dativ, separable verbs, Wechselpräpositionen, plural
+  A2:{next:'B1', vocab:1200,
+      skills:['CASE','AUX_CHOICE','SEPARABLE_VERB','PREPOSITION','PLURAL','VERB_CONJUGATION']},
+  // B1: subordinate clauses (verb-final), adjective endings, relative clauses,
+  //     Konjunktiv II (würde), connectors
+  B1:{next:'B2', vocab:2400,
+      skills:['VERB_POSITION','ADJ_ENDING','RELATIVE_CLAUSE','SUBJUNCTIVE_II','PREPOSITION','CONNECTOR']},
+  // B2: Passiv, full Konjunktiv II (irreal), complex relative clauses, two-part
+  //     connectors, TeKaMoLo word order
+  B2:{next:'C1', vocab:4000,
+      skills:['PASSIVE','SUBJUNCTIVE_II','RELATIVE_CLAUSE','CONNECTOR','WORD_ORDER','ADJ_ENDING']},
+  // C1: Konjunktiv I (indirect speech), passive variants, Nominalstil, extended
+  //     participial attributes, advanced connectors
+  C1:{next:'C2', vocab:6000,
+      skills:['SUBJUNCTIVE_I','PASSIVE','NOMINALIZATION','PARTICIPIAL','CONNECTOR','VERB_POSITION']},
+  // C2: near-native nuance — modal particles, dense Nominalstil, elaborate
+  //     participial/subordinate structures, register
+  C2:{next:null, vocab:8000,
+      skills:['MODAL_PARTICLE','NOMINALIZATION','PARTICIPIAL','SUBJUNCTIVE_I','CONNECTOR','PASSIVE']}
+};
+const MASTER = 80;
+
+function seedProfile(){
+  return {level:'A2', xp:240, streak:5, vocab:600, seenWords:[],
+    skills:{GENDER:92, CASE:84, VERB_CONJUGATION:86, SPELLING:96, NEGATION:84,
+            PLURAL:82, AUX_CHOICE:48, SEPARABLE_VERB:40, PREPOSITION:55}};
+}
+let profile;
+function loadProfile(){
+  try{ profile = JSON.parse(localStorage.getItem('plappo_profile')) || seedProfile(); }
+  catch(e){ profile = seedProfile(); }
+  if(!profile.skills) profile = seedProfile();
+}
+function saveProfile(){ localStorage.setItem('plappo_profile', JSON.stringify(profile)); }
+
+function levelProgress(){
+  const cfg = LEVELCFG[profile.level];
+  const mastered = cfg.skills.filter(s=>(profile.skills[s]||0)>=MASTER).length;
+  const gPct = mastered/cfg.skills.length;
+  const vPct = Math.min((profile.vocab||0)/cfg.vocab, 1);
+  return {pct: Math.round(100*(0.7*gPct+0.3*vPct)), mastered, total:cfg.skills.length,
+          gPct, vPct, cfg};
+}
+
+// Update mastery from one answer. Errors weaken their category; a clean sentence
+// strengthens the level's skills and credits new vocabulary. (A production
+// version would attribute strength to the specific constructions actually used.)
+function applyResult(fb, sentence){
+  const cfg = LEVELCFG[profile.level];
+  const errCats = new Set((fb.errors||[]).map(e=>e.category));
+  cfg.skills.forEach(s=>{
+    if(errCats.has(s)) profile.skills[s] = Math.max(0,(profile.skills[s]||0)-12);
+    else if(!fb.has_errors) profile.skills[s] = Math.min(100,(profile.skills[s]||0)+6);
+  });
+  if(!fb.has_errors){
+    const words = new Set(sentence.toLowerCase().split(/[^a-zäöüß]+/).filter(w=>w.length>1));
+    let added=0; words.forEach(w=>{ if(!profile.seenWords.includes(w)){profile.seenWords.push(w);added++;} });
+    profile.vocab = Math.min(profile.vocab + added, cfg.vocab);
+  }
+  profile.xp += fb.has_errors ? 5 : 12;
+  document.getElementById('xp').textContent = profile.xp;
+  const p = levelProgress();
+  if(p.pct>=100 && cfg.next){ profile.level=cfg.next; profile.justLeveled=cfg.next; }
+  saveProfile();
+}
+
+function ringSVG(pct, color){
+  const r=60, C=2*Math.PI*r, off=C*(1-pct/100);
+  return `<svg width="150" height="150" viewBox="0 0 150 150">
+    <circle cx="75" cy="75" r="${r}" fill="none" stroke="#e9e1d2" stroke-width="12"/>
+    <circle cx="75" cy="75" r="${r}" fill="none" stroke="${color}" stroke-width="12"
+      stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${off}"/>
+  </svg>`;
+}
+
+// ---- story (A2; words above level get .hard) ----
+const STORY = [
+  "Anna kommt nach Hause. Sie ist müde.",
+  "Sie sucht ihren <hard>Schlüssel</hard>, aber er ist weg.",
+  "„Wo ist mein Schlüssel?\", denkt sie <hard>besorgt</hard>.",
+  "Sie fragt ihren Bruder: „Hast du meinen Schlüssel gesehen?\"",
+  "Der Bruder lacht: „Er steckt in der Tür!\""
+];
+const GLOSS = {
+  'Schlüssel':'der Schlüssel — key', 'besorgt':'besorgt — worried',
+  'müde':'müde — tired', 'sucht':'suchen — to look for', 'steckt':'stecken — to be stuck/in',
+  'Tür':'die Tür — door', 'lacht':'lachen — to laugh', 'Bruder':'der Bruder — brother'
+};
+
+const QUESTIONS = [
+  {q:'Warum ist Anna besorgt?', en:'Why is Anna worried?'},
+  {q:'Wen fragt Anna?', en:'Whom does Anna ask?'},
+  {q:'Wo ist der Schlüssel am Ende?', en:'Where is the key in the end?'}
+];
+
+// ---- a few category-targeted drills (prototype) ----
+const DRILLS = {
+  VERB_POSITION:{why:'weil + verb at the end',
+    prompt:'Arrange: I stay home because I am tired.',
+    answer:['Ich','bleibe','zu','Hause,','weil','ich','müde','bin']},
+  CASE:{why:'Akkusativ after sehen',
+    prompt:'Arrange: I see the man.',
+    answer:['Ich','sehe','den','Mann']},
+  AUX_CHOICE:{why:'gehen → sein in the perfect',
+    prompt:'Arrange: I went home.',
+    answer:['Ich','bin','nach','Hause','gegangen']},
+  SEPARABLE_VERB:{why:'separable prefix goes to the end',
+    prompt:'Arrange: I call my mother every day.',
+    answer:['Ich','rufe','meine','Mutter','jeden','Tag','an']},
+  _default:{why:'word order practice',
+    prompt:'Arrange: We play football on Saturday.',
+    answer:['Wir','spielen','am','Samstag','Fußball']}
+};
+
+// ---------- navigation ----------
+function renderFor(id){ if(id==='home') renderHome(); if(id==='profile') renderProfile(); }
+function show(id){
+  state.stack.push(state.view); state.view=id;
+  renderFor(id);
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));
+  document.getElementById('back').style.visibility = id==='home'?'hidden':'visible';
+  const titles={home:'Plappo',story:'Lesen · '+profile.level,question:'Frage',drill:'Übung',profile:'Profil'};
+  document.getElementById('htitle').textContent=titles[id]||'Plappo';
+}
+function goBack(){ const p=state.stack.pop()||'home'; state.view=p;
+  renderFor(p);
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===p));
+  document.getElementById('back').style.visibility=p==='home'?'hidden':'visible'; }
+
+// ---------- home ----------
+document.getElementById('lvlpick').addEventListener('click',e=>{
+  if(!e.target.dataset.l) return;
+  profile.level=e.target.dataset.l; state.level=profile.level; saveProfile();
+  document.querySelectorAll('#lvlpick span').forEach(s=>s.classList.toggle('on',s===e.target));
+  renderHome();
+});
+
+// ---------- story ----------
+function renderStory(){
+  const el=document.getElementById('storytext'); el.innerHTML='';
+  STORY.forEach(par=>{
+    const p=document.createElement('p');
+    par.split(/(<hard>.*?<\/hard>|\s+)/).forEach(tok=>{
+      if(!tok.trim()){ p.appendChild(document.createTextNode(tok)); return; }
+      const hard=tok.startsWith('<hard>');
+      const word=tok.replace(/<\/?hard>/g,'');
+      const span=document.createElement('span');
+      span.className='w'+(hard?' hard':''); span.textContent=word;
+      span.onclick=()=>{ const key=word.replace(/[.,„":!?]/g,'');
+        document.getElementById('gloss').textContent=GLOSS[key]||(key+' — (no gloss)'); };
+      p.appendChild(span);
+    });
+    el.appendChild(p);
+  });
+}
+
+// ---------- questions ----------
+function startQuestions(){ state.qi=0; loadQuestion(); show('question'); }
+function loadQuestion(){
+  const q=QUESTIONS[state.qi];
+  document.getElementById('qcount').textContent=`Frage ${state.qi+1} von ${QUESTIONS.length}`;
+  document.getElementById('qtext').innerHTML=`${q.q}<span class="en">${q.en}</span>`;
+  document.getElementById('answer').value='';
+  document.getElementById('qhint').textContent='';
+  document.getElementById('fbslot').innerHTML='';
+  document.getElementById('checkbtn').disabled=false;
+  document.getElementById('checkbtn').textContent='Prüfen';
+}
+function nextQuestion(){
+  if(state.qi < QUESTIONS.length-1){ state.qi++; loadQuestion(); show('question'); }
+  else { show('home'); }
+}
+
+async function checkAnswer(){
+  const sentence=document.getElementById('answer').value.trim();
+  if(!sentence) return;
+  const btn=document.getElementById('checkbtn');
+  btn.disabled=true; btn.textContent='…prüft (Gemini)';
+  try{
+    const r=await fetch('/api/feedback',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({level:state.level, sentence})});
+    const fb=await r.json();
+    if(fb.error) throw new Error(fb.error);
+    applyResult(fb, sentence);
+    renderFeedback(fb, sentence);
+  }catch(err){
+    document.getElementById('fbslot').innerHTML=
+      `<div class="fb"><h3>⚠ Konnte nicht prüfen</h3><div class="small">${err.message}</div></div>`;
+  }finally{ btn.disabled=false; btn.textContent='Erneut prüfen'; }
+}
+
+function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+
+function renderFeedback(fb, original){
+  const slot=document.getElementById('fbslot');
+  if(!fb.has_errors && (!fb.errors||!fb.errors.length)){
+    slot.innerHTML=`<div class="fb"><div class="perfect"><div class="big">✓</div>
+      <h3>Perfekt! Grammatik korrekt.</h3>
+      <div class="correct" style="text-align:left">${esc(fb.corrected_sentence)}</div></div></div>`;
+    return;
+  }
+  // highlight the wrong fragments in the user's sentence
+  let wrote=esc(original);
+  (fb.errors||[]).forEach(e=>{ if(e.original_fragment){
+    const frag=esc(e.original_fragment);
+    if(wrote.includes(frag)) wrote=wrote.replace(frag,`<del>${frag}</del>`);
+  }});
+  const chips=(fb.errors||[]).map(e=>{
+    const m=CAT[e.category]||{label:e.category,c:'#999'};
+    return `<div class="chip"><span class="dot" style="background:${m.c}"></span>
+      <div><div class="ctag" style="color:${m.c}">${m.label}</div>
+        <div class="cfix"><del>${esc(e.original_fragment||'')}</del> → <b>${esc(e.correction||'')}</b></div>
+        <div class="cex">${esc(e.explanation||'')}</div></div></div>`;
+  }).join('');
+  slot.innerHTML=`<div class="fb">
+    <h3>Fast richtig! 👏</h3>
+    <div class="small">You wrote:</div>
+    <div class="wrote">${wrote}</div>
+    ${chips}
+    <div class="correct"><span class="lab">✓ KORREKT</span>${esc(fb.corrected_sentence)}</div>
+    <div class="row">
+      <button class="btn ghost" onclick="openDrill('${(fb.errors[0]||{}).category||'_default'}')">Drill it</button>
+      <button class="btn" onclick="nextQuestion()">Weiter →</button>
+    </div></div>`;
+}
+
+// ---------- drill ----------
+let drill={answer:[],built:[]};
+function openDrill(cat){
+  const d=DRILLS[cat]||DRILLS._default;
+  drill={answer:d.answer.slice(), built:[], tokens:shuffle(d.answer.slice())};
+  document.getElementById('drilltag').textContent='Mini-Übung · '+(CAT[cat]?CAT[cat].label:'Grammatik');
+  document.getElementById('drillwhy').textContent=d.why;
+  document.getElementById('drillprompt').textContent=d.prompt;
+  document.getElementById('drillresult').textContent='';
+  renderDrill(); show('drill');
+}
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; }
+function renderDrill(){
+  const b=document.getElementById('build');
+  b.innerHTML = drill.built.length
+    ? drill.built.map((w,i)=>`<span class="placed" onclick="unplace(${i})">${esc(w)}</span>`).join(' ')
+    : '<span class="slot">tap words below…</span>';
+  const t=document.getElementById('toks'); t.innerHTML='';
+  drill.tokens.forEach((w,i)=>{
+    const used=drill.built.filter(x=>x===w).length >
+               drill.tokens.slice(0,i).filter(x=>x===w).length ? false:false;
+    const span=document.createElement('span'); span.className='tok'; span.textContent=w;
+    span.onclick=()=>{ drill.built.push(w); span.classList.add('used'); renderDrill(); markUsed(); };
+    t.appendChild(span);
+  });
+  markUsed();
+}
+function markUsed(){
+  const need={}; drill.built.forEach(w=>need[w]=(need[w]||0)+1);
+  const seen={};
+  [...document.querySelectorAll('#toks .tok')].forEach(el=>{
+    const w=el.textContent; seen[w]=(seen[w]||0)+1;
+    el.classList.toggle('used', (need[w]||0) >= seen[w]);
+  });
+}
+function unplace(i){ drill.built.splice(i,1); renderDrill(); }
+function resetDrill(){ drill.built=[]; document.getElementById('drillresult').textContent=''; renderDrill(); }
+function checkDrill(){
+  const ok = drill.built.join(' ')===drill.answer.join(' ');
+  const el=document.getElementById('drillresult');
+  el.style.color = ok?'#4f7a4d':'#b14';
+  el.textContent = ok?'✓ Richtig! Gut gemacht.':'Nicht ganz — versuch es nochmal.';
+}
+
+// ---------- weak spots ----------
+function getCSS(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+function renderHome(){
+  const p=levelProgress();
+  document.getElementById('homesummary').innerHTML=
+    `<div class="badge">${profile.level}</div>
+     <div style="flex:1">
+       <div style="font-weight:600">Level ${profile.level}</div>
+       <div class="pbar"><div class="pf" style="width:${p.pct}%"></div></div>
+       <div class="small" style="margin-top:5px">${p.cfg.next ? p.pct+'% to '+p.cfg.next : p.pct+'% C2 mastery'} · ⭐ ${profile.xp}</div>
+     </div>
+     <div class="chev">›</div>`;
+  const cfg=LEVELCFG[profile.level];
+  const weak=cfg.skills.map(s=>[s, profile.skills[s]||0]).filter(([s,v])=>v<MASTER)
+    .sort((a,b)=>a[1]-b[1]).slice(0,4);
+  document.getElementById('weakbars').innerHTML = weak.length ? weak.map(([k,v])=>{
+    const m=CAT[k]||{label:k,c:'#999'};
+    return `<div class="skill"><span class="nm">${m.label}</span>
+      <span class="track"><span class="fill" style="width:${v}%;background:${m.c}"></span></span>
+      <span class="pc">${v}</span></div>`;
+  }).join('') : '<div class="small">All level skills mastered — ready to level up! 🎉</div>';
+}
+
+function renderProfile(){
+  const p=levelProgress(), cfg=p.cfg;
+  const banner = profile.justLeveled
+    ? `<div class="levelup">🎉 Level up! You reached ${profile.level}.</div>` : '';
+  profile.justLeveled=null; saveProfile();
+  const skills = cfg.skills.map(s=>{
+    const v=profile.skills[s]||0, m=CAT[s]||{label:s,c:'#999'}, done=v>=MASTER;
+    return `<div class="skill ${done?'done':''}">
+      <span class="nm">${m.label}${done?' <span class="ck">✓</span>':''}</span>
+      <span class="track"><span class="fill" style="width:${v}%;background:${m.c}"></span></span>
+      <span class="pc">${v}</span></div>`;
+  }).join('');
+  const need = cfg.skills.filter(s=>(profile.skills[s]||0)<MASTER).map(s=>(CAT[s]||{label:s}).label);
+  const nx = cfg.next || 'Mastery';
+  document.getElementById('profilebody').innerHTML=`
+    ${banner}
+    <div class="ringwrap">${ringSVG(p.pct, getCSS('--accent'))}
+      <div class="center"><div class="lv">${profile.level}</div>
+        <div class="to">${cfg.next ? '→ '+cfg.next : '🏅 top'}</div></div></div>
+    <div class="ringpct">${cfg.next
+        ? `<b>${p.pct}%</b> of the way to <b>${cfg.next}</b>`
+        : `<b>${p.pct}%</b> toward full C2 mastery`}</div>
+
+    <div class="seclabel">Grammar skills · ${p.mastered}/${p.total} mastered</div>
+    ${skills}
+
+    <div class="seclabel">Vocabulary</div>
+    <div class="skill"><span class="nm">Words used</span>
+      <span class="track"><span class="fill" style="width:${Math.round(p.vPct*100)}%;background:#7a86b8"></span></span>
+      <span class="pc">${profile.vocab}/${cfg.vocab}</span></div>
+
+    <div class="nextstep">${cfg.next
+        ? '<b>To reach '+nx+':</b> ' + (need.length
+            ? 'master '+need.length+' more grammar point'+(need.length>1?'s':'')+
+              ' ('+need.slice(0,3).join(', ')+(need.length>3?'…':'')+') and keep building vocabulary.'
+            : "just a little more vocabulary — you've mastered the grammar!")
+        : "<b>You're at the top level.</b> Keep refining nuance, register, and idiom — C2 is about sounding native, not new rules."}</div>`;
+}
+
+loadProfile();
+state.level=profile.level;
+document.getElementById('xp').textContent=profile.xp;
+document.querySelectorAll('#lvlpick span').forEach(s=>s.classList.toggle('on',s.dataset.l===profile.level));
+renderStory();
+renderHome();
+document.getElementById('back').style.visibility='hidden';
+</script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+{
+  "generator": "gemini-2.5-flash",
+  "judge": "gemini-2.5-pro",
+  "sentences": 12,
+  "summary": {
+    "above": 2,
+    "on": 4,
+    "below": 0
+  },
+  "stories": [
+    {
+      "target": "A2",
+      "topic": "der erste Schultag",
+      "title": "Lenas erster Schultag",
+      "text": "Heute ist ein besonderer Tag für Lena. Es ist ihr erster Schultag in der Schule. Lena steht früh auf und ist ein bisschen aufgeregt. Sie isst schnell ihr Brot und trinkt Milch zum Frühstück. Ihre Mutter packt die Schultasche mit neuen Büchern und Stiften. Zusammen gehen Lena und ihre Mutter zur großen Schule. Vor dem Schulgebäude warten schon viele andere Kinder. Lena findet ihre neue Klasse und die Lehrerin lächelt freundlich. Sie setzt sich an einen Tisch neben ein anderes Mädchen. Die Lehrerin erzählt eine spannende Geschichte über Tiere. Danach malen alle Kinder bunte Bilder für die Wand. Lena hat heute eine neue Freundin gefunden und ist sehr glücklich.",
+      "estimated": "A2",
+      "class": "above",
+      "over_words": [
+        "Schulgebäude"
+      ],
+      "over_grammar": [],
+      "note": "The text is a very good example of the A2 level, using appropriate vocabulary and grammatical structures like the Perfekt tense, adjective declensions, and prepositions with dative. The word 'Schulgebäude' is slightly above A2, as 'Gebäude' is typically B1 vocabulary, but it is easily understandable from context.",
+      "latency_s": 24.6
+    },
+    {
+      "target": "A2",
+      "topic": "ein verlorener Hund im Park",
+      "title": "Max im Park",
+      "text": "Anna hat einen kleinen Hund. Er heißt Max und ist sehr verspielt. Jeden Nachmittag gehen sie zusammen in den Park. Max rennt gern und spielt mit dem Ball. Eines Tages sieht Max einen Hasen. Er läuft schnell hinter dem Hasen her und ist plötzlich weg. Anna ruft: \"Max! Max!\", aber Max kommt nicht zurück. Sie sucht ihn überall im Park. Anna ist sehr traurig und hat Angst. Dann kommt eine Frau mit einem anderen Hund. Die Frau hat Max gefunden! Er spielt mit ihrem Hund. Anna ist so glücklich und umarmt Max fest.",
+      "estimated": "A2",
+      "class": "above",
+      "over_words": [
+        "umarmt"
+      ],
+      "over_grammar": [
+        "Eines Tages (Genitiv)"
+      ],
+      "note": "The text is largely at the A2 level, using present tense, Perfekt, and appropriate cases. However, the phrase 'Eines Tages' is a genitive construction, which is typically introduced at B1. While it's a common fixed phrase, its grammatical form is above the target level.",
+      "latency_s": 23.2
+    },
+    {
+      "target": "B1",
+      "topic": "der erste Schultag",
+      "title": "Lenas erster Schultag",
+      "text": "Heute war ein besonderer Tag für die kleine Lena. Sie war sechs Jahre alt und hatte ihren allerersten Schultag. Am Morgen war sie sehr aufgeregt, aber auch ein bisschen nervös. Nach dem Frühstück zog sie ihre neue Kleidung an und packte ihren Rucksack. Ihr Schulranzen war schon voll mit Büchern und einem Federmäppchen. Zusammen mit ihren Eltern ging sie dann zur Schule, die nicht weit entfernt war. Vor dem großen Gebäude sah Lena viele andere Kinder mit bunten Schultüten. Sie hielt die Hand ihrer Mutter fest, als sie den Schulhof betraten. Ihre Lehrerin, Frau Müller, begrüßte alle neuen Schüler sehr freundlich. Lena fand ihren Platz in der Klasse neben einem Jungen namens Max. Sie malten Bilder und sangen ein kurzes Lied zusammen. Am Abend war Lena müde, aber sie war auch sehr glücklich über ihren ersten Schultag.",
+      "estimated": "B1",
+      "class": "on",
+      "over_words": [],
+      "over_grammar": [],
+      "note": "The text is a very good example of the B1 level. It correctly uses the Präteritum for narration, which is a key B1 skill. It also includes appropriate subordinate clauses (relative clause with 'die', temporal clause with 'als') and correct adjective declensions. The vocabulary is entirely within the A1-B1 range and suitable for the topic.",
+      "latency_s": 18.6
+    },
+    {
+      "target": "B1",
+      "topic": "ein verlorener Hund im Park",
+      "title": "Bello im Park",
+      "text": "Marie und ihr Hund, Bello, liebten Spaziergänge sehr. Heute waren sie in einem großen Park mit vielen Bäumen. Bello war ein fröhlicher, brauner Labrador und spielte gern. Plötzlich sah Bello ein kleines Eichhörnchen auf einem Baum. Er rannte schnell hinter dem Eichhörnchen her und verschwand. Marie rief seinen Namen laut, aber Bello hörte sie nicht mehr. Nach ein paar Minuten merkte Marie, dass Bello nicht mehr da war. Sie suchte überall und wurde langsam sehr traurig und besorgt. Bello fühlte sich allein und wusste nicht, wo Marie war. Dann sah eine nette Frau Bello unter einem großen Baum sitzen. Sie las Maries Telefonnummer auf Bellos Halsband. Wenig später waren Marie und Bello wieder glücklich zusammen zu Hause.",
+      "estimated": "B1",
+      "class": "on",
+      "over_words": [],
+      "over_grammar": [],
+      "note": "The text is a perfect example of a B1-level narrative. It consistently uses the Präteritum for storytelling, which is a key B1 skill. The vocabulary is appropriate, and the sentence structures, including simple subordinate clauses, are typical for this level. There are no words or grammatical structures that are clearly above B1.",
+      "latency_s": 18.6
+    },
+    {
+      "target": "B2",
+      "topic": "der erste Schultag",
+      "title": "Ein neuer Anfang",
+      "text": "Emmas Herz klopfte schnell an diesem Morgen. Es war ihr erster Tag an der neuen Schule, und eine Mischung aus Aufregung und Unsicherheit erfüllte sie. Das große, alte Gebäude wirkte imposant, fast ein wenig einschüchternd, als sie davor stand. Sie suchte nach ihrem Klassenzimmer, Nummer 207, und atmete tief durch, bevor sie die Tür öffnete. Drinnen saßen schon einige unbekannte Gesichter, und eine freundliche Lehrerin lächelte ihr entgegen. Frau Müller stellte sich vor und hieß alle neuen Schüler herzlich willkommen. Emma beobachtete ihre neuen Mitschüler; manche schienen nervös, andere unterhielten sich schon lebhaft. Ein Mädchen mit roten Haaren neben ihr drehte sich um und flüsterte: \"Ich bin Lena, und du?\" Emma stellte sich vor und spürte, wie ein Teil ihrer Anspannung nachließ. Die erste Stunde handelte von den Erwartungen an das neue Schuljahr und gemeinsamen Regeln. Obwohl der Vormittag noch lang war, fühlte sich Emma nicht mehr ganz so allein. Vielleicht würde dieser neue Anfang doch nicht so schlimm werden, wie sie befürchtet hatte.",
+      "estimated": "B2",
+      "class": "on",
+      "over_words": [],
+      "over_grammar": [],
+      "note": "The text is a very good example of a B2-level narrative. It uses appropriate vocabulary (e.g., 'imposant', 'einschüchternd', 'Anspannung') and grammatical structures (Präteritum for narration, various subordinate clauses, Konjunktiv II for hypothesis) that are characteristic of the B2 level. There are no elements clearly above the target level.",
+      "latency_s": 19.9
+    },
+    {
+      "target": "B2",
+      "topic": "ein verlorener Hund im Park",
+      "title": "Der verlorene Freund im Park",
+      "text": "Lena genoss einen ruhigen Spaziergang im Stadtpark, als die Abendsonne langsam unterging. Plötzlich bemerkte sie eine kleine Bewegung unter einem großen Busch am Wegrand. Es war ein kleiner, zotteliger Hund, der ängstlich zu ihr aufblickte und leise winselte. Sein Fell war schmutzig, und er zitterte leicht, offensichtlich allein und verloren. Lena sprach sanft mit ihm und streckte langsam eine Hand aus, um ihn zu beruhigen. Der Hund zögerte zuerst, wedelte dann aber vorsichtig mit dem Schwanz und kam näher. Sie suchte nach einem Halsband oder einer Marke, um seinen Besitzer zu identifizieren, fand aber nichts. Ihre Gedanken kreisten darum, wie sie dem armen Tier am besten helfen könnte. Sie beschloss, ihn vorübergehend mit nach Hause zu nehmen und dann das Tierheim zu kontaktieren. Auf dem Heimweg sah sie an einem Laternenpfahl ein Plakat mit der Aufschrift „Hund vermisst!“. Das Bild zeigte genau den kleinen zotteligen Hund, den sie gerade gefunden hatte. Mit einem Anruf führte Lena den glücklichen Hund noch am selben Abend wieder mit seiner überglücklichen Familie zusammen.",
+      "estimated": "B2",
+      "class": "on",
+      "over_words": [],
+      "over_grammar": [],
+      "note": "The text is a very good example of a B2-level narrative. It consistently uses the Präteritum for storytelling and correctly incorporates a range of subordinate clauses (relative, temporal, final, indirect question) and vocabulary appropriate for this level. The use of the Plusquamperfekt ('gefunden hatte') to sequence past events is a key B2 competency. The text does not contain any elements that are clearly above the B2 level.",
+      "latency_s": 19.9
+    }
+  ]
+}

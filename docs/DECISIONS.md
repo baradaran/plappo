@@ -1,0 +1,158 @@
+# Decision log (walkthrough)
+
+Every significant decision, in the order it was made, with the context and the
+reasoning — so a new architect or engineer can understand not just *what* the app
+is but *why*. Format per entry: **Context · Decision · Why · Alternatives · Status**.
+
+Cross-refs: [ARCHITECTURE.md](ARCHITECTURE.md), [PEDAGOGY_ROADMAP.md](PEDAGOGY_ROADMAP.md),
+[CLAUDE.md](../CLAUDE.md).
+
+---
+
+### ADR-001 — Validate the feedback engine before building any UI
+**Context:** The app's core risk is whether an LLM can reliably grade learner
+German. **Decision:** Build an offline eval of the grammar-feedback engine first;
+no UI until it passes. **Why:** Wrong feedback in a teaching app actively teaches
+mistakes — it's worse than none. The risky thing must be proven in isolation.
+**Alternatives:** Build UI first and "see how it feels" — rejected; it hides the
+core risk. **Status:** Done; engine validated A1–C2.
+
+### ADR-002 — Structured outputs (schema-constrained JSON) for all LLM calls
+**Context:** Free-text model output is hard to score and render. **Decision:** Every
+LLM call returns JSON constrained to a schema (`TutorFeedback`, story object).
+**Why:** Guarantees parseable, enum-bounded results; the scorer and UI never see a
+surprise. **Alternatives:** Parse prose with regex — brittle. **Status:** Done.
+
+### ADR-003 — Headline metric = false-positive rate on *correct* sentences
+**Context:** "Accuracy" alone hides the worst failure: inventing errors in good
+German. **Decision:** Make ~half the eval cases already-correct, and treat the
+false-positive rate as the make-or-break number. **Why:** A tutor that "corrects"
+correct German destroys trust — the single biggest threat to the concept.
+**Alternatives:** Optimise detection recall only — rejected. **Status:** Done;
+0% false-positive on both models, A1–C2.
+
+### ADR-004 — A closed error taxonomy as the single source of truth
+**Context:** Categories are referenced by the dataset, the model's schema, the
+scorer, and the UI. **Decision:** Define them once in `taxonomy.py`; everything
+imports from there. **Why:** The model can only emit labels we score; no drift
+between layers. **Alternatives:** Ad-hoc strings per layer — guarantees divergence.
+**Status:** Done (20 categories).
+
+### ADR-005 — LLM = Gemini on Vertex (via yavar's ADC), isolated behind one file
+**Context:** No Anthropic key in this environment, but `yavar` has Vertex (Gemini)
+credit. **Decision:** Run on Gemini via GCP ADC, with *all* LLM access behind
+`vertex_backend.py`. **Why:** Use available credit; keep the provider a one-file
+concern so switching to Claude later is trivial. **Alternatives:** Block on getting
+a Claude key — rejected; the harness is provider-agnostic by design. **Status:** Done.
+
+### ADR-006 — Ship Gemini 2.5 Flash, not Pro
+**Context:** Compared Pro vs Flash on the grammar eval. **Decision:** Use Flash.
+**Why:** Flash matched or *beat* Pro (caught an irrealis error Pro missed at C2),
+at ~2× speed and far lower cost. At per-answer scale, cost is decisive.
+**Alternatives:** Pro for "max quality" — not justified by the data. **Status:** Done.
+
+### ADR-007 — Expand the taxonomy to 20 categories for C1/C2
+**Context:** The first 12 categories were basic/intermediate; C1/C2 grammar
+(Konjunktiv I, Passiv, Nominalstil, participial attributes, modal particles) wasn't
+representable. **Decision:** Add 8 advanced categories so the engine can *tag*
+advanced grammar and the level→skill map is real. **Why:** Otherwise C1/C2 skill
+bars are decorative — the engine could never move them. **Alternatives:** Leave
+C1/C2 grammar coarse — rejected; would be dishonest. **Caveat:** The level→grammar
+mapping is a standard-progression *heuristic*, not an official CEFR syllabus
+(none is machine-readable). **Status:** Done.
+
+### ADR-008 — FSRS-style spaced repetition for review
+**Context:** Retention needs scheduled review, not re-reading. **Decision:** Use the
+real FSRS forgetting curve `R(t,S)=(1+FACTOR·t/S)^DECAY` and retrieval-driven
+scheduling; a *simplified* stability update (not the trained 19-weight model).
+**Why:** FSRS is the modern state of the art; the curve + scheduling are the core
+insight, the exact weights are an optimisation. **Alternatives:** SM-2 (older,
+worse) or full FSRS lib (drop-in later — the data model matches). **Status:** Done;
+labelled "FSRS-style" honestly.
+
+### ADR-009 — Level is *measured*, not set; track grammar and vocabulary separately
+**Context:** Should the user pick their level? **Decision:** No. Derive the current
+level from performance (grammar mastery + words used), shown as two axes (e.g.
+*Grammar A1 · Vocabulary A2*); the user sets only a **goal**. **Why:** Self-
+assessment is unreliable; hand-setting breaks comprehensible input (too easy → no
+i+1; too hard → not comprehensible). Proficiency isn't one number — CEFR explicitly
+allows jagged profiles, and vocab-ahead-of-grammar is a common, real shape in German
+learners. **Alternatives:** Manual level pills (the original prototype) — replaced.
+**Caveat:** "Grammar level" isn't an official CEFR scale; present as a hedged
+heuristic ("≈"). **Status:** Done.
+
+### ADR-010 — Focused feedback: lead with one error, collapse the rest
+**Context:** The engine returns *all* errors. **Decision:** UI surfaces the single
+highest-priority (treatable, level-core) error; others collapse behind "+N more".
+**Why:** Meta-analytic evidence (Ferris/Bitchener) — focused correction on treatable
+errors beats comprehensive correction, which overloads and demotivates.
+**Alternatives:** Show everything — rejected. **Status:** Done in UI; a ranked
+engine-side version is a Phase-1 roadmap item.
+
+### ADR-011 — Don't trust "write at level X"; gate generated stories with a judge
+**Context:** The input half depends on stories staying in-level. **Decision:** A
+story-in-level eval that *generates* with one model and *judges* with a **different**
+one (avoids self-agreement), classifying three ways: above (drift) / on / below
+(too easy). **Why:** arXiv 2505.08351 (2025) shows LLMs drift off a prompted CEFR
+level — and our own longer-story sweep reproduced it (A2 stories leaked over-level
+words). **Alternatives:** Trust the generation prompt — empirically wrong.
+**Caveat:** The judge is itself an LLM, not ground truth — a drift *signal*, not a
+certified grade. **Status:** Done.
+
+### ADR-012 — i+1 gloss-whitelist: over-level words are OK *if glossed*
+**Context:** A strict "no word above level" gate rejects pedagogically fine stories.
+**Decision:** The gate accepts over-level words *if they appear in the story's
+glossary* (i.e. they're supported). **Why:** That's exactly the "+1" of i+1 —
+comprehensible input is meant to contain a few new, supported words. **Alternatives:**
+Reject any over-level word — too strict, kills richness. **Status:** Done.
+
+### ADR-013 — Story content: generate once, select per user, add as you go
+**Context:** Should stories be generated on every read? **Decision:** No. Generate
+into a **shared library** (tagged, gated), **select** per user cheaply, and grow the
+library incrementally (background). Reserve on-demand for the long tail, folding
+results back into the library. **Why:** A CEFR level is shared across users —
+regenerating per read re-pays generation + gating cost forever, with latency every
+time. The library converts a per-read variable cost into a one-time fixed cost
+amortised across all users; it also enables extensive-reading *volume* and vocab
+recycling, and moves the drift-gate to authoring time (where human QA can live).
+**Alternatives:** On-demand-every-time — simple at tiny scale, doesn't scale.
+**Status:** Forward-compatible data model + persistence shipped; per-user selector
+is the documented next step (slots into `select_from_library()`).
+
+### ADR-014 — UI: content serif vs. chrome sans, calm semantics, one hero action
+**Context:** The app puts a blank box in front of a beginner — UX must not add load.
+**Decision:** Literary serif for German content, quiet sans for UI; one primary
+action per screen; muted semantic colours (correction = green, attention = amber,
+never alarm-red); an animated diff to make the error→fix gap *noticed*; browser TTS
+for listening input; accessibility baseline. **Why:** Reduce extraneous cognitive
+load (Sweller); engineer "noticing" (Schmidt); keep errorful learning safe, not
+punishing; avoid the gamification overjustification trap. **Status:** Done.
+
+### ADR-015 — Pedagogy grounded in cited, checkable research (incl. debated claims)
+**Context:** Pedagogy claims must be verifiable, not vibes. **Decision:** A roadmap
+mapping every feature to a research principle, with DOIs/links and explicit
+**[debated]** flags (Krashen i+1, Bloom 2σ, the Truscott–Ferris debate). **Why:**
+Checking sources should reveal nuance; build on the solid parts. **Status:** Done
+([PEDAGOGY_ROADMAP.md](PEDAGOGY_ROADMAP.md)).
+
+### ADR-016 — Offline rigour (Pro) vs. in-app guard (Flash); never spend in the request path
+**Context:** Judging/gating costs calls. **Decision:** Offline evals use Pro and full
+datasets for confidence; the in-app gate uses Flash and the library serves most
+reads. **Why:** Pay for rigour where it compounds (offline), stay cheap where it
+scales (per request). **Status:** Done.
+
+### ADR-017 — Reuse the eval code at runtime (no test/prod split)
+**Context:** Risk that "what we tested" diverges from "what ships". **Decision:** The
+server imports the same `eval/` modules (`tutor`, `vertex_backend`, `story_service`).
+**Why:** The validated engine *is* the production engine. **Alternatives:** A separate
+prod implementation — invites drift between measured and shipped behaviour.
+**Status:** Done.
+
+---
+
+## Open decisions / next up
+- Ranked **focused-feedback on the engine side** (ADR-010 is UI-only today).
+- The **per-user story selector** in `select_from_library()` (ADR-013).
+- Drop-in **real FSRS** library (ADR-008) — data model already matches.
+- **Calibrate the story judge** against human CEFR ratings / a Goethe word-list (ADR-011).
+- Validate the **level→grammar map** against a real syllabus (ADR-007).

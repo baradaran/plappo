@@ -1,0 +1,129 @@
+{
+  "model": "MOCK",
+  "aggregate": {
+    "n_cases": 6,
+    "n_correct_sentences": 2,
+    "n_error_sentences": 4,
+    "detection": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "errors_caught": 4,
+      "errors_missed": 0,
+      "false_positive_rate_on_correct": 0.0,
+      "invented_errors": 0,
+      "clean_pass_rate": 1.0
+    },
+    "category": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 4,
+      "fp": 0,
+      "fn": 0
+    },
+    "correction": {
+      "accuracy_on_error_sentences": 1.0,
+      "unchanged_on_correct_sentences": 1.0
+    },
+    "by_level": {
+      "A1": {
+        "n": 6,
+        "detect_f1": 1.0,
+        "false_positives": 0,
+        "n_correct": 2,
+        "correction_acc": 1.0
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "a01",
+      "level": "A1",
+      "text": "Ich habe einen Hund.",
+      "gold_correct": "Ich habe einen Hund.",
+      "gold_cats": [],
+      "pred_corrected": "Ich habe einen Hund.",
+      "pred_cats": [],
+      "pred_has_errors": false,
+      "correction_ok": true,
+      "latency_s": 0.0
+    },
+    {
+      "id": "a02",
+      "level": "A1",
+      "text": "Ich heiße Anna und komme aus Spanien.",
+      "gold_correct": "Ich heiße Anna und komme aus Spanien.",
+      "gold_cats": [],
+      "pred_corrected": "Ich heiße Anna und komme aus Spanien.",
+      "pred_cats": [],
+      "pred_has_errors": false,
+      "correction_ok": true,
+      "latency_s": 0.0
+    },
+    {
+      "id": "a03",
+      "level": "A1",
+      "text": "Er trinken Wasser.",
+      "gold_correct": "Er trinkt Wasser.",
+      "gold_cats": [
+        "VERB_CONJUGATION"
+      ],
+      "pred_corrected": "Er trinkt Wasser.",
+      "pred_cats": [
+        "VERB_CONJUGATION"
+      ],
+      "pred_has_errors": true,
+      "correction_ok": true,
+      "latency_s": 0.0
+    },
+    {
+      "id": "a04",
+      "level": "A1",
+      "text": "Das ist eine Tisch.",
+      "gold_correct": "Das ist ein Tisch.",
+      "gold_cats": [
+        "GENDER"
+      ],
+      "pred_corrected": "Das ist ein Tisch.",
+      "pred_cats": [
+        "GENDER"
+      ],
+      "pred_has_errors": true,
+      "correction_ok": true,
+      "latency_s": 0.0
+    },
+    {
+      "id": "a05",
+      "level": "A1",
+      "text": "Ich sehe der Mann.",
+      "gold_correct": "Ich sehe den Mann.",
+      "gold_cats": [
+        "CASE"
+      ],
+      "pred_corrected": "Ich sehe den Mann.",
+      "pred_cats": [
+        "CASE"
+      ],
+      "pred_has_errors": true,
+      "correction_ok": true,
+      "latency_s": 0.0
+    },
+    {
+      "id": "a06",
+      "level": "A1",
+      "text": "ich wohne in berlin.",
+      "gold_correct": "Ich wohne in Berlin.",
+      "gold_cats": [
+        "SPELLING"
+      ],
+      "pred_corrected": "Ich wohne in Berlin.",
+      "pred_cats": [
+        "SPELLING"
+      ],
+      "pred_has_errors": true,
+      "correction_ok": true,
+      "latency_s": 0.0
+    }
+  ]
+}

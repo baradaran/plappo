@@ -1,0 +1,442 @@
+{
+  "models": [
+    "gemini-2.5-pro",
+    "gemini-2.5-flash"
+  ],
+  "runs": [
+    {
+      "model": "gemini-2.5-pro",
+      "aggregate": {
+        "n_cases": 12,
+        "n_correct_sentences": 6,
+        "n_error_sentences": 6,
+        "detection": {
+          "precision": 1.0,
+          "recall": 0.833,
+          "f1": 0.909,
+          "errors_caught": 5,
+          "errors_missed": 1,
+          "false_positive_rate_on_correct": 0.0,
+          "invented_errors": 0,
+          "clean_pass_rate": 1.0
+        },
+        "category": {
+          "precision": 0.8,
+          "recall": 0.667,
+          "f1": 0.727,
+          "tp": 4,
+          "fp": 1,
+          "fn": 2
+        },
+        "correction": {
+          "accuracy_on_error_sentences": 0.833,
+          "unchanged_on_correct_sentences": 1.0
+        },
+        "by_level": {
+          "C1": {
+            "n": 6,
+            "detect_f1": 1.0,
+            "false_positives": 0,
+            "n_correct": 3,
+            "correction_acc": 1.0
+          },
+          "C2": {
+            "n": 6,
+            "detect_f1": 0.8,
+            "false_positives": 0,
+            "n_correct": 3,
+            "correction_acc": 0.667
+          }
+        }
+      },
+      "cases": [
+        {
+          "id": "c01",
+          "level": "C1",
+          "text": "Der Sprecher betonte, die Regierung werde die Steuern nicht erhöhen.",
+          "gold_correct": "Der Sprecher betonte, die Regierung werde die Steuern nicht erhöhen.",
+          "gold_cats": [],
+          "pred_corrected": "Der Sprecher betonte, die Regierung werde die Steuern nicht erhöhen.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 8.94
+        },
+        {
+          "id": "c02",
+          "level": "C1",
+          "text": "Die von der Kommission vorgeschlagenen Maßnahmen wurden abgelehnt.",
+          "gold_correct": "Die von der Kommission vorgeschlagenen Maßnahmen wurden abgelehnt.",
+          "gold_cats": [],
+          "pred_corrected": "Die von der Kommission vorgeschlagenen Maßnahmen wurden abgelehnt.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 5.99
+        },
+        {
+          "id": "c03",
+          "level": "C1",
+          "text": "Trotz des schlechten Wetters fand die Veranstaltung im Freien statt.",
+          "gold_correct": "Trotz des schlechten Wetters fand die Veranstaltung im Freien statt.",
+          "gold_cats": [],
+          "pred_corrected": "Trotz des schlechten Wetters fand die Veranstaltung im Freien statt.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 5.57
+        },
+        {
+          "id": "c04",
+          "level": "C1",
+          "text": "Das Museum ist im 19. Jahrhundert gebaut geworden.",
+          "gold_correct": "Das Museum ist im 19. Jahrhundert gebaut worden.",
+          "gold_cats": [
+            "PASSIVE"
+          ],
+          "pred_corrected": "Das Museum ist im 19. Jahrhundert gebaut worden.",
+          "pred_cats": [
+            "PASSIVE"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 7.51
+        },
+        {
+          "id": "c05",
+          "level": "C1",
+          "text": "Das ist der Kollege, dem ich gestern auf der Konferenz getroffen habe.",
+          "gold_correct": "Das ist der Kollege, den ich gestern auf der Konferenz getroffen habe.",
+          "gold_cats": [
+            "RELATIVE_CLAUSE"
+          ],
+          "pred_corrected": "Das ist der Kollege, den ich gestern auf der Konferenz getroffen habe.",
+          "pred_cats": [
+            "RELATIVE_CLAUSE"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 7.22
+        },
+        {
+          "id": "c06",
+          "level": "C1",
+          "text": "Je mehr Geld er verdient, desto er gibt mehr aus.",
+          "gold_correct": "Je mehr Geld er verdient, desto mehr gibt er aus.",
+          "gold_cats": [
+            "CONNECTOR"
+          ],
+          "pred_corrected": "Je mehr Geld er verdient, desto mehr gibt er aus.",
+          "pred_cats": [
+            "CONNECTOR"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 14.21
+        },
+        {
+          "id": "c07",
+          "level": "C2",
+          "text": "Angesichts der angespannten Lage sah sich die Regierung gezwungen, sofort zu handeln.",
+          "gold_correct": "Angesichts der angespannten Lage sah sich die Regierung gezwungen, sofort zu handeln.",
+          "gold_cats": [],
+          "pred_corrected": "Angesichts der angespannten Lage sah sich die Regierung gezwungen, sofort zu handeln.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 5.38
+        },
+        {
+          "id": "c08",
+          "level": "C2",
+          "text": "Komm doch einfach mal bei uns vorbei, wenn du Zeit hast.",
+          "gold_correct": "Komm doch einfach mal bei uns vorbei, wenn du Zeit hast.",
+          "gold_cats": [],
+          "pred_corrected": "Komm doch einfach mal bei uns vorbei, wenn du Zeit hast.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 3.99
+        },
+        {
+          "id": "c09",
+          "level": "C2",
+          "text": "Es handelt sich um ein nicht zu unterschätzendes Risiko.",
+          "gold_correct": "Es handelt sich um ein nicht zu unterschätzendes Risiko.",
+          "gold_cats": [],
+          "pred_corrected": "Es handelt sich um ein nicht zu unterschätzendes Risiko.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 5.48
+        },
+        {
+          "id": "c10",
+          "level": "C2",
+          "text": "Die in dem Bericht erwähnte Zahlen sind längst veraltet.",
+          "gold_correct": "Die in dem Bericht erwähnten Zahlen sind längst veraltet.",
+          "gold_cats": [
+            "PARTICIPIAL"
+          ],
+          "pred_corrected": "Die in dem Bericht erwähnten Zahlen sind längst veraltet.",
+          "pred_cats": [
+            "ADJ_ENDING"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 8.49
+        },
+        {
+          "id": "c11",
+          "level": "C2",
+          "text": "Wenn ich das gewusst hätte, würde ich nicht gekommen sein.",
+          "gold_correct": "Wenn ich das gewusst hätte, wäre ich nicht gekommen.",
+          "gold_cats": [
+            "SUBJUNCTIVE_II"
+          ],
+          "pred_corrected": "Wenn ich das gewusst hätte, würde ich nicht gekommen sein.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": false,
+          "latency_s": 6.91
+        },
+        {
+          "id": "c12",
+          "level": "C2",
+          "text": "Ich kenne eine Frau, dessen Mann Arzt ist.",
+          "gold_correct": "Ich kenne eine Frau, deren Mann Arzt ist.",
+          "gold_cats": [
+            "RELATIVE_CLAUSE"
+          ],
+          "pred_corrected": "Ich kenne eine Frau, deren Mann Arzt ist.",
+          "pred_cats": [
+            "RELATIVE_CLAUSE"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 7.74
+        }
+      ],
+      "call_errors": 0,
+      "avg_latency_s": 2.3
+    },
+    {
+      "model": "gemini-2.5-flash",
+      "aggregate": {
+        "n_cases": 12,
+        "n_correct_sentences": 6,
+        "n_error_sentences": 6,
+        "detection": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "errors_caught": 6,
+          "errors_missed": 0,
+          "false_positive_rate_on_correct": 0.0,
+          "invented_errors": 0,
+          "clean_pass_rate": 1.0
+        },
+        "category": {
+          "precision": 0.667,
+          "recall": 0.667,
+          "f1": 0.667,
+          "tp": 4,
+          "fp": 2,
+          "fn": 2
+        },
+        "correction": {
+          "accuracy_on_error_sentences": 1.0,
+          "unchanged_on_correct_sentences": 1.0
+        },
+        "by_level": {
+          "C1": {
+            "n": 6,
+            "detect_f1": 1.0,
+            "false_positives": 0,
+            "n_correct": 3,
+            "correction_acc": 1.0
+          },
+          "C2": {
+            "n": 6,
+            "detect_f1": 1.0,
+            "false_positives": 0,
+            "n_correct": 3,
+            "correction_acc": 1.0
+          }
+        }
+      },
+      "cases": [
+        {
+          "id": "c01",
+          "level": "C1",
+          "text": "Der Sprecher betonte, die Regierung werde die Steuern nicht erhöhen.",
+          "gold_correct": "Der Sprecher betonte, die Regierung werde die Steuern nicht erhöhen.",
+          "gold_cats": [],
+          "pred_corrected": "Der Sprecher betonte, die Regierung werde die Steuern nicht erhöhen.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 3.79
+        },
+        {
+          "id": "c02",
+          "level": "C1",
+          "text": "Die von der Kommission vorgeschlagenen Maßnahmen wurden abgelehnt.",
+          "gold_correct": "Die von der Kommission vorgeschlagenen Maßnahmen wurden abgelehnt.",
+          "gold_cats": [],
+          "pred_corrected": "Die von der Kommission vorgeschlagenen Maßnahmen wurden abgelehnt.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 3.48
+        },
+        {
+          "id": "c03",
+          "level": "C1",
+          "text": "Trotz des schlechten Wetters fand die Veranstaltung im Freien statt.",
+          "gold_correct": "Trotz des schlechten Wetters fand die Veranstaltung im Freien statt.",
+          "gold_cats": [],
+          "pred_corrected": "Trotz des schlechten Wetters fand die Veranstaltung im Freien statt.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 3.9
+        },
+        {
+          "id": "c04",
+          "level": "C1",
+          "text": "Das Museum ist im 19. Jahrhundert gebaut geworden.",
+          "gold_correct": "Das Museum ist im 19. Jahrhundert gebaut worden.",
+          "gold_cats": [
+            "PASSIVE"
+          ],
+          "pred_corrected": "Das Museum ist im 19. Jahrhundert gebaut worden.",
+          "pred_cats": [
+            "PASSIVE"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 4.71
+        },
+        {
+          "id": "c05",
+          "level": "C1",
+          "text": "Das ist der Kollege, dem ich gestern auf der Konferenz getroffen habe.",
+          "gold_correct": "Das ist der Kollege, den ich gestern auf der Konferenz getroffen habe.",
+          "gold_cats": [
+            "RELATIVE_CLAUSE"
+          ],
+          "pred_corrected": "Das ist der Kollege, den ich gestern auf der Konferenz getroffen habe.",
+          "pred_cats": [
+            "RELATIVE_CLAUSE"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 3.25
+        },
+        {
+          "id": "c06",
+          "level": "C1",
+          "text": "Je mehr Geld er verdient, desto er gibt mehr aus.",
+          "gold_correct": "Je mehr Geld er verdient, desto mehr gibt er aus.",
+          "gold_cats": [
+            "CONNECTOR"
+          ],
+          "pred_corrected": "Je mehr Geld er verdient, desto mehr gibt er aus.",
+          "pred_cats": [
+            "WORD_ORDER"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 2.85
+        },
+        {
+          "id": "c07",
+          "level": "C2",
+          "text": "Angesichts der angespannten Lage sah sich die Regierung gezwungen, sofort zu handeln.",
+          "gold_correct": "Angesichts der angespannten Lage sah sich die Regierung gezwungen, sofort zu handeln.",
+          "gold_cats": [],
+          "pred_corrected": "Angesichts der angespannten Lage sah sich die Regierung gezwungen, sofort zu handeln.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 2.79
+        },
+        {
+          "id": "c08",
+          "level": "C2",
+          "text": "Komm doch einfach mal bei uns vorbei, wenn du Zeit hast.",
+          "gold_correct": "Komm doch einfach mal bei uns vorbei, wenn du Zeit hast.",
+          "gold_cats": [],
+          "pred_corrected": "Komm doch einfach mal bei uns vorbei, wenn du Zeit hast.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 4.06
+        },
+        {
+          "id": "c09",
+          "level": "C2",
+          "text": "Es handelt sich um ein nicht zu unterschätzendes Risiko.",
+          "gold_correct": "Es handelt sich um ein nicht zu unterschätzendes Risiko.",
+          "gold_cats": [],
+          "pred_corrected": "Es handelt sich um ein nicht zu unterschätzendes Risiko.",
+          "pred_cats": [],
+          "pred_has_errors": false,
+          "correction_ok": true,
+          "latency_s": 2.83
+        },
+        {
+          "id": "c10",
+          "level": "C2",
+          "text": "Die in dem Bericht erwähnte Zahlen sind längst veraltet.",
+          "gold_correct": "Die in dem Bericht erwähnten Zahlen sind längst veraltet.",
+          "gold_cats": [
+            "PARTICIPIAL"
+          ],
+          "pred_corrected": "Die in dem Bericht erwähnten Zahlen sind längst veraltet.",
+          "pred_cats": [
+            "ADJ_ENDING"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 2.68
+        },
+        {
+          "id": "c11",
+          "level": "C2",
+          "text": "Wenn ich das gewusst hätte, würde ich nicht gekommen sein.",
+          "gold_correct": "Wenn ich das gewusst hätte, wäre ich nicht gekommen.",
+          "gold_cats": [
+            "SUBJUNCTIVE_II"
+          ],
+          "pred_corrected": "Wenn ich das gewusst hätte, wäre ich nicht gekommen.",
+          "pred_cats": [
+            "SUBJUNCTIVE_II"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 4.81
+        },
+        {
+          "id": "c12",
+          "level": "C2",
+          "text": "Ich kenne eine Frau, dessen Mann Arzt ist.",
+          "gold_correct": "Ich kenne eine Frau, deren Mann Arzt ist.",
+          "gold_cats": [
+            "RELATIVE_CLAUSE"
+          ],
+          "pred_corrected": "Ich kenne eine Frau, deren Mann Arzt ist.",
+          "pred_cats": [
+            "RELATIVE_CLAUSE"
+          ],
+          "pred_has_errors": true,
+          "correction_ok": true,
+          "latency_s": 3.81
+        }
+      ],
+      "call_errors": 0,
+      "avg_latency_s": 1.13
+    }
+  ]
+}
