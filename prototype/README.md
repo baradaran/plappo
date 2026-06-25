@@ -12,18 +12,26 @@ python server.py            # -> http://127.0.0.1:8000
 ```
 
 Open <http://127.0.0.1:8000> in a browser. Use Gemini Pro instead:
-`PLAPPO_MODEL=gemini-2.5-pro python server.py`.
+`PLAPPO_MODEL=gemini-2.5-pro python server.py`. Append `?demo=1` to the URL to load
+populated demo data (streak/skills/reviews) for screenshots; without it you get an
+honest zero-state first run.
+
+> **Display note:** the UI is intentionally a **412 px phone-frame mock**, centred
+> on desktop — it is not a responsive web layout. Best viewed narrow (or in a
+> browser device emulator).
 
 ## The flow
 
-1. **Home** — pick a level; see your "weak spots" (fills in as you make mistakes).
-2. **Story** — read an A2 story; tap any word for a gloss; harder words are highlighted.
-3. **Questions** — type a free German answer, hit **Prüfen**. This calls the real
-   grammar engine and renders the **feedback card**: your sentence with the wrong
-   bits struck through, a coloured chip per error (category + fix + explanation),
-   and the corrected sentence.
-4. **Drill it** — generates a tap-to-order mini-exercise targeting the error
-   category you just made.
+1. **Home** — your level is *measured*, not picked; weak spots fill in as you write.
+2. **Story** — read a level-appropriate story (generated and in-band-gated server-
+   side, served from a growing library); tap any word for a gloss, and add it to
+   review deliberately (lookups don't auto-enrol).
+3. **Questions** — type a free German answer, hit **Check my German**. This calls
+   the real grammar engine and renders the **feedback card**: your sentence with the
+   wrong bit struck through (with the fix), one focused error chip (the rest collapse),
+   praise that names a strength you actually showed, and the corrected sentence. The
+   error also becomes a spaced-review card.
+4. **Drill it** — a tap-to-order exercise built from *your own corrected sentence*.
 
 ## How it's wired
 
@@ -36,13 +44,15 @@ Open <http://127.0.0.1:8000> in a browser. Use Gemini Pro instead:
 
 ## What's real vs. stubbed
 
-| Real | Stubbed (prototype) |
+| Real | Stubbed / simplified (prototype) |
 |---|---|
-| Grammar feedback (live Gemini) | The story (one hardcoded A2 text) |
-| Error categories, corrections, explanations | Comprehension questions (3 fixed) |
-| Weak-spot aggregation from your answers | Drills (a few hardcoded per category) |
-| | Streak / XP / SRS scheduling |
+| Grammar feedback (live Gemini) | Comprehension questions (fixed per story) |
+| Error categories, corrections, explanations | Goal/streak gamification |
+| Level + vocab **measured** from your writing (skills only credited when exercised; vocab from content lemmas) | Persistence is `localStorage` |
+| Story generation, in-band gated, served from a library (with offline fallback) | |
+| Spaced review (FSRS-style) with **typed, verified** recall | |
+| Drills + review cards built from your real mistakes | |
 
-The story-generation and drill-generation would themselves be model calls in the
-real app — and story generation (staying inside a CEFR level) is the next
-unsolved problem to test, separate from the feedback engine this validates.
+Story generation staying inside a CEFR level is validated separately by the
+story-level eval (`../eval/story_level_eval.py`); the `demonstrated`-skills signal
+that drives the measured level has its own gate (`../eval/skills_demonstrated_eval.py`).

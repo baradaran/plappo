@@ -659,6 +659,15 @@ function fallbackStory(){const gloss={},set=new Set();
  Object.entries(GLOSS).forEach(([k,v])=>{const kk=k.toLowerCase();gloss[kk]=[v[0],v[1],v[2]];set.add(kk);});
  return {title:'Der verlorene Schlüssel',sentences:STORY.map(s=>s.replace(/<\/?n>/g,'')),gloss,glossArr:[...set],
   questions:QUESTIONS,level:profile.level,check:{offline:true,in_band:true,estimated:profile.level}};}
+/* U6: keep a small rotating cache of real stories per level, so an offline user
+   doesn't see the same hardcoded fallback every time. */
+function cacheStory(level,s){try{const k='plappo_story_cache_'+level;
+  const arr=JSON.parse(localStorage.getItem(k)||'[]').filter(x=>x.title!==s.title);
+  arr.unshift(s);localStorage.setItem(k,JSON.stringify(arr.slice(0,5)));}catch(e){}}
+function pickCached(level,excludeTitle){try{
+  const arr=JSON.parse(localStorage.getItem('plappo_story_cache_'+level)||'[]')
+   .filter(x=>x.title!==excludeTitle);
+  return arr.length?arr[Math.floor(Math.random()*arr.length)]:null;}catch(e){return null;}}
 async function openReader(force){push('p-reader');
  const key='plappo_story_'+profile.level;
  if(!force){const c=localStorage.getItem(key);if(c){try{story=JSON.parse(c);renderStoryView();return;}catch(e){}}}
@@ -666,8 +675,11 @@ async function openReader(force){push('p-reader');
  try{const topic=TOPICS[Math.floor(Math.random()*TOPICS.length)];
   const r=await fetch('/api/story',{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({level:profile.level,topic,prefer:force?'fresh':'library'})});const s=await r.json();
-  if(s.error)throw new Error(s.error);story=normalizeStory(s);localStorage.setItem(key,JSON.stringify(story));}
- catch(e){story=fallbackStory();toast('Offline story (generator unavailable)');}
+  if(s.error)throw new Error(s.error);story=normalizeStory(s);
+  localStorage.setItem(key,JSON.stringify(story));cacheStory(profile.level,story);}
+ catch(e){const cached=pickCached(profile.level,story&&story.title);
+  if(cached){story=cached;toast('Offline — showing a saved story');}
+  else{story=fallbackStory();toast('Offline story (generator unavailable)');}}
  renderStoryView();}
 function setReaderLoading(){document.getElementById('readerTitle').textContent='Writing a story…';
  const chk=document.getElementById('readerCheck');if(chk)chk.textContent='';
@@ -684,9 +696,23 @@ function renderStoryView(){if(!story.glossSet)story.glossSet=new Set(story.gloss
  story.sentences.forEach(par=>{const p=document.createElement('p');
   par.split(/(\s+)/).forEach(tok=>{if(!tok.trim()){p.appendChild(document.createTextNode(tok));return;}
    const norm=tok.replace(/[.,„":!?»«]/g,'').toLowerCase(),s=document.createElement('w');
-   if(story.glossSet.has(norm))s.className='new';s.textContent=tok;s.onclick=()=>openSheet(tok);p.appendChild(s);});
+   s.textContent=tok;s.onclick=()=>openSheet(tok);
+   if(story.glossSet.has(norm)){s.className='new';   // U5: glossed words are real, keyboard-reachable buttons
+    s.setAttribute('role','button');s.tabIndex=0;s.setAttribute('aria-label',tok+' — show meaning');
+    s.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openSheet(tok);}};}
+   p.appendChild(s);});
   el.appendChild(p);});
- document.getElementById('dots').innerHTML=story.sentences.map((_,i)=>`<i class="${i<2?'on':''}"></i>`).join('');}
+ // U2: real reading progress — light dots by how far the reader has scrolled, not
+ // a fixed "first two". If the whole story fits without scrolling, it's all read.
+ document.getElementById('dots').innerHTML=story.sentences.map(()=>`<i></i>`).join('');
+ paintProgress();
+ const rb=document.querySelector('#p-reader .reader-body');if(rb)rb.onscroll=paintProgress;}
+function paintProgress(){const dots=document.getElementById('dots');if(!dots||!story)return;
+ const n=story.sentences.length,rb=document.querySelector('#p-reader .reader-body');
+ const max=rb?rb.scrollHeight-rb.clientHeight:0;
+ const frac=max>4?rb.scrollTop/max:1;
+ const lit=max<=4?n:Math.min(n,Math.max(1,Math.ceil(frac*n)));
+ [...dots.children].forEach((d,i)=>d.classList.toggle('on',i<lit));}
 function closeReader(){document.getElementById('p-reader').classList.remove('on');stopSpeak();}
 let sheetGloss={back:'',en:''};
 function openSheet(w){const k=w.replace(/[.,„":!?»«]/g,'').toLowerCase();
@@ -751,13 +777,14 @@ function renderFeedback(fb,original){const slot=document.getElementById('fbslot'
    <div class="solution"><div class="lab">Your sentence</div><div class="txt"><span>${esc(original)}</span>
    <button class="hear" onclick="speak(${JSON.stringify(original)})">🔊</button></div></div>
    <div class="acts"><button class="btn" onclick="nextQ()">Next</button></div></div>`;
-  speak(original);return;}
+  return;}  // U5: no autoplay — the 🔊 button plays on demand
  /* focused feedback: lead with the single most important error */
  const errs=[...fb.errors].sort((a,b)=>PRIORITY.indexOf(a.category)-PRIORITY.indexOf(b.category));
  const primary=errs[0],rest=errs.slice(1);
  let wrote=esc(original);if(primary.original_fragment&&wrote.includes(esc(primary.original_fragment))){
   wrote=wrote.replace(esc(primary.original_fragment),
-   `<del id="d0">${esc(primary.original_fragment)}</del><ins id="i0">${esc(primary.correction||'')}</ins>`);}
+   `<del id="d0" title="was" aria-label="was: ${esc(primary.original_fragment)}">${esc(primary.original_fragment)}</del>`+
+   `<ins id="i0" title="corrected" aria-label="corrected to: ${esc(primary.correction||'')}">${esc(primary.correction||'')}</ins>`);}
  const m=CAT[primary.category]||{l:primary.category,c:'#999'};
  // Contingent praise (U3): name a real strength the learner actually showed
  // (from `demonstrated`), not a random compliment. Falls back to neutral.
@@ -892,7 +919,7 @@ function reveal(correct){const it=rqueue[rpos];const ans=it.type==='vocab'?it.ba
      <svg viewBox="0 0 24 24" width="16" fill="none" stroke="currentColor" stroke-width="1.9"
        stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
      Hear it</button></div>`;
- speak(ans);
+ // U5: no autoplay — "Hear it" plays on demand.
  // Derive the grade from the verified result; correct+fast => Easy. null = gave up.
  const derived=correct===true?(Date.now()-rStart<4000?4:3):1;
  const hint=correct===null?'Grade yourself:':'Suggested from your answer — adjust if needed:';

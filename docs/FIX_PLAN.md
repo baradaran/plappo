@@ -75,11 +75,16 @@ are currently gameable, self-reported, or disconnected from real errors.
 ## Phase 3 — Content depth, accessibility, polish, QA
 - ☐ **P7** Task-based prompts in story generation (additive on story `questions`);
   small generation eval. *(largest item — may split/defer)*
-- ☐ **U2** Real reading progress (IntersectionObserver); remove fake "first-two-lit".
-- ☐ **U5** A11y: tappable words as real buttons (role/tabindex/keys/aria); don't rely
-  on color alone; stop autoplaying TTS, add mute.
-- ☐ **U6** Offline fallback rotation (cache last N stories per level).
-- ☐ **U7** Responsive desktop reading layout, or document the 412px phone mock.
+- ☑ **U2** Real reading progress: dots now light by scroll position
+  (`paintProgress`), all lit if the story fits without scrolling; no fake default.
+- ☑ **U5** A11y + autoplay: glossed words are keyboard-reachable buttons
+  (role/tabindex/Enter-Space/aria-label); diff `del`/`ins` carry was/corrected
+  labels (not color-only); auto-`speak()` removed on correct-answer and reveal —
+  TTS now only via the explicit 🔊 / "Hear it" buttons.
+- ☑ **U6** Offline rotation: real stories cached per level (last 5); offline
+  serves a random saved story, falling back to the hardcoded one only if none.
+- ☑ **U7** Documented the 412px phone-frame mock + `?demo=1` in `prototype/README`
+  (chose to document rather than rework into a responsive layout).
 - ☐ **U8** Manual QA checklist over every open/close/first-run/offline/error path.
 
 ---
