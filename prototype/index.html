@@ -214,7 +214,7 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .skill .nm .ck{color:var(--good)}
 .skill .tr{flex:1;height:8px;background:#ece5d6;border-radius:5px;overflow:hidden}
 .skill .tr>i{display:block;height:100%;border-radius:5px;transition:width 600ms var(--t)}
-.skill .pc{width:38px;text-align:right;color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+.skill .pc{width:78px;text-align:right;color:var(--muted);font-size:12px}
 .cando{margin-top:14px;padding:14px 16px;border-radius:var(--r-m);background:var(--brand-tint);
   border:1px solid #ecd8cd;font-size:14px;color:#7a3c25;line-height:1.5}
 .levels{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
@@ -451,6 +451,9 @@ const LEVELCFG={
  C1:{next:'C2',vocab:6000,skills:['SUBJUNCTIVE_I','PASSIVE','NOMINALIZATION','PARTICIPIAL','CONNECTOR','VERB_POSITION']},
  C2:{next:null,vocab:8000,skills:['MODAL_PARTICLE','NOMINALIZATION','PARTICIPIAL','SUBJUNCTIVE_I','CONNECTOR','PASSIVE']}};
 const MASTER=80;
+/* Qualitative band for a skill score (U4): the score is a hedged estimate, so the
+   UI shows a band, not a misleadingly precise integer. MASTER (80) = "Mastered". */
+function skillBand(v){return v>=MASTER?'Mastered':v>=55?'Building':v>=25?'Started':v>0?'New':'—';}
 const CANDO={A1:'order food, introduce yourself, ask simple questions',
  A2:'talk about your day, the past, and make plans',B1:'handle most travel situations and explain opinions',
  B2:'discuss abstract topics and argue a point clearly',C1:'use German flexibly for work and study',
@@ -554,7 +557,6 @@ const DRILLS={
  SEPARABLE_VERB:{why:'separable prefix to the end',en:'I call my mother every day.',
    ans:['Ich','rufe','meine','Mutter','jeden','Tag','an']},
  _default:{why:'word order',en:'We play football on Saturday.',ans:['Wir','spielen','am','Samstag','Fußball']}};
-const PRAISE=['Strong sentence.','Nice — almost there.','Good German.','Well done.','Close!'];
 
 /* ============ navigation ============ */
 let qi=0;
@@ -717,6 +719,12 @@ function renderFeedback(fb,original){const slot=document.getElementById('fbslot'
   wrote=wrote.replace(esc(primary.original_fragment),
    `<del id="d0">${esc(primary.original_fragment)}</del><ins id="i0">${esc(primary.correction||'')}</ins>`);}
  const m=CAT[primary.category]||{l:primary.category,c:'#999'};
+ // Contingent praise (U3): name a real strength the learner actually showed
+ // (from `demonstrated`), not a random compliment. Falls back to neutral.
+ const errCats=new Set(errs.map(e=>e.category));
+ const strengths=(fb.demonstrated||[]).filter(c=>!errCats.has(c)&&CAT[c]).map(c=>CAT[c].l);
+ const lead=strengths.length?`Your ${strengths[0]} was right — one thing to fix:`
+   :`Good effort — one thing to fix:`;
  const moreBtn=rest.length?`<button class="more" onclick="this.nextElementSibling.style.display='block';this.remove()">
    + ${rest.length} more ${rest.length>1?'things':'thing'} to polish later</button>
    <div style="display:none">${rest.map(e=>{const mm=CAT[e.category]||{l:e.category,c:'#999'};
@@ -726,7 +734,7 @@ function renderFeedback(fb,original){const slot=document.getElementById('fbslot'
     </div></div>`;}).join('')}</div>`:'';
  slot.innerHTML=`<div class="fb">
   <div class="top"><div class="verdict"><span class="ring2" style="background:var(--warn)">!</span>
-   ${PRAISE[Math.floor(Math.random()*4)]} One thing to fix:</div></div>
+   ${lead}</div></div>
   <div class="diff">${wrote}</div>
   <div class="note"><span class="dot" style="background:${m.c}"></span><div>
    <div class="tag" style="color:${m.c}">${m.l}</div>
@@ -866,10 +874,12 @@ function checkDrill(){const ok=drill.built.join(' ')===drill.ans.join(' ');
 /* ============ PROFILE ============ */
 function renderProfile(){const p=levelProgress(),cfg=p.cfg,ga=grammarAchieved(),va=vocabAchieved();
  if(profile.justLeveled){toast('🎉 Level up — you reached '+profile.level+'!');profile.justLeveled=null;saveProfile();}
+ // U4: show a qualitative band, not a raw integer — the level is a hedged
+ // estimate (the "≈" elsewhere), so don't imply two-digit precision.
  const skills=cfg.skills.map(s=>{const v=profile.skills[s]||0,m=CAT[s],done=v>=MASTER;
   return`<div class="skill"><span class="nm">${m.l}${done?' <span class="ck">✓</span>':''}</span>
    <span class="tr"><i style="width:${v}%;background:${m.c}"></i></span>
-   <span class="pc">${v}</span></div>`;}).join('');
+   <span class="pc">${skillBand(v)}</span></div>`;}).join('');
  const need=cfg.skills.filter(s=>(profile.skills[s]||0)<MASTER).map(s=>CAT[s].l);
  const cssBrand=getComputedStyle(document.documentElement).getPropertyValue('--brand').trim();
  document.getElementById('profileBody').innerHTML=`

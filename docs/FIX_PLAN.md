@@ -46,8 +46,12 @@ are currently gameable, self-reported, or disconnected from real errors.
   bands, tags each lemma with its lowest band); `/api/feedback` returns
   `content_lemmas`; client tracks `seenLemmas` and counts distinct content lemmas
   regardless of errors (migrated counts preserved via `max`). Unit-tested.
-- ☐ **U3** Contingent praise from real `demonstrated` strengths; drop the RNG.
-- ☐ **U4** One precision register — banded skill labels/bars, hide raw integers.
+- ☑ **U3** Contingent praise: verdict now names a real strength from `demonstrated`
+  ("Your Verb position was right — one thing to fix"), falling back to neutral. RNG
+  `PRAISE[]` removed.
+- ☑ **U4** Single precision register: per-skill scores render as bands
+  (Mastered/Building/Started/New) via `skillBand()`, not raw integers; bar width
+  still reflects the underlying value. Vocab keeps a genuine count.
 
 ## Phase 2 — Close the feedback → retention loop
 - ☐ **P6** On each error, mint a grammar cloze review card from `corrected_sentence`
@@ -97,3 +101,6 @@ are currently gameable, self-reported, or disconnected from real errors.
   trustworthiness; `--mock` verified mechanics + back-compat (`run_eval --mock`
   still passes). ⚠️ Run `skills_demonstrated_eval.py` live (Vertex) before relying
   on the field — until then the UI degrades safely (no credit when unsure).
+- **U3/U4 done** — Phase 1 complete. Praise is now earned (names a real
+  `demonstrated` strength); skill bars show qualitative bands, not pseudo-precise
+  integers. Both ride on P1's `demonstrated` signal.
