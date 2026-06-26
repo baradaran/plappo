@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Plappo — Pedagogical Foundations & the Challenge of LLM-Generated Learning Content</title>
+<style>
+  @page { size: A4; margin: 20mm 18mm; }
+  :root{
+    --ink:#1d2230; --soft:#54607a; --line:#d9deea; --bg:#fbfcfe;
+    --accent:#2d5fa6; --good:#1f7a4d; --warn:#9a6b00; --bad:#a5322c;
+    --chip:#eef2fb;
+  }
+  *{ box-sizing:border-box; }
+  html{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  body{
+    font-family:"Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color:var(--ink); line-height:1.5; font-size:10.6pt; margin:0;
+  }
+  h1,h2,h3,h4{ line-height:1.2; color:var(--ink); }
+  h1{ font-size:25pt; margin:0 0 6px; letter-spacing:-.4px; }
+  h2{ font-size:16pt; margin:30px 0 8px; padding-bottom:5px; border-bottom:2px solid var(--accent); }
+  h3{ font-size:12.5pt; margin:18px 0 5px; color:var(--accent); }
+  h4{ font-size:11pt; margin:13px 0 3px; }
+  p{ margin:6px 0; }
+  a{ color:var(--accent); text-decoration:none; }
+  small{ color:var(--soft); }
+  code{ font-family:"Cascadia Code","Consolas",monospace; font-size:9pt; background:#f0f2f7; padding:1px 4px; border-radius:3px; }
+  ul,ol{ margin:6px 0 6px 0; padding-left:20px; }
+  li{ margin:3px 0; }
+  .muted{ color:var(--soft); }
+  .lead{ font-size:11.5pt; color:var(--soft); }
+  .page-break{ page-break-before:always; }
+  .avoid-break{ break-inside:avoid; page-break-inside:avoid; }
+
+  /* cover */
+  .cover{ padding:40px 0 10px; border-bottom:3px solid var(--accent); margin-bottom:14px; }
+  .kicker{ text-transform:uppercase; letter-spacing:2px; font-size:9pt; color:var(--accent); font-weight:700; }
+  .cover .sub{ font-size:13pt; color:var(--soft); margin-top:8px; max-width:60ch; }
+  .meta{ margin-top:18px; font-size:9.5pt; color:var(--soft); }
+  .meta b{ color:var(--ink); }
+
+  /* chips / flags */
+  .chip{ display:inline-block; font-size:8.2pt; font-weight:700; padding:1px 7px; border-radius:10px;
+         background:var(--chip); color:var(--accent); margin-right:4px; white-space:nowrap; }
+  .flag{ display:inline-block; font-size:8pt; font-weight:700; padding:1px 6px; border-radius:3px; }
+  .f-debated{ background:#fff3d6; color:var(--warn); }
+  .f-free{ background:#e3f4ea; color:var(--good); }
+  .f-risk{ background:#fbe4e2; color:var(--bad); }
+
+  /* callouts */
+  .box{ border:1px solid var(--line); border-radius:8px; padding:12px 14px; margin:12px 0; background:var(--bg); }
+  .box.good{ border-left:4px solid var(--good); }
+  .box.warn{ border-left:4px solid var(--warn); }
+  .box.bad{ border-left:4px solid var(--bad); }
+  .box.accent{ border-left:4px solid var(--accent); }
+  .box h4{ margin-top:0; }
+
+  /* tables */
+  table{ border-collapse:collapse; width:100%; margin:10px 0; font-size:9.4pt; }
+  th,td{ border:1px solid var(--line); padding:6px 8px; text-align:left; vertical-align:top; }
+  th{ background:#eef2fb; color:var(--ink); font-weight:700; }
+  tr{ break-inside:avoid; }
+  td.id{ font-weight:700; color:var(--accent); white-space:nowrap; }
+
+  /* two-column pro/con */
+  .cols{ display:flex; gap:14px; margin:10px 0; }
+  .col{ flex:1; border:1px solid var(--line); border-radius:8px; padding:10px 12px; }
+  .col.pro{ background:#f1f8f3; border-color:#cbe6d4; }
+  .col.con{ background:#fdf2f0; border-color:#f1d3ce; }
+  .col h4{ margin:0 0 4px; }
+  .col.pro h4{ color:var(--good); }
+  .col.con h4{ color:var(--bad); }
+  .col ul{ padding-left:16px; }
+
+  .toc{ font-size:10pt; }
+  .toc li{ margin:2px 0; }
+  .src{ font-size:9pt; color:var(--soft); }
+  .principle-tag{ font-weight:700; color:var(--accent); }
+  footer{ margin-top:26px; padding-top:8px; border-top:1px solid var(--line); font-size:8.5pt; color:var(--soft); }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="kicker">Plappo · Internal Research Brief</div>
+  <h1>Pedagogy, Sources &amp; the Challenge of<br>LLM-Generated Language-Learning Content</h1>
+  <div class="sub">What learning science we built on, where it comes from, where it is contested — and an honest account of using a large language model to generate teaching content: what it buys us, how it fails, and what we did about it.</div>
+  <div class="meta">
+    <b>Audience:</b> people I want to walk through what I looked into &nbsp;·&nbsp;
+    <b>Scope:</b> the German-learning engine (Plappo) &nbsp;·&nbsp;
+    <b>Date:</b> 25 June 2026<br>
+    <b>Source of truth:</b> <code>docs/PEDAGOGY_ROADMAP.md</code>, <code>docs/DECISIONS.md</code> (ADR-001 … ADR-023), and the <code>eval/</code> engine.
+  </div>
+</div>
+
+<div class="box accent avoid-break">
+  <h4>How to read this document</h4>
+  <p style="margin:4px 0">Three things are deliberately kept separate so you can judge them separately:</p>
+  <ul style="margin:4px 0">
+    <li><b>The learning science</b> — the principles, who established them, and (importantly) where the field genuinely disagrees. Contested claims carry a <span class="flag f-debated">debated</span> flag rather than being hidden.</li>
+    <li><b>What Plappo actually built</b> on each principle — traced to a specific architectural decision (ADR-xxx) so a claim is checkable in code, not marketing.</li>
+    <li><b>The LLM-generation problem</b> — the long middle of this document. Generating pedagogically-correct language content with an LLM is the riskiest thing we do; it gets a full pros/cons / failure-mode treatment.</li>
+  </ul>
+  <p class="muted" style="margin:4px 0">Honesty rule carried over from the codebase: <i>label approximations, keep caveats, never claim more than the evals measured.</i></p>
+</div>
+
+<h2>Contents</h2>
+<ol class="toc">
+  <li>Executive summary — the bet, and the honest version of it</li>
+  <li>The seven principles &amp; their sources (with what's contested)</li>
+  <li>How each principle became a product decision</li>
+  <li>Content-design pedagogy: grammar-first, capped vocabulary, native register</li>
+  <li><b>LLM-generated content for pedagogy — the core of this brief</b>
+    <ul>
+      <li>4 ways it genuinely helps</li>
+      <li>The headline failure: CEFR level drift (with our own reproduction)</li>
+      <li>A catalogue of failure modes</li>
+      <li>Pros / cons, side by side</li>
+      <li>What we built to contain it (the gating architecture)</li>
+      <li>The honest ceiling: automated feedback vs. a human teacher</li>
+    </ul>
+  </li>
+  <li>How we keep ourselves honest — the measurement plan</li>
+  <li>Open risks we have not closed</li>
+  <li>Annotated bibliography (every claim traceable)</li>
+</ol>
+
+<!-- ================= 1 ================= -->
+<div class="page-break"></div>
+<h2>1 · Executive summary</h2>
+<p class="lead">Most language apps optimise for engagement — streaks, taps, recognition. Plappo optimises for the things that actually build a second language: <b>meaningful input, real production, and focused feedback on a forgetting-proof schedule</b>, adapting to a <i>measured</i> level rather than a self-declared one.</p>
+
+<p>Concretely the loop is: read a level-appropriate German story → answer in your <b>own written German</b> → get <b>focused grammar feedback</b> (one or two treatable errors, not every mistake) → review the things you got wrong on a <b>spaced schedule</b>. Every one of those four verbs maps to a body of research, and every mapping is written down in the codebase so it can be checked.</p>
+
+<p><b>The honest version:</b> the <i>core</i> findings we lean on — retrieval practice, spacing, the generation effect, focused feedback on rule-based errors — are robust and replicated. The famous <i>headline</i> versions — Krashen's exact <i>i+1</i>, Bloom's exact "2&nbsp;sigma," "correction always works" — are influential but contested. We build on the solid parts and flag the rest. And the single most fragile component is the one this brief is mostly about: <b>using an LLM to generate the input</b>. An LLM told to "write at A2" does not reliably write at A2 — this is now an empirically documented effect, and we reproduced it ourselves. So we never trust the prompt; we gate the output.</p>
+
+<div class="box good avoid-break">
+  <h4>The one-sentence takeaway for a skeptical reader</h4>
+  <p>The pedagogy is grounded and mostly conservative; the risk is concentrated in LLM-generated content, and the engineering response to that risk is to treat the model as an <i>untrusted content source</i> behind a measurable gate — not as a teacher.</p>
+</div>
+
+<!-- ================= 2 ================= -->
+<h2>2 · The seven principles &amp; their sources</h2>
+<p>Everything in the product ladders up to seven principles. Each is given here with its grounding and — where it matters — the part the field argues about.</p>
+
+<table>
+  <thead><tr><th style="width:34px">#</th><th style="width:30%">Principle</th><th>Grounded in &amp; what's contested</th></tr></thead>
+  <tbody>
+    <tr>
+      <td class="id">P1</td>
+      <td><b>Input before output.</b> Meaningful, slightly-above-level input (<i>i+1</i>); grammar met <i>in context</i>, not as isolated rules.</td>
+      <td>Krashen, <i>Comprehensible Input</i>; Long, <i>Focus on Form</i> (not Forms). <span class="flag f-debated">debated</span> The <i>i+1</i> construct is criticised as not precisely testable — we use it as a design heuristic, not a measurement.</td>
+    </tr>
+    <tr>
+      <td class="id">P2</td>
+      <td><b>Production is where acquisition happens.</b> Producing language forces deeper processing than recognising it.</td>
+      <td>Swain, <i>Output Hypothesis</i>; Schmidt, <i>Noticing</i>; Slamecka &amp; Graf, the <i>Generation Effect</i>. The generation effect is a robust lab finding.</td>
+    </tr>
+    <tr>
+      <td class="id">P3</td>
+      <td><b>Feedback must be focused, timely, actionable.</b> A few treatable errors — not every mistake.</td>
+      <td>Ferris &amp; Bitchener (focused written corrective feedback); Hattie &amp; Timperley (feed-up / feed-back / feed-forward). <span class="flag f-debated">debated</span> Truscott argued correction is useless; the resolution is "it works <i>when focused</i> on treatable, rule-based errors."</td>
+    </tr>
+    <tr>
+      <td class="id">P4</td>
+      <td><b>You remember by retrieving on a schedule.</b> Spaced, interleaved, effortful recall.</td>
+      <td>Bjork (desirable difficulties); Roediger &amp; Karpicke (testing effect); Cepeda (spacing meta-analysis); <b>FSRS</b> as the concrete scheduler. The strongest, least-contested cluster in the whole document.</td>
+    </tr>
+    <tr>
+      <td class="id">P5</td>
+      <td><b>Motivation is intrinsic or it's fragile.</b> Competence, autonomy, relatedness beat points.</td>
+      <td>Deci &amp; Ryan (Self-Determination Theory; overjustification); Bloom (Mastery); Csíkszentmihályi (Flow). <span class="flag f-debated">debated</span> Bloom's exact 2&nbsp;sigma is aspirational and contested.</td>
+    </tr>
+    <tr>
+      <td class="id">P6</td>
+      <td><b>Adapt to the individual.</b> 1:1 tutoring is the gold standard; an error profile makes it scalable.</td>
+      <td>Bloom (2-sigma); Vygotsky (ZPD / dynamic assessment); learner-corpus research. AI-tutoring efficacy is moving fast (2024–2026) — treat any single study as provisional.</td>
+    </tr>
+    <tr>
+      <td class="id">P7</td>
+      <td><b>Grammar is the target; vocabulary is the medium.</b> Train form explicitly; let vocabulary be acquired incidentally through repeated meaningful exposure — capped per level, native in register.</td>
+      <td>Nation (frequency bands, coverage, incidental learning); Hu &amp; Nation (~98% coverage threshold); Wray (formulaic language); Gilmore (authenticity). The coverage threshold is a strong, empirical anchor.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="box warn avoid-break">
+  <h4>Why we keep the contested flags visible</h4>
+  <p>It would be easy to cite Krashen and Bloom as settled fact. They are not. Krashen's input hypothesis is enormously influential <i>and</i> criticised for being unfalsifiable; Bloom's 2-sigma is famous <i>and</i> hard to replicate at that magnitude. Surfacing the disagreement is the point — it tells you which parts of the foundation are load-bearing (P2, P3-focused, P4, P7-coverage) and which are inspirational framing (P1's exact <i>i+1</i>, P5's exact 2σ).</p>
+</div>
+
+<!-- ================= 3 ================= -->
+<div class="page-break"></div>
+<h2>3 · From principle to product decision</h2>
+<p>The link between a research principle and a shipped behaviour is recorded as an Architecture Decision Record. The ones that carry pedagogy:</p>
+
+<table>
+  <thead><tr><th style="width:78px">ADR</th><th style="width:34%">Decision</th><th>Pedagogical reason &amp; caveat</th></tr></thead>
+  <tbody>
+    <tr><td class="id">001 / 003</td><td>Validate the feedback engine <i>before</i> any UI; headline metric = <b>false-positive rate on correct sentences</b>.</td><td><span class="principle-tag">P3.</span> A tutor that "corrects" good German actively teaches mistakes and destroys trust. Result: <b>0% false-positive, A1–C2</b>. "Don't be wrong" was proven first.</td></tr>
+    <tr><td class="id">002</td><td>Schema-constrained JSON for every LLM call.</td><td>Parseable, enum-bounded output; the scorer and UI never see a surprise. The foundation that makes everything else measurable.</td></tr>
+    <tr><td class="id">004 / 007</td><td>A single closed <b>error taxonomy</b> (20 categories) as the one source of truth.</td><td>The model can only emit labels we score — no drift between layers. <span class="flag f-debated">caveat</span> the level→grammar mapping is a <i>standard-progression heuristic</i>, not an official CEFR syllabus (none is machine-readable).</td></tr>
+    <tr><td class="id">008</td><td>Real <b>FSRS-5</b> spaced repetition (official default parameters; published difficulty/stability equations).</td><td><span class="principle-tag">P4.</span> Predicts <i>when</i> you are about to forget and reviews just in time. Anki's default scheduler since 2023; the highest-leverage retention upgrade.</td></tr>
+    <tr><td class="id">009</td><td>Level is <b>measured, not set</b>; grammar and vocabulary tracked as two axes.</td><td><span class="principle-tag">P5/P6.</span> Self-assessment is unreliable; hand-setting breaks comprehensible input. CEFR explicitly allows jagged profiles. <span class="flag f-debated">caveat</span> "grammar level" isn't an official scale — presented as "≈".</td></tr>
+    <tr><td class="id">010</td><td>Focused feedback: lead with <b>one</b> error, collapse the rest — ordered engine-side by pedagogical priority.</td><td><span class="principle-tag">P3.</span> Ferris/Bitchener: focused correction on treatable errors beats comprehensive correction, which overloads and demotivates.</td></tr>
+    <tr><td class="id">011 / 012</td><td>Don't trust "write at level X" — <b>gate generated stories</b> with a different-model judge; over-level words OK <i>if glossed</i>.</td><td><span class="principle-tag">P1.</span> The "+1" of i+1 is supported new vocabulary. This is the central LLM-risk mitigation — see §5.</td></tr>
+    <tr><td class="id">013</td><td>Story content: <b>generate once, select per user, grow the library</b>.</td><td>A CEFR level is shared across users; regenerating per read re-pays cost and latency forever. Converts a per-read variable cost into a one-time fixed cost, and moves the drift-gate to authoring time where human QA can live.</td></tr>
+    <tr><td class="id">014</td><td>UI: literary serif for content, quiet sans for chrome; one hero action; muted semantics (never alarm-red); animated error→fix diff.</td><td>Reduce extraneous cognitive load (Sweller); engineer "noticing" (Schmidt); keep errorful learning safe; avoid the gamification overjustification trap.</td></tr>
+    <tr><td class="id">018–022</td><td>Grammar-first cloze; capped vocabulary with a measurable coverage gate; meaning as an ephemeral gloss; incidental vocab via carrier-word recycling; native register as a second judge axis.</td><td><span class="principle-tag">P7.</span> The content-design pedagogy — its own section (§4).</td></tr>
+    <tr><td class="id">023</td><td>Analytics are opt-in, pseudonymous, no-PII, with GDPR/BDSG rights.</td><td>We can optimise FSRS and calibrate the judge from real learning data without identifying anyone — and learner text sent to the LLM is a separate, documented legal flow.</td></tr>
+  </tbody>
+</table>
+
+<!-- ================= 4 ================= -->
+<h2>4 · Content-design pedagogy (P7): simple words, real language</h2>
+<p>This is where the most opinionated teaching choices live, and where LLM generation does the most work. Four decisions:</p>
+
+<h3>4.1 Grammar is the target — the blank is always a grammatical function</h3>
+<p>Every training item is a cloze whose gap tests a <b>grammatical decision</b> (case, adjective/verb ending, verb position, separable prefix, auxiliary, preposition). The cue supplies the <i>meaning</i> (the base form), so the only thing produced is the <b>form</b>: <code>Ich helfe ___ Bruder. (mein)</code> → <i>meinem</i> <span class="chip">CASE</span>. Grading is exact-match — <b>no LLM call</b> — and it feeds the same per-skill grammar profile, so doing review literally raises your measured grammar level.<br>
+<span class="src">Why: the moat is German grammatical accuracy, not vocab recall; Schmidt's <i>Noticing</i> and the generation effect apply to <i>form</i>. (ADR-018)</span></p>
+
+<h3>4.2 Vocabulary is capped per level — and the cap is measured, not vibed</h3>
+<p>Content draws from a per-level allowed lexicon (cumulative frequency bands; Goethe lists where they exist) plus a small <b>i+1 budget</b> of new words that must be glossed. The story gate adds a <b>deterministic lexical-coverage check</b>: lemmatise the text (<code>simplemma</code>, which handles irregulars like <i>fuhr→fahren</i>), band by <code>wordfreq</code> Zipf frequency, compute the in-band fraction, reject if unsupported out-of-band content words exceed budget.<br>
+<span class="src">Why: reading comprehension needs ~95–98% known-word coverage (Hu &amp; Nation 2000) — the cap is <i>what makes input comprehensible</i>, not a limitation. <span class="flag f-debated">caveat</span> Zipf frequency is a principled but imperfect CEFR proxy, so the threshold stays lenient — the gate catches <i>gross</i> drift; the LLM judge handles nuance. (ADR-019)</span></p>
+
+<h3>4.3 Meaning is a subtle comprehension aid, never a trained or featured thing</h3>
+<p>A word lookup is an ephemeral crutch: a quiet gloss — <b>no flashcard, no XP, no "added to your deck."</b> Its only job is to make <i>this sentence</i> comprehensible now.<br>
+<span class="src">Why: incidental acquisition through meaningful input (Krashen; Webb; Nation), not deliberate paired-associate study. (ADR-020)</span></p>
+
+<h3>4.4 Vocabulary is acquired as a by-product of grammar practice</h3>
+<p>A gloss-tap is an <b>"I don't know this word" signal</b>. Signalled (or never-met) words are preferentially reused as the <b>carrier words</b> in upcoming grammar cloze items — so you meet them again, in natural context, while practising grammar. Unknown-status <i>decays</i> as you stop looking a word up (several no-lookup encounters → treated as known).<br>
+<span class="src">Why: words stick after ~8–12 meaningful encounters (Nation; Webb), not via definitions. <span class="flag f-debated">caveat</span> "didn't look up" ≠ "knows it" — a soft prior over several encounters, never a verdict. (ADR-021)</span></p>
+
+<h3>4.5 The German must be native-authentic <i>within</i> the cap</h3>
+<p>Cap the <b>range</b> (which words/structures), never the <b>naturalness</b>. Within an A2 lexicon you can write textbook German or the German a native actually uses — we require the latter: real collocations (<i>eine Entscheidung treffen</i>, not <i>machen</i>), natural connectors and word order, modal particles (<i>doch, mal, eben</i>), common contractions (<i>ins, am, gibt's</i>). The story judge scores a separate <b>naturalness</b> axis (native vs. textbook/translationese); the gate ships only <code>naturalness≥4/5</code> and re-styles on a miss.<br>
+<span class="src">Why: native-like fluency is largely formulaic/collocational (Wray), not vocabulary breadth; authentic input beats contrived textbook language (Gilmore). Range and naturalness are independent axes — <b>simple words, real language</b>. (ADR-022)</span></p>
+
+<!-- ================= 5 — THE CORE ================= -->
+<div class="page-break"></div>
+<h2>5 · LLM-generated content for pedagogy</h2>
+<p class="lead">This is the part I most want people to understand. An LLM is the only practical way to produce an endless supply of level-appropriate, on-theme, grammatically-targeted German stories. It is also a confident, fluent, and <i>unreliable</i> author. The whole engineering story here is: <b>get the upside, and never let the model be the last word.</b></p>
+
+<h3>5.1 Where it genuinely helps</h3>
+<table>
+  <thead><tr><th style="width:26%">Capability</th><th>Why it matters pedagogically</th></tr></thead>
+  <tbody>
+    <tr><td><b>Volume of comprehensible input</b></td><td>Acquisition scales with the <i>volume</i> of input (the extensive-reading / graded-reader evidence; Day &amp; Bamford; Nation). One story a day isn't enough to move a level. An LLM makes a large graded library economically feasible where hand-authoring does not.</td></tr>
+    <tr><td><b>On-demand personalisation</b></td><td>It can weave a learner's specific weak skills and looked-up words into a fresh story (ADR-021) — input that <i>targets</i> the detected weakness. That's the move from "we found your gap" to "here's input that closes it" (P6).</td></tr>
+    <tr><td><b>Structured, taggable output</b></td><td>Schema-constrained generation (ADR-002) yields a story <i>plus</i> its glossary, comprehension questions, a communicative writing task (TBLT), the grammar points it exercises, and a theme — in one call. The tags are what make later cheap selection (ADR-013) possible.</td></tr>
+    <tr><td><b>Structured feedback at scale</b></td><td>For the grammar tutor, the model returns error span + taxonomy category + minimal correction + one-line explanation + the skills demonstrated correctly. Validated at <b>0% false-positive, A1–C2</b> — the thing that makes the whole loop trustworthy.</td></tr>
+  </tbody>
+</table>
+
+<h3>5.2 The headline failure: CEFR level drift</h3>
+<div class="box bad avoid-break">
+  <h4>Telling an LLM "write at A2" does not reliably produce A2</h4>
+  <p>This is now empirically documented — <i>"Alignment Drift in CEFR-prompted LLMs for Interactive Spanish Tutoring,"</i> arXiv&nbsp;<a href="https://arxiv.org/abs/2505.08351">2505.08351</a>&nbsp;(2025): models measurably drift off a prompted CEFR level over a conversation. <b>We reproduced it ourselves</b> — a longer-story sweep leaked over-level words into A2 stories. The conclusion baked into the architecture (ADR-011): <b>do not trust the generation prompt</b>; verify the output.</p>
+</div>
+<p>Drift is insidious because the output still <i>looks</i> good — it's fluent, on-topic, plausibly leveled. A human skimming it would likely approve it. The leak is a handful of B1/B2 content words inside an A2 story, which is exactly enough to push the text below the ~98% known-word coverage threshold and break comprehensibility for the actual A2 learner. The failure is invisible to vibes and only visible to measurement.</p>
+
+<h3>5.3 A catalogue of failure modes (and the mitigation for each)</h3>
+<table>
+  <thead><tr><th style="width:24%">Failure mode</th><th style="width:40%">What it looks like</th><th>Mitigation in Plappo</th></tr></thead>
+  <tbody>
+    <tr><td><b>Level drift (too hard)</b></td><td>Over-level vocab/grammar leaks into a story for a lower level; breaks <i>i+1</i> comprehensibility.</td><td>Different-model judge classifies above/on/below + a deterministic in-band coverage gate; regenerate steering away from the offending words (ADR-011/012/019).</td></tr>
+    <tr><td><b>Level drift (too easy)</b></td><td>A "B1" story that's really A2 — no acquisition, wasted read.</td><td>The judge's three-way classification flags <i>below</i>, not just above.</td></tr>
+    <tr><td><b>Stilted "Lehrbuchdeutsch"</b></td><td>Technically in-level but reads as translated-from-English textbook German; teaches unnatural phrasing.</td><td>A separate <b>naturalness</b> judge axis (1–5) + <code>unnatural_phrases</code> flags; ship only ≥4, otherwise re-style (ADR-022).</td></tr>
+    <tr><td><b>Inventing errors in correct German</b> (feedback side)</td><td>The tutor "corrects" a sentence that was already right — the single most trust-destroying failure.</td><td>Headline metric is the <i>false-positive rate on correct sentences</i>; ~half the eval set is already-correct; explicit "do NOT rewrite correct German" rule (ADR-003).</td></tr>
+    <tr><td><b>Self-agreement / grading itself</b></td><td>Using the same model to write and to judge — it rubber-stamps its own drift.</td><td>Generate with one model, judge with a <i>different</i> one (ADR-011).</td></tr>
+    <tr><td><b>Judge is not ground truth</b></td><td>The "stays-in-level" checker is itself an LLM — a signal, not a certified CEFR grade.</td><td>Acknowledged explicitly; backed by a <i>deterministic</i> coverage check so the gate doesn't rest on the LLM alone; calibration against human ratings is an open task.</td></tr>
+    <tr><td><b>Hallucinated glossary / wrong lemma</b></td><td>A gloss with the wrong part of speech or a lemma that doesn't match the surface form silently corrupts the coverage check and the carrier-word loop.</td><td>Schema requires surface form <i>exactly as it appears</i> + lemma + POS; coverage lemmatises independently with <code>simplemma</code> rather than trusting the model's lemma.</td></tr>
+    <tr><td><b>Cost / latency in the request path</b></td><td>Generating + gating on every read re-pays the cost forever and adds latency every time.</td><td>Generate-once / select-per-user library; most reads hit the corpus, not a generation call (ADR-013/016).</td></tr>
+    <tr><td><b>Subtle factual / cultural errors</b></td><td>Plausible-but-wrong facts in a "nature" or "city" story the learner absorbs as true.</td><td>Partly mitigated by short, simple, low-stakes content; <i>not</i> fully solved — flagged as residual risk (§7).</td></tr>
+  </tbody>
+</table>
+
+<h3>5.4 Pros and cons, side by side</h3>
+<div class="cols avoid-break">
+  <div class="col pro">
+    <h4>What LLM generation buys us</h4>
+    <ul>
+      <li>Effectively unlimited graded input → the <b>volume</b> extensive reading needs.</li>
+      <li>Real personalisation: weak-skill targeting and looked-up-word recycling baked into fresh stories.</li>
+      <li>One structured call yields story + glossary + questions + communicative task + tags.</li>
+      <li>Trustworthy structured grammar feedback (0% false-positive, A1–C2).</li>
+      <li>Native-register prose is achievable <i>within</i> a capped lexicon — "simple words, real language."</li>
+      <li>Cost collapses to near-zero when amortised via the shared library.</li>
+    </ul>
+  </div>
+  <div class="col con">
+    <h4>What it costs / risks</h4>
+    <ul>
+      <li>Confidently off-level output that <i>looks</i> fine (the drift problem).</li>
+      <li>Every gate is itself probabilistic — a judge LLM is a signal, not truth.</li>
+      <li>Naturalness and factual accuracy are not guaranteed by the prompt.</li>
+      <li>Validation is ongoing work, not a one-time pass — models change under you.</li>
+      <li>Automated feedback is real but <b>weaker than a human teacher</b> (§5.6).</li>
+      <li>Privacy/legal surface: learner text goes to a third-party processor (ADR-023).</li>
+    </ul>
+  </div>
+</div>
+
+<h3>5.5 What we built to contain it — the gating architecture</h3>
+<p>The design principle is to treat the model as an <b>untrusted content source</b> and wrap it in checks that get progressively cheaper and more deterministic:</p>
+<ol>
+  <li><b>Constrain the output shape</b> — schema-enforced JSON so the result is always parseable and tag-bounded (ADR-002).</li>
+  <li><b>Judge with a different model</b> — level classification (above/on/below) + a naturalness score, by a model that didn't write the text (ADR-011).</li>
+  <li><b>Add a deterministic backstop</b> — lemmatise + frequency-band the actual words and compute in-band coverage; this needs no model and can't be talked into agreeing with itself (ADR-019).</li>
+  <li><b>Apply the i+1 exception</b> — over-level words are allowed <i>only</i> if the story glosses them (supported new vocabulary is the legitimate "+1") (ADR-012).</li>
+  <li><b>Regenerate with steering, then give up</b> — on a miss, re-prompt away from the offending words and stilted phrasings, bounded by <code>max_tries</code>; a story that never passes is simply not shipped.</li>
+  <li><b>Move the gate to authoring time</b> — because content is generated into a shared library, the expensive rigorous gate (Pro model, full datasets) runs <i>offline</i>, where human QA can also sit, and runtime just selects (ADR-013/016).</li>
+</ol>
+<div class="box accent avoid-break">
+  <h4>The pattern, stated generally</h4>
+  <p>For pedagogical LLM content: <b>generate cheap, verify expensive, and keep at least one verifier that is not itself an LLM.</b> The deterministic coverage check is the load-bearing one — it's the only part of the pipeline that cannot be charmed by fluent output.</p>
+</div>
+
+<h3>5.6 The honest ceiling: automated feedback is not a teacher</h3>
+<div class="box warn avoid-break">
+  <p>A meta-analysis of feedback channels finds teacher online feedback (g ≈ 2.25) ≫ automated (g ≈ 0.70) ≫ peer. Automated feedback — what we ship — <b>helps, but is not as strong as a good human teacher.</b> The honest framing for Plappo is therefore <i>scalable practice between lessons</i>, not a teacher replacement. A separate 2025 meta-analysis also finds near-zero benefit of LLM tools to <i>self-regulation</i> over short studies — so we must not assume the tool builds study habits; we design for them (FSRS cadence, reflection) and measure over months.</p>
+</div>
+
+<!-- ================= 6 ================= -->
+<div class="page-break"></div>
+<h2>6 · How we keep ourselves honest — the measurement plan</h2>
+<p>The project's spine is "prove the risky thing with an eval <i>first</i>, then build UI on top." The signals we hold ourselves to:</p>
+<table>
+  <thead><tr><th style="width:55%">Signal we watch</th><th>What it proves</th></tr></thead>
+  <tbody>
+    <tr><td>Engine false-positive rate stays ~0% as content scales</td><td>P3 — trust (the make-or-break metric)</td></tr>
+    <tr><td>Errors in a skill <i>decline</i> over spaced repetitions (not just first-try accuracy)</td><td>P4 — durable retention, not cramming</td></tr>
+    <tr><td>Time-to-level-up correlates with real CEFR can-do performance</td><td>P1 / P5 — valid progression, not a vanity number</td></tr>
+    <tr><td>Generated stories stay in-band on coverage <i>and</i> naturalness as the library grows</td><td>§5 — drift stays contained at scale</td></tr>
+    <tr><td>Retention driven by competence + relatedness, not streak pressure</td><td>P5 — intrinsic motivation</td></tr>
+    <tr><td>Profile-selected content reduces repeat errors faster than random content</td><td>P6 — personalisation actually works</td></tr>
+  </tbody>
+</table>
+<p class="muted">Calibration tasks already wired into <code>analyze_events.py</code> (from consented logs): per-user FSRS parameter optimisation; calibrating the story judge against human CEFR ratings; tuning the Zipf bands; validating the level→grammar map against a real Goethe syllabus.</p>
+
+<!-- ================= 7 ================= -->
+<h2>7 · Open risks we have <i>not</i> closed</h2>
+<table>
+  <thead><tr><th style="width:30%">Risk</th><th style="width:40%">Why it matters</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td><b>Story generation staying in-level at scale</b></td><td>The input half of the app; empirically a real LLM failure (arXiv 2505.08351, reproduced).</td><td>Contained by the gate; needs ongoing eval as the library and models change — never "done."</td></tr>
+    <tr><td><b>Corrective-feedback dosage</b></td><td>Over-correct → demotivate (violates P3); under-correct → stall.</td><td>Tunable via the focused-feedback ranking; not yet tuned on real learner data.</td></tr>
+    <tr><td><b>Advanced grammar is partly style, not rules</b></td><td>At C1/C2 much "grammar" is register/preference; the engine should stay silent, not invent errors.</td><td>Handled by testing C1/C2 via correct-sentence (false-positive) cases.</td></tr>
+    <tr><td><b>No canonical machine-readable CEFR grammar syllabus</b></td><td>Our level→skill map is <i>standard</i>, not authoritative.</td><td>Validate against Goethe inventories before any high-stakes claim.</td></tr>
+    <tr><td><b>Judge ≠ ground truth; factual/cultural slips</b></td><td>The level/naturalness judge is an LLM; generated facts can be plausibly wrong.</td><td>Deterministic coverage backstop helps level; factual accuracy is only partly mitigated — residual.</td></tr>
+    <tr><td><b>Self-regulation &amp; relatedness</b></td><td>LLM tools show near-zero self-regulation benefit short-term; relatedness is the missing leg of intrinsic motivation.</td><td>Design for habit (FSRS, reflection) and measure over months; relatedness features are later-phase.</td></tr>
+  </tbody>
+</table>
+
+<!-- ================= 8 ================= -->
+<div class="page-break"></div>
+<h2>8 · Annotated bibliography</h2>
+<p class="muted">Every claim above is traceable here. <span class="flag f-free">free</span> = openly available; <span class="flag f-debated">debated</span> = checking the source will (correctly) show an active scholarly disagreement, not a settled fact. Verify exact volume/page/DOI before quoting in anything public.</p>
+
+<h3>P1 — Comprehensible input / Focus on Form</h3>
+<ul class="src">
+  <li>Krashen, S. (1982) <i>Principles and Practice in Second Language Acquisition</i>; (1985) <i>The Input Hypothesis</i>. <span class="flag f-free">free</span> (sdkrashen.com) <span class="flag f-debated">debated</span> — the <i>i+1</i> construct is criticised as not precisely testable.</li>
+  <li>Long, M. (1991) "Focus on form: A design feature in language teaching methodology"; expanded in Long (2015).</li>
+  <li>Nation, I.S.P. (2009) <i>Teaching ESL/EFL Reading and Writing</i>; Day &amp; Bamford (1998) <i>Extensive Reading in the Second Language Classroom</i> — the extensive-reading evidence base.</li>
+</ul>
+
+<h3>P2 — Output, Noticing, Generation</h3>
+<ul class="src">
+  <li>Swain, M. (1985) "Communicative competence: some roles of comprehensible input and comprehensible output" (Output Hypothesis).</li>
+  <li>Schmidt, R. (1990) "The role of consciousness in second language learning," <i>Applied Linguistics</i> 11(2), 129–158 (Noticing).</li>
+  <li>Slamecka, N. &amp; Graf, P. (1978) "The generation effect: delineation of a phenomenon," <i>J. Exp. Psychology</i>.</li>
+</ul>
+
+<h3>P3 — Focused corrective feedback</h3>
+<ul class="src">
+  <li>Truscott, J. (1996) "The case against grammar correction in L2 writing classes," <i>Language Learning</i> 46(2), 327–369, DOI 10.1111/j.1467-1770.1996.tb01238.x. <span class="flag f-debated">debated</span> — read the <i>against</i> side first.</li>
+  <li>Ferris, D. (2011) <i>Treatment of Error in Second Language Student Writing</i> (2nd ed.); Bitchener &amp; Ferris (2012) <i>Written Corrective Feedback in SLA and Writing</i> — the <i>for, but focused</i> side.</li>
+  <li>Hattie, J. &amp; Timperley, H. (2007) "The power of feedback," <i>Review of Educational Research</i> 77(1), 81–112, DOI 10.3102/003465430298487.</li>
+  <li>Chen &amp; Renandya (2020) meta-analysis, <i>TESL-EJ</i> 24(3) — overall <b>g ≈ 0.59</b> across 35 studies. <span class="flag f-debated">debated</span> — weight of evidence favours <i>focused</i> CF on <i>treatable</i> errors.</li>
+</ul>
+
+<h3>P4 — Spaced retrieval, interleaving, scheduling</h3>
+<ul class="src">
+  <li>Roediger &amp; Karpicke (2006) "Test-enhanced learning," <i>Psychological Science</i> 17(3), 249–255 (testing effect).</li>
+  <li>Bjork &amp; Bjork (2011) "Making things hard on yourself, but in a good way" (desirable difficulties).</li>
+  <li>Cepeda et al. (2006) "Distributed practice in verbal recall tasks," <i>Psychological Bulletin</i> 132(3) (spacing meta-analysis).</li>
+  <li><b>FSRS</b> — open-spaced-repetition community (Jarrett Ye et al.); Anki's default since v23.10 (Nov 2023), replacing SM-2; DSR memory model. <span class="flag f-free">free</span> github.com/open-spaced-repetition.</li>
+</ul>
+
+<h3>P5 — Motivation, mastery, flow</h3>
+<ul class="src">
+  <li>Deci &amp; Ryan (2000) "The 'what' and 'why' of goal pursuits," <i>Psychological Inquiry</i> 11(4), 227–268. <span class="flag f-free">free</span> selfdeterminationtheory.org (autonomy/competence/relatedness; overjustification).</li>
+  <li>Bloom, B. (1984) "The 2 Sigma Problem," <i>Educational Researcher</i> 13(6), 4–16. <span class="flag f-debated">debated</span> — the 2σ figure is aspirational; exact replicability contested.</li>
+  <li>Csíkszentmihályi, M. (1990) <i>Flow: The Psychology of Optimal Experience</i>.</li>
+</ul>
+
+<h3>P6 — Adapt to the individual</h3>
+<ul class="src">
+  <li>Vygotsky, L. (1978) <i>Mind in Society</i> (Zone of Proximal Development).</li>
+  <li>Poehner &amp; Lantolf (2005) "Dynamic assessment in the language classroom," <i>Language Teaching Research</i>.</li>
+  <li>Ellis, R. (2003) <i>Task-based Language Learning and Teaching</i> (TBLT).</li>
+</ul>
+
+<h3>P7 — Vocabulary, coverage, formulaic language, authenticity</h3>
+<ul class="src">
+  <li>Nation, I.S.P. (2013) <i>Learning Vocabulary in Another Language</i> (2nd ed.) — frequency bands, coverage, encounters needed.</li>
+  <li>Hu &amp; Nation (2000) "Unknown vocabulary density and reading comprehension," <i>RFL</i> 13(1). <span class="flag f-free">free</span> — the ~98% coverage threshold (the empirical basis for capping vocabulary).</li>
+  <li>Webb, S. (2007) "The effects of repetition on vocabulary knowledge," <i>Applied Linguistics</i> 28(1).</li>
+  <li>Laufer &amp; Nation (1995) "Vocabulary size and use," <i>Applied Linguistics</i> 16(3) — lexical frequency profiling (the measurable cap).</li>
+  <li>Wray, A. (2002) <i>Formulaic Language and the Lexicon</i> — native-like fluency is chunk-based.</li>
+  <li>Gilmore, A. (2007) "Authentic materials and authenticity in foreign language learning," <i>Language Teaching</i> 40(2). <span class="flag f-debated">debated</span>.</li>
+</ul>
+
+<h3>Standards &amp; the 2024–2026 AI/LLM evidence (re-check yearly)</h3>
+<ul class="src">
+  <li><b>CEFR Companion Volume (2020)</b>, Council of Europe. <span class="flag f-free">free</span> coe.int — authoritative level descriptors / can-do statements.</li>
+  <li><b>LLMs drift off the target CEFR level</b> — "Alignment Drift in CEFR-prompted LLMs," arXiv <a href="https://arxiv.org/abs/2505.08351">2505.08351</a> (2025). <span class="flag f-risk">our biggest risk</span> — validates building a "stays-in-level" checker rather than trusting the prompt.</li>
+  <li><b>AI in language teaching — positive across skills:</b> <i>Computers &amp; Education: AI</i> (2025), ScienceDirect S2666920X25001626 — positive but large variation by level/design.</li>
+  <li><b>LLMs in education — systematic reviews (2025):</b> ScienceDirect S2666920X25001699; Springer 10.1007/s43621-025-01094-z (personalised learning).</li>
+  <li><b>Self-regulation caution:</b> meta-analysis of LLM effects, arXiv <a href="https://arxiv.org/abs/2509.22725">2509.22725</a> (2025) — <i>near-zero</i> self-regulation benefit (studies ≤10 weeks).</li>
+  <li><b>Online feedback meta-analysis:</b> teacher (g ≈ 2.25) ≫ automated (g ≈ 0.70) ≫ peer — <i>Asia-Pacific Education Researcher</i>, Springer 10.1007/s40299-021-00594-6.</li>
+  <li><b>Recent feedback synthesis (2024):</b> "How effective is feedback for L1, L2, and FL learners' writing? A meta-analysis," ScienceDirect S0959475224000884.</li>
+</ul>
+
+<div class="box accent avoid-break">
+  <h4>Honesty note (carried verbatim from the roadmap)</h4>
+  <p>The <i>core</i> findings — retrieval practice, spacing, output, focused feedback on rule-based errors — are robust and replicated. The headline <i>figures</i> and <i>strong</i> versions — Krashen's <i>i+1</i>, Bloom's exact 2σ, "correction always works" — are influential but debated. That's precisely why the sources are listed: so the reader checks them and builds on the solid parts. Core SLA is stable; FSRS internals, CEFR editions, and AI-tutoring evidence evolve — revisit yearly.</p>
+</div>
+
+<footer>
+  Plappo — internal research brief on pedagogical foundations and LLM-generated content. Generated 25 June 2026.
+  Traceable to <code>docs/PEDAGOGY_ROADMAP.md</code>, <code>docs/DECISIONS.md</code> (ADR-001…023), and the <code>eval/</code> engine.
+  Not legal advice; AI-tutoring evidence is provisional and should be re-checked yearly.
+</footer>
+
+</body>
+</html>
